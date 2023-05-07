@@ -1,4 +1,5 @@
-
+# make a parameter to save date and time of execution
+DATE := $(shell date +%Y-%m-%d_%H-%M-%S)
 
 # make a new requirements.txt file
 .PHONY: new-requirements
@@ -23,3 +24,23 @@ install_requirements:
 freeze:
 	@echo "Freezing requirements..."
 	@pip freeze > requirements.txt
+
+# deactivate the virtual environment
+.PHONY: deactivate
+deactivate:
+	@echo "Deactivating virtual environment..."
+	@deactivate
+
+# remove the folder dataset
+#.PHONY: remove-dataset
+#remove-dataset:
+#	@echo "Removing dataset folder..."
+#	@rm -rf dataset
+
+# commit to repository
+.PHONY: commit
+commit:
+	@echo "Commiting to repository..."
+	@git add .
+	@git commit -m "Update: $(DATE)"
+	@git push origin master

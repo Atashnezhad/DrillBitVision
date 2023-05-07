@@ -6,3 +6,4 @@ venv/*
 htmlcov
 src/__pycache__
 test/__pycache__
+dataset/*
