@@ -1,0 +1,8 @@
+venv/*
+.idea
+.pytest_cache
+.coverage
+.vscode
+htmlcov
+src/__pycache__
+test/__pycache__
