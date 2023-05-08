@@ -18,6 +18,7 @@ install_requirements:
 	@make update-pip
 	@echo "Installing required packages..."
 	@pip install -r requirements.txt
+	@pip install -r requirements-test.txt
 
 # get all pip list packages and save to requirements.txt
 .PHONY: freeze
@@ -44,3 +45,18 @@ commit:
 	@git add .
 	@git commit -m "Update: $(DATE)"
 	@git push origin master
+
+
+# run the flake8 script on all python files in the src folder
+.PHONY: run-flake8
+run-flake8:
+	isort neural_network_model/*.py
+	#isort test/*.py
+	flake8 neural_network_model/*.py
+	#flake8 test/*.py
+
+# run black on all python files in the src folder
+.PHONY: run-black
+run-black:
+	black neural_network_model/*.py
+	#black test/*.py
