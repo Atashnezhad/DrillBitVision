@@ -6,7 +6,8 @@ venv/*
 htmlcov
 src/__pycache__
 test/__pycache__
-dataset/*
+dataset/
 dataclass_prac/
 .tox/
 .mypy_cache/
+dataset_augmented/
