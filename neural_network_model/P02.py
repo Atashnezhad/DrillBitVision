@@ -1,6 +1,7 @@
 # import pandas as pd
 import os
-from neural_network_model.model import AUGMENTATION_SETTING
+from model import AUGMENTATION_SETTING
+import logging
 
 # import shutil
 from tqdm import tqdm
@@ -31,6 +32,20 @@ from tensorflow.keras.preprocessing.image import (
     img_to_array,
 )
 
+# Initialize the logger
+logger = logging.getLogger()
+logger.setLevel(logging.INFO)
+# Create console handler
+ch = logging.StreamHandler()
+ch.setLevel(logging.INFO)
+
+# Create formatter and add it to the handler
+formatter = logging.Formatter("%(asctime)s - %(levelname)s - %(message)s")
+ch.setFormatter(formatter)
+
+# Add the handler to the logger
+logger.addHandler(ch)
+
 
 class BitVision:
     """
@@ -40,9 +55,7 @@ class BitVision:
 
     def __init__(self, *args, **kwargs):
         self.dataset_address = kwargs.get("dataset_address", None)
-
         self.image_dict: Dict[str, Dict[str, Any]] = {}
-
         self.categories_name_folders = None
         self.find_categories_name()
 
@@ -52,11 +65,23 @@ class BitVision:
         :return:
         """
         self.categories_name_folders = os.listdir(self.dataset_address)
-        list_to_ignore = [".DS_Store"]
+        list_to_ignore = [".DS_Store", ".gif"]
         self.categories_name_folders = [
             x for x in self.categories_name_folders if x not in list_to_ignore
         ]
-        # print(self.categories_name_folders)
+        logger.info(self.categories_name_folders)
+        logger.info(f"Categories name: {self.categories_name_folders}")
+
+        # for images in each category dir, check if the image is in list_to_ignore, if yes remove from dir
+        for category_folder in self.categories_name_folders:
+            # read the files in the dataset folder
+            main_dataset_folder = Path(__file__).parent / ".." / "dataset"
+            data_address = main_dataset_folder / category_folder
+
+            for file in os.listdir(data_address):
+                if file in list_to_ignore:
+                    os.remove(file)
+                    logger.info(f"Removed {file} from {category_folder}")
 
     def read_data(self, *, print_file_names: bool = False) -> None:
         """
@@ -72,9 +97,9 @@ class BitVision:
             data_address = main_dataset_folder / category_folder
 
             if print_file_names:
-                print("List of files in the folder:")
+                logger.info(f"List of files in the folder: {category_folder}")
                 for file in data_address.iterdir():
-                    print(file.name)
+                    logger.info(f"File name: {file.name}")
 
             self.image_dict[category_folder] = {}
             self.image_dict[category_folder]["image_list"] = list(
@@ -84,7 +109,7 @@ class BitVision:
                 list(data_address.iterdir())
             )
 
-        print(self.image_dict)
+        logger.info(f"Image dict: {self.image_dict}")
 
     def balance_data(self, number_of_images_tobe_gen: int = 200):
         """
@@ -106,7 +131,7 @@ class BitVision:
             if not os.path.exists(
                 AUGMENTATION_SETTING.AUGMENTED_IMAGES_DIR_ADDRESS / image_category
             ):
-                os.mkdir(
+                os.makedirs(
                     AUGMENTATION_SETTING.AUGMENTED_IMAGES_DIR_ADDRESS / image_category
                 )
             # check if the dir is empty if not delete all the files
@@ -117,17 +142,22 @@ class BitVision:
                 ).iterdir():
                     os.remove(file)
 
+            number_of_images = self.image_dict[image_category]["number_of_images"]
             for _ in tqdm(
                 range(0, number_of_images_tobe_gen + 1),
                 desc=f"Augmenting {image_category} images:",
             ):
-                number_of_images = self.image_dict[image_category]["number_of_images"]
                 # generate a random number integer between 0 and number_of_images
                 rand_img_num = int(random() * number_of_images)
 
                 img_address = self.image_dict[image_category]["image_list"][
                     rand_img_num
                 ]
+                if img_address == ".DS_Store":
+                    logger.info(f"Found .DS_Store in {image_category} folder")
+                    continue
+                logger.info(f"Image address: {img_address}")
+
                 img = load_img(img_address)
 
                 x = img_to_array(img)
@@ -143,27 +173,67 @@ class BitVision:
                 ):
                     break
 
-        # check the number of images in the augmented folder
-        for image_category in self.image_dict.keys():
-            print(
-                f"Number of images in {image_category} folder: "
-                f"{len(list((AUGMENTATION_SETTING.AUGMENTED_IMAGES_DIR_ADDRESS / image_category).iterdir()))}"
-            )
-
-    def train_test_split(self):
+    def train_test_split(self, *args, **kwargs):
         """
         This function is used to split the data into train and test.
         :return:
         """
+        train_fraction = kwargs.get("train_fraction", 0.7)
+        test_fraction = kwargs.get("test_fraction", 0.2)
+        validation_fraction = kwargs.get("validation_fraction", 0.1)
+
+        logger.info(f"Train fraction: {train_fraction}")
+        logger.info(f"Test fraction: {test_fraction}")
+        logger.info(f"Validation fraction: {validation_fraction}")
+
         # get the list of dirs in the AUGMENTED_IMAGES_DIR_ADDRESS
         augmented_images_dir_list = os.listdir(
             AUGMENTATION_SETTING.AUGMENTED_IMAGES_DIR_ADDRESS
         )
-        print(augmented_images_dir_list)
+        logger.info(f"Augmented images dir list: {augmented_images_dir_list}")
+
+        # make a new dir for train and test and validation data
+        if not os.path.exists(AUGMENTATION_SETTING.TRAIN_TEST_SPLIT_DIR_ADDRESS):
+            os.makedirs(AUGMENTATION_SETTING.TRAIN_TEST_SPLIT_DIR_ADDRESS)
+        # make 3 dirs for train, test and validation under AUGMENTATION_SETTING.TRAIN_TEST_SPLIT_DIR_ADDRESS
+        for dir_name in AUGMENTATION_SETTING.TRAIN_TEST_SPLIT_DIR_NAMES:
+            if not os.path.exists(
+                AUGMENTATION_SETTING.TRAIN_TEST_SPLIT_DIR_ADDRESS / dir_name
+            ):
+                os.makedirs(
+                    AUGMENTATION_SETTING.TRAIN_TEST_SPLIT_DIR_ADDRESS / dir_name
+                )
+        logger.info(f"Created train, test and validation dirs")
+
+        # under each train, test and validation dir make a dir for each category
+        for dir_name in AUGMENTATION_SETTING.TRAIN_TEST_SPLIT_DIR_NAMES:
+            for category in augmented_images_dir_list:
+                if not os.path.exists(
+                    AUGMENTATION_SETTING.TRAIN_TEST_SPLIT_DIR_ADDRESS
+                    / dir_name
+                    / category
+                ):
+                    os.makedirs(
+                        AUGMENTATION_SETTING.TRAIN_TEST_SPLIT_DIR_ADDRESS
+                        / dir_name
+                        / category
+                    )
+        logger.info(f"Created category dirs under train, test and validation dirs")
+
+
+
+
+
 
 
 if __name__ == "__main__":
     obj = BitVision(dataset_address=Path(__file__).parent / ".." / "dataset")
     # obj.read_data(print_file_names=False)
     # obj.balance_data(number_of_images_tobe_gen=200)
-    obj.train_test_split()
+
+    train_test_validation_split = {
+        "train_fraction": 0.7,
+        "test_fraction": 0.2,
+        "validation_fraction": 0.1,
+    }
+    obj.train_test_split(**train_test_validation_split)

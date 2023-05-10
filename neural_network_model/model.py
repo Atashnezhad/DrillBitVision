@@ -18,8 +18,12 @@ class AugmentationSetting(BaseModel):
     AUGMENTED_IMAGES_DIR_ADDRESS: str = (
         Path(__file__).parent / ".." / "dataset_augmented"
     )
+    TRAIN_TEST_SPLIT_DIR_ADDRESS: str = (
+        Path(__file__).parent / ".." / "dataset_train_test_val"
+    )
     AUGMENTED_IMAGES_SAVE_PREFIX: str = "augmented_image"
     AUGMENTED_IMAGES_SAVE_FORMAT: str = "jpeg"
+    TRAIN_TEST_SPLIT_DIR_NAMES: list = ["train", "test", "val"]
 
 
 AUGMENTATION_SETTING = AugmentationSetting()

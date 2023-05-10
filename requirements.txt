@@ -1,6 +1,7 @@
 requests
 bs4
-git+https://github.com/Joeclinton1/google-images-download.git
 bing_image_downloader
 pillow
 pydantic
+tqdm
+black

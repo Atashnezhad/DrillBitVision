@@ -11,3 +11,4 @@ dataclass_prac/
 .tox/
 .mypy_cache/
 dataset_augmented/
+dataset_train_test_val/

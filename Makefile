@@ -41,6 +41,8 @@ deactivate:
 # commit to repository
 .PHONY: commit
 commit:
+	@run-flake8
+	@run-black
 	@echo "Commiting to repository..."
 	@git add .
 	@git commit -m "Update: $(DATE)"
