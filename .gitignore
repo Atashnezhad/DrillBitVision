@@ -8,4 +8,5 @@ src/__pycache__
 test/__pycache__
 dataset/*
 dataclass_prac/
-
+.tox/
+.mypy_cache/
