@@ -4,7 +4,7 @@ from pydantic import BaseModel
 
 
 class AugmentionSetting(BaseModel):
-    ROTATION_RANGE: int = 65
+    ROTATION_RANGE: int = 25
     WIDTH_SHIFT_RANGE: float = 0.0
     HEIGHT_SHIFT_RANGE: float = 0.0
     SHEAR_RANGE: float = 0.2

@@ -61,4 +61,4 @@ run-flake8:
 .PHONY: run-black
 run-black:
 	black neural_network_model/*.py
-	#black test/*.py
+	black tests/*.py

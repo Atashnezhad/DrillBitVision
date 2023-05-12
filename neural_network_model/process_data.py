@@ -1,11 +1,17 @@
-# import pandas as pd
 import logging
 import os
 import random
 import shutil
 
-from model import SETTING
 from bing_image_downloader import downloader
+
+from neural_network_model.model import SETTING
+from tensorflow.keras.preprocessing import image
+from tensorflow.keras.preprocessing.image import (
+    ImageDataGenerator,
+    img_to_array,
+    load_img,
+)
 
 # set seed to get the same random numbers each time
 random.seed(1)
@@ -20,30 +26,15 @@ from typing import Any, Dict, List
 from tqdm import tqdm
 
 warnings.filterwarnings("ignore")
-# from collections import Counter
-#
-# import numpy as np
-# import matplotlib.pyplot as plt
-# # import tensorflow as tf
-# from tensorflow import keras
-# import tensorflow
 
-from tensorflow.keras.callbacks import ModelCheckpoint
-from tensorflow.keras.layers import *
-from tensorflow.keras.models import *
-from tensorflow.keras.preprocessing import image
-from tensorflow.keras.preprocessing.image import (
-    ImageDataGenerator,
-    img_to_array,
-    load_img,
-)
 
 # Initialize the logger
 logger = logging.getLogger()
-logger.setLevel(logging.INFO)
+logger.setLevel(logging.FATAL)
 # Create console handler
 ch = logging.StreamHandler()
-ch.setLevel(logging.INFO)
+ch.setLevel(logging.FATAL)
+
 
 # Create formatter and add it to the handler
 formatter = logging.Formatter("%(asctime)s - %(levelname)s - %(message)s")
@@ -53,7 +44,7 @@ ch.setFormatter(formatter)
 logger.addHandler(ch)
 
 
-class BitVision:
+class Preprocessing:
     """
     This class is used to train the neural network model.
     for the bit type detection.
@@ -78,6 +69,7 @@ class BitVision:
                 force_replace=False,
                 timeout=120,
             )
+        logger.info("Downloaded images")
 
     def find_categories_name(self) -> None:
         """
@@ -103,9 +95,10 @@ class BitVision:
                     os.remove(file)
                     logger.info(f"Removed {file} from {category_folder}")
 
-    def read_data(self, *, print_file_names: bool = False) -> None:
+    def make_image_dict(self, *, print_file_names: bool = False) -> None:
         """
-        This function prints the number of files in the dataset folder.
+        This function reads the data from the dataset folder.
+        and stores the data in image_dict.
         :param print_file_names:
 
         :return:
@@ -131,10 +124,11 @@ class BitVision:
 
         logger.info(f"Image dict: {self.image_dict}")
 
-    def balance_data(self, number_of_images_tobe_gen: int = 200):
+    def augment_data(self, number_of_images_tobe_gen: int = 200):
         """
-        This function is used to balance the data.
-        :return:
+        This function augments the images and save them into the dataset_augmented folder.
+        :param number_of_images_tobe_gen: number of images to be generated
+        :return: None
         """
         Augment_data_gen = image.ImageDataGenerator(
             rotation_range=SETTING.AUGMENTATION_SETTING.ROTATION_RANGE,
@@ -198,7 +192,8 @@ class BitVision:
 
     def train_test_split(self, *args, **kwargs):
         """
-        This function is used to split the data into train and test.
+        This function is used to split the data into train, test and validation.
+        And save them into the dataset_train_test_split folder.
         :return:
         """
         # get the list of dirs in the AUGMENTED_IMAGES_DIR_ADDRESS
@@ -287,8 +282,8 @@ class BitVision:
 
 
 if __name__ == "__main__":
-    obj = BitVision(dataset_address=Path(__file__).parent / ".." / "dataset")
+    obj = Preprocessing(dataset_address=Path(__file__).parent / ".." / "dataset")
     # BitVision.download_images()
-    # obj.read_data(print_file_names=False)
-    # obj.balance_data(number_of_images_tobe_gen=200)
+    obj.make_image_dict(print_file_names=False)
+    obj.augment_data(number_of_images_tobe_gen=200)
     obj.train_test_split()
