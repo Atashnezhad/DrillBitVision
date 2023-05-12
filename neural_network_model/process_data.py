@@ -14,7 +14,7 @@ from tensorflow.keras.preprocessing.image import (
 )
 
 # set seed to get the same random numbers each time
-random.seed(1)
+random.seed(SETTING.RANDOM_SEED_SETTING.SEED)
 import random
 
 # import sys
@@ -52,9 +52,7 @@ class Preprocessing:
 
     def __init__(self, *args, **kwargs):
         self.dataset_address = kwargs.get("dataset_address", None)
-        self.image_dict: Dict[str, Dict[str, Any]] = {}
         self.categories_name_folders = None
-        self.find_categories_name()
 
     @staticmethod
     def download_images(category_list=None) -> None:
@@ -71,7 +69,8 @@ class Preprocessing:
             )
         logger.info("Downloaded images")
 
-    def find_categories_name(self) -> None:
+    @property
+    def categorie_name(self) -> List[str]:
         """
         This function is used to find the categories name.
         :return:
@@ -95,34 +94,29 @@ class Preprocessing:
                     os.remove(file)
                     logger.info(f"Removed {file} from {category_folder}")
 
-    def make_image_dict(self, *, print_file_names: bool = False) -> None:
+        return self.categories_name_folders
+
+    @property
+    def image_dict(self) -> Dict[str, Dict[str, Any]]:
         """
         This function reads the data from the dataset folder.
         and stores the data in image_dict.
-        :param print_file_names:
-
         :return:
         """
-
-        for category_folder in self.categories_name_folders:
+        image_dicts = {}
+        for category_folder in self.categorie_name:
             # read the files in the dataset folder
             main_dataset_folder = Path(__file__).parent / ".." / "dataset"
             data_address = main_dataset_folder / category_folder
-
-            if print_file_names:
-                logger.info(f"List of files in the folder: {category_folder}")
-                for file in data_address.iterdir():
-                    logger.info(f"File name: {file.name}")
-
-            self.image_dict[category_folder] = {}
-            self.image_dict[category_folder]["image_list"] = list(
+            image_dicts[category_folder] = {}
+            image_dicts[category_folder]["image_list"] = list(
                 data_address.iterdir()
             )
-            self.image_dict[category_folder]["number_of_images"] = len(
+            image_dicts[category_folder]["number_of_images"] = len(
                 list(data_address.iterdir())
             )
 
-        logger.info(f"Image dict: {self.image_dict}")
+        return image_dicts
 
     def augment_data(self, number_of_images_tobe_gen: int = 200):
         """
@@ -204,16 +198,16 @@ class Preprocessing:
 
         # make a new dir for train and test and validation data
         if not os.path.exists(
-            SETTING.PREPROCESSING_SETTING.TRAIN_TEST_SPLIT_DIR_ADDRESS
+            SETTING.PREPROCESSING_SETTING.TRAIN_TEST_VAL_SPLIT_DIR_ADDRESS
         ):
-            os.makedirs(SETTING.PREPROCESSING_SETTING.TRAIN_TEST_SPLIT_DIR_ADDRESS)
+            os.makedirs(SETTING.PREPROCESSING_SETTING.TRAIN_TEST_VAL_SPLIT_DIR_ADDRESS)
         # make 3 dirs for train, test and validation under AUGMENTATION_SETTING.TRAIN_TEST_SPLIT_DIR_ADDRESS
         for dir_name in SETTING.PREPROCESSING_SETTING.TRAIN_TEST_SPLIT_DIR_NAMES:
             if not os.path.exists(
-                SETTING.PREPROCESSING_SETTING.TRAIN_TEST_SPLIT_DIR_ADDRESS / dir_name
+                    SETTING.PREPROCESSING_SETTING.TRAIN_TEST_VAL_SPLIT_DIR_ADDRESS / dir_name
             ):
                 os.makedirs(
-                    SETTING.PREPROCESSING_SETTING.TRAIN_TEST_SPLIT_DIR_ADDRESS
+                    SETTING.PREPROCESSING_SETTING.TRAIN_TEST_VAL_SPLIT_DIR_ADDRESS
                     / dir_name
                 )
         logger.info(f"Created train, test and validation dirs")
@@ -222,12 +216,12 @@ class Preprocessing:
         for dir_name in SETTING.PREPROCESSING_SETTING.TRAIN_TEST_SPLIT_DIR_NAMES:
             for category in augmented_images_dir_list:
                 if not os.path.exists(
-                    SETTING.PREPROCESSING_SETTING.TRAIN_TEST_SPLIT_DIR_ADDRESS
+                    SETTING.PREPROCESSING_SETTING.TRAIN_TEST_VAL_SPLIT_DIR_ADDRESS
                     / dir_name
                     / category
                 ):
                     os.makedirs(
-                        SETTING.PREPROCESSING_SETTING.TRAIN_TEST_SPLIT_DIR_ADDRESS
+                        SETTING.PREPROCESSING_SETTING.TRAIN_TEST_VAL_SPLIT_DIR_ADDRESS
                         / dir_name
                         / category
                     )
@@ -271,7 +265,7 @@ class Preprocessing:
                 SETTING.AUGMENTATION_SETTING.AUGMENTED_IMAGES_DIR_ADDRESS
                 / categ
                 / image,
-                SETTING.PREPROCESSING_SETTING.TRAIN_TEST_SPLIT_DIR_ADDRESS
+                SETTING.PREPROCESSING_SETTING.TRAIN_TEST_VAL_SPLIT_DIR_ADDRESS
                 / dest_folder
                 / categ
                 / image,
@@ -284,6 +278,6 @@ class Preprocessing:
 if __name__ == "__main__":
     obj = Preprocessing(dataset_address=Path(__file__).parent / ".." / "dataset")
     # BitVision.download_images()
-    obj.make_image_dict(print_file_names=False)
+    print(obj.image_dict)
     obj.augment_data(number_of_images_tobe_gen=200)
     obj.train_test_split()
