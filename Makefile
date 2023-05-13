@@ -62,3 +62,8 @@ run-flake8:
 run-black:
 	black neural_network_model/*.py
 	black tests/*.py
+
+# pip freeze
+.PHONY: pip-freeze
+pip-freeze:
+	@pip freeze > requirements.txt

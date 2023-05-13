@@ -4,7 +4,6 @@ import os
 import random
 import shutil
 
-import pandas as pd
 from keras import Sequential
 from keras.layers import (
     Conv2D,
@@ -20,8 +19,10 @@ from neural_network_model.model import SETTING
 # set seed to get the same random numbers each time
 random.seed(1)
 import matplotlib.pyplot as plt
+
 # from tensorflow.keras.callbacks import ModelCheckpoint
 from keras.callbacks import ModelCheckpoint
+
 # import sys
 import warnings
 from pathlib import Path
@@ -31,6 +32,7 @@ import os
 import shutil
 import sys
 import warnings
+from tensorflow.keras.applications.resnet50 import preprocess_input, decode_predictions
 
 warnings.filterwarnings("ignore")
 from collections import Counter
@@ -87,6 +89,7 @@ class BitVision:
         self.model: tensorflow.keras.models.Sequential = None
         self.assemble_deep_net_model()
         self.train_vali_gens = {}
+        self.model_history = None
 
     @property
     def categories(self) -> List[str]:
@@ -195,10 +198,11 @@ class BitVision:
         """
         my_list = ["train", "val"]
         for subdir in my_list:
-            datagen = image.ImageDataGenerator(rescale=1. / 255)
+            datagen = image.ImageDataGenerator(rescale=1.0 / 255)
 
             generator = datagen.flow_from_directory(
-                directory=SETTING.PREPROCESSING_SETTING.TRAIN_TEST_VAL_SPLIT_DIR_ADDRESS / subdir,
+                directory=SETTING.PREPROCESSING_SETTING.TRAIN_TEST_VAL_SPLIT_DIR_ADDRESS
+                / subdir,
                 target_size=SETTING.FLOW_FROM_DIRECTORY_SETTING.TARGET_SIZE,
                 color_mode=SETTING.FLOW_FROM_DIRECTORY_SETTING.COLOR_MODE,
                 classes=None,
@@ -211,7 +215,7 @@ class BitVision:
                 save_format="png",
                 follow_links=False,
                 subset=None,
-                interpolation="nearest"
+                interpolation="nearest",
             )
             self.train_vali_gens[subdir] = generator
 
@@ -241,15 +245,88 @@ class BitVision:
             use_multiprocessing=SETTING.MODEL_SETTING.USE_MULTIPROCESSING,
             shuffle=SETTING.MODEL_SETTING.SHUFFLE,
             initial_epoch=SETTING.MODEL_SETTING.INITIAL_EPOCH,
-            callbacks=[self.check_points()]
+            callbacks=[self.check_points()],
         )
+
+        self.model.save(SETTING.MODEL_SETTING.SAVE_FILE_PATH)
+        logger.info(f"Model saved to {SETTING.MODEL_SETTING.SAVE_FILE_PATH}")
+        self.model_history = model_history
+
+    def plot_history(self):
+        logger.info(self.model_history.history.keys())
+        keys_plot = ["loss", "accuracy"]
+        # make two plots side by side and have train and val for loss and accuracy
+        fig, axs = plt.subplots(
+            SETTING.FIGURE_SETTING.NUM_ROWS_IN_PLOT_HIST,
+            SETTING.FIGURE_SETTING.NUM_COLS_IN_PLOT_HIST,
+            figsize=SETTING.FIGURE_SETTING.FIGURE_SIZE_IN_PLOT_HIST,
+        )
+        for i, key in enumerate(keys_plot):
+            axs[i].plot(self.model_history.history[key], color="red")
+            axs[i].plot(self.model_history.history[f"val_{key}"], color="green")
+            axs[i].set_title(f"model {key}")
+            axs[i].set_ylabel(key)
+            axs[i].set_xlabel("epoch")
+            axs[i].legend(["train", "val"], loc="upper left")
+        plt.show()
+
+    def predict(self, *args, **kwargs):
+        model_path = kwargs.get("model_path", None)
+        if model_path is None:
+            raise ValueError("model_path is None")
+
+        model = keras.models.load_model(model_path)
+        logger.info(f"Model loaded from {model_path}")
+
+        plt.figure(figsize=SETTING.FIGURE_SETTING.FIGURE_SIZE_IN_PRED_MODEL)
+
+        for category in self.categories:
+            number_of_cols = SETTING.FIGURE_SETTING.NUMBER_OF_FIGURES_IN_ROW
+            number_of_rows = SETTING.FIGURE_SETTING.NUM_ROWS_IN_PRED_MODEL
+
+            # get the list of test images
+            test_images_list = os.listdir(
+                SETTING.PREPROCESSING_SETTING.TRAIN_TEST_VAL_SPLIT_DIR_ADDRESS
+                / SETTING.PREPROCESSING_SETTING.TRAIN_TEST_SPLIT_DIR_NAMES[1]
+                / category
+            )
+
+            for i, img in enumerate(test_images_list[0:number_of_cols]):
+                path_to_img = (
+                    SETTING.PREPROCESSING_SETTING.TRAIN_TEST_VAL_SPLIT_DIR_ADDRESS /
+                    SETTING.PREPROCESSING_SETTING.TRAIN_TEST_SPLIT_DIR_NAMES[1] / category /
+                    str(img)
+                ).resolve()
+
+                img = load_img(
+                    path_to_img,
+                    target_size=SETTING.FLOW_FROM_DIRECTORY_SETTING.TARGET_SIZE,
+                )
+                ax = plt.subplot(number_of_rows, number_of_cols, i + 1)
+                plt.imshow(img)
+                img = img_to_array(img)
+                # expand dimensions to match the shape of model input
+                img_batch = np.expand_dims(img, axis=0)
+                img_preprocessed = preprocess_input(img_batch)
+                # Generate feature output by predicting on the input image
+                # prediction = model.predict_classes(img)
+                prediction = model.predict(img_preprocessed)
+                prediction = np.argmax(prediction, axis=1)
+                print(prediction)
+
+            plt.show()
 
 
 if __name__ == "__main__":
     obj = BitVision()
     # print(obj.categories)
-    print(obj.data_details)
+    # print(obj.data_details)
     # obj.plot_image_category()
-    obj.compile_model()
-    obj.rescaling()
-    obj.train_model()
+    # obj.compile_model()
+    # obj.rescaling()
+    # obj.train_model()
+    # obj.plot_history()
+
+    model_name = "model_epoch_39_loss_0.28_acc_0.79_val_acc_0.66_.h5"
+    model_path = Path(__file__) / ".." / "deep_model" / model_name
+    obj.predict(model_path=SETTING.MODEL_SETTING.SAVE_FILE_PATH)

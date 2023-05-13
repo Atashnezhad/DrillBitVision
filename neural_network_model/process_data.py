@@ -109,9 +109,7 @@ class Preprocessing:
             main_dataset_folder = Path(__file__).parent / ".." / "dataset"
             data_address = main_dataset_folder / category_folder
             image_dicts[category_folder] = {}
-            image_dicts[category_folder]["image_list"] = list(
-                data_address.iterdir()
-            )
+            image_dicts[category_folder]["image_list"] = list(data_address.iterdir())
             image_dicts[category_folder]["number_of_images"] = len(
                 list(data_address.iterdir())
             )
@@ -204,7 +202,8 @@ class Preprocessing:
         # make 3 dirs for train, test and validation under AUGMENTATION_SETTING.TRAIN_TEST_SPLIT_DIR_ADDRESS
         for dir_name in SETTING.PREPROCESSING_SETTING.TRAIN_TEST_SPLIT_DIR_NAMES:
             if not os.path.exists(
-                    SETTING.PREPROCESSING_SETTING.TRAIN_TEST_VAL_SPLIT_DIR_ADDRESS / dir_name
+                SETTING.PREPROCESSING_SETTING.TRAIN_TEST_VAL_SPLIT_DIR_ADDRESS
+                / dir_name
             ):
                 os.makedirs(
                     SETTING.PREPROCESSING_SETTING.TRAIN_TEST_VAL_SPLIT_DIR_ADDRESS

@@ -18,7 +18,7 @@ class AugmentionSetting(BaseModel):
 
     # Address to save augmented images
     AUGMENTED_IMAGES_DIR_ADDRESS: str = (
-            Path(__file__).parent / ".." / "dataset_augmented"
+        Path(__file__).parent / ".." / "dataset_augmented"
     )
     AUGMENTED_IMAGES_SAVE_PREFIX: str = "augmented_image"
     AUGMENTED_IMAGES_SAVE_FORMAT: str = "jpeg"
@@ -30,7 +30,7 @@ class CategorySetting(BaseModel):
 
 class PreprocessingSetting(BaseModel):
     TRAIN_TEST_VAL_SPLIT_DIR_ADDRESS: str = (
-            Path(__file__).parent / ".." / "dataset_train_test_val"
+        Path(__file__).parent / ".." / "dataset_train_test_val"
     )
     TRAIN_TEST_SPLIT_DIR_NAMES: list = ["train", "test", "val"]
     TRAIN_FRACTION: float = 0.7
@@ -39,18 +39,19 @@ class PreprocessingSetting(BaseModel):
 
 
 class ModelSetting(BaseModel):
-    MODELS_DIR_ADDRESS: str = (
-            Path(__file__).parent / ".." / "deep_model"
+    MODELS_DIR_ADDRESS: str = Path(__file__).parent / ".." / "deep_model"
+    SAVE_FILE_PATH: str = (
+        MODELS_DIR_ADDRESS
+        / "model_epoch_{epoch:02d}_loss_{loss:.2f}_acc_{accuracy:.2f}_val_acc_{"
+        "val_accuracy:.2f}_.h5"
     )
-    SAVE_FILE_PATH: str = MODELS_DIR_ADDRESS / "model_epoch_{epoch:02d}_loss_{loss:.2f}_acc_{accuracy:.2f}_val_acc_{" \
-                                               "val_accuracy:.2f}_.h5"
 
     # compile
     LOSS: str = "categorical_crossentropy"
     METRICS: List = ["accuracy"]
 
     # fit generator
-    EPOCHS: int = 40
+    EPOCHS: int = 3
     FIT_GEN_VERBOSE: int = 1
     VALIDATION_STEPS: int = 2
     CLASS_WEIGHT: dict = None
@@ -66,6 +67,22 @@ class ModelSetting(BaseModel):
     CHECK_POINT_VERBOSE: int = 1
     SAVE_BEST_ONLY: bool = True
     MODE: str = "max"
+
+    # predict
+    FIGURE_SIZE: tuple = (20, 10)
+    NUMBER_OF_FIGURES_IN_ROW: int = 7
+
+
+class FigureSetting(BaseModel):
+    # in the predict method of BitVision class
+    FIGURE_SIZE_IN_PRED_MODEL: tuple = (20, 10)
+    NUM_ROWS_IN_PRED_MODEL: int = 1
+    # in the plot_history method of BitVision class
+    FIGURE_SIZE_IN_PLOT_HIST: tuple = (17, 10)
+    NUM_ROWS_IN_PLOT_HIST: int = 1
+    NUM_COLS_IN_PLOT_HIST: int = 2
+
+    NUMBER_OF_FIGURES_IN_ROW: int = 7
 
 
 class RandomSeedSetting(BaseModel):
@@ -88,6 +105,7 @@ class Setting(BaseModel):
     MODEL_SETTING: ModelSetting = ModelSetting()
     RANDOM_SEED_SETTING: RandomSeedSetting = RandomSeedSetting()
     FLOW_FROM_DIRECTORY_SETTING: FlowFromDirectorySetting = FlowFromDirectorySetting()
+    FIGURE_SETTING: FigureSetting = FigureSetting()
 
 
 SETTING = Setting()
