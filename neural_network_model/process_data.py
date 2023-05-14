@@ -76,7 +76,7 @@ class Preprocessing:
         :return:
         """
         self.categories_name_folders = os.listdir(self.dataset_address)
-        list_to_ignore = SETTING.IGNORE_SETTING.IGNORE_List
+        list_to_ignore = SETTING.IGNORE_SETTING.IGNORE_LIST
         self.categories_name_folders = [
             x for x in self.categories_name_folders if x not in list_to_ignore
         ]
@@ -305,7 +305,7 @@ class Preprocessing:
 
 if __name__ == "__main__":
     obj = Preprocessing(dataset_address=Path(__file__).parent / ".." / "dataset")
-    # BitVision.download_images()
+    # Preprocessing.download_images()
     print(obj.image_dict)
     obj.augment_data(number_of_images_tobe_gen=200)
     obj.train_test_split()
