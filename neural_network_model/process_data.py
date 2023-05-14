@@ -76,7 +76,7 @@ class Preprocessing:
         :return:
         """
         self.categories_name_folders = os.listdir(self.dataset_address)
-        list_to_ignore = [".DS_Store", ".gif"]
+        list_to_ignore = SETTING.IGNORE_SETTING.IGNORE_List
         self.categories_name_folders = [
             x for x in self.categories_name_folders if x not in list_to_ignore
         ]
@@ -91,7 +91,7 @@ class Preprocessing:
 
             for file in os.listdir(data_address):
                 if file in list_to_ignore:
-                    os.remove(file)
+                    os.remove(data_address / file)
                     logger.info(f"Removed {file} from {category_folder}")
 
         return self.categories_name_folders
@@ -100,13 +100,13 @@ class Preprocessing:
     def image_dict(self) -> Dict[str, Dict[str, Any]]:
         """
         This function reads the data from the dataset folder.
-        and stores the data in image_dict.
+        and stores the data as a dict with categories and values in image_dict.
         :return:
         """
         image_dicts = {}
         for category_folder in self.categorie_name:
             # read the files in the dataset folder
-            main_dataset_folder = Path(__file__).parent / ".." / "dataset"
+            main_dataset_folder = SETTING.DATA_ADDRESS_SETTING.MAIN_DATA_DIR_ADDRESS
             data_address = main_dataset_folder / category_folder
             image_dicts[category_folder] = {}
             image_dicts[category_folder]["image_list"] = list(data_address.iterdir())
@@ -116,7 +116,10 @@ class Preprocessing:
 
         return image_dicts
 
-    def augment_data(self, number_of_images_tobe_gen: int = 200):
+    def augment_data(
+        self,
+        number_of_images_tobe_gen: int = SETTING.AUGMENTATION_SETTING.NUMBER_OF_IMAGES_TOBE_GENERATED,
+    ):
         """
         This function augments the images and save them into the dataset_augmented folder.
         :param number_of_images_tobe_gen: number of images to be generated
@@ -143,8 +146,8 @@ class Preprocessing:
                     / image_category
                 )
             # check if the dir is empty if not delete all the files
-            # TODO: check if this is needed or not
             else:
+                # empty the previous augmented images
                 for file in (
                     SETTING.AUGMENTATION_SETTING.AUGMENTED_IMAGES_DIR_ADDRESS
                     / image_category
@@ -162,9 +165,14 @@ class Preprocessing:
                 img_address = self.image_dict[image_category]["image_list"][
                     rand_img_num
                 ]
-                if img_address == ".DS_Store":
-                    logger.info(f"Found .DS_Store in {image_category} folder")
+                for case in SETTING.IGNORE_SETTING.IGNORE_List:
+                    if case == img_address.name:
+                        logger.info(f"Found {case} in {image_category} folder")
+                        continue
+                # check if the image name is in the ignore list, if so continue
+                if img_address in SETTING.IGNORE_SETTING.IGNORE_List:
                     continue
+
                 logger.info(f"Image address: {img_address}")
 
                 img = load_img(img_address)
@@ -230,7 +238,7 @@ class Preprocessing:
 
     def populated_augmented_images_into_train_test_val_dirs(self):
         for category in self.categories_name_folders:
-            # get the list of images in the dataset_augmented pdc_bit folder
+            # get the list of images in the dataset_augmented category (i.e. pdc_bit) folder
             original_list = os.listdir(
                 SETTING.AUGMENTATION_SETTING.AUGMENTED_IMAGES_DIR_ADDRESS / category
             )
@@ -251,7 +259,6 @@ class Preprocessing:
             train_list = selected_items[:num_train]
             test_list = selected_items[num_train : num_train + num_test]
             val_list = selected_items[num_train + num_test :]
-            # TODO: check if the dirs are not empty if not delete all the files
             # copy the images from the dataset_augmented pdc_bit folder to the train, test and validation folders
             self.copy_images(train_list, category, "train")
             self.copy_images(test_list, category, "test")
@@ -259,6 +266,28 @@ class Preprocessing:
 
     @staticmethod
     def copy_images(images, categ, dest_folder):
+
+        # check if the dir is empty, if not delete all the files
+        if os.listdir(
+            SETTING.PREPROCESSING_SETTING.TRAIN_TEST_VAL_SPLIT_DIR_ADDRESS
+            / dest_folder
+            / categ
+        ):
+            logger.info(
+                f"Deleting all the files in {SETTING.PREPROCESSING_SETTING.TRAIN_TEST_VAL_SPLIT_DIR_ADDRESS / dest_folder / categ}"
+            )
+            for file in os.listdir(
+                SETTING.PREPROCESSING_SETTING.TRAIN_TEST_VAL_SPLIT_DIR_ADDRESS
+                / dest_folder
+                / categ
+            ):
+                os.remove(
+                    SETTING.PREPROCESSING_SETTING.TRAIN_TEST_VAL_SPLIT_DIR_ADDRESS
+                    / dest_folder
+                    / categ
+                    / file
+                )
+
         for image in images:
             shutil.copy(
                 SETTING.AUGMENTATION_SETTING.AUGMENTED_IMAGES_DIR_ADDRESS

@@ -101,10 +101,11 @@ class BitVision:
         # get the list of dirs in the resource_dir
         subdir_name = os.listdir(self.train_test_val_dir)
         # check if there is .DS_Store in the subdir_name if so remove it
-        if ".DS_Store" in subdir_name:
-            subdir_name.remove(".DS_Store")
+        subdir_name = self.filter_out_list(list_to_be_edited=subdir_name)
         subdir_path = self.train_test_val_dir / subdir_name[0]
         categories_name = os.listdir(subdir_path)
+        # filter the list of categories if there is a case in the IGNORE_LIST
+        categories_name = self.filter_out_list(list_to_be_edited=categories_name)
         return categories_name
 
     @property
@@ -277,6 +278,16 @@ class BitVision:
             axs[i].legend(["train", "val"], loc="upper left")
         plt.show()
 
+    @staticmethod
+    def filter_out_list(
+        filter_out_list: List[str] = SETTING.IGNORE_SETTING.IGNORE_LIST,
+        list_to_be_edited: List[str] = None,
+    ) -> List[str]:
+        for case in filter_out_list:
+            if case in list_to_be_edited:
+                list_to_be_edited.remove(case)
+        return list_to_be_edited
+
     def predict(self, *args, **kwargs):
         model_path = kwargs.get("model_path", None)
         if model_path is None:
@@ -285,11 +296,11 @@ class BitVision:
         model = keras.models.load_model(model_path)
         logger.info(f"Model loaded from {model_path}")
 
-        plt.figure(figsize=SETTING.FIGURE_SETTING.FIGURE_SIZE_IN_PRED_MODEL)
-
         for category in self.categories:
-            number_of_cols = SETTING.FIGURE_SETTING.NUMBER_OF_FIGURES_IN_ROW
+            plt.figure(figsize=SETTING.FIGURE_SETTING.FIGURE_SIZE_IN_PRED_MODEL)
+            number_of_cols = SETTING.FIGURE_SETTING.NUM_COLS_IN_PRED_MODEL
             number_of_rows = SETTING.FIGURE_SETTING.NUM_ROWS_IN_PRED_MODEL
+            number_of_test_to_pred = SETTING.MODEL_SETTING.NUMBER_OF_TEST_TO_PRED
 
             # get the list of test images
             test_images_list = os.listdir(
@@ -298,10 +309,9 @@ class BitVision:
                 / category
             )
             # check if .DS_Store is in the list if so remove it
-            if ".DS_Store" in test_images_list:
-                test_images_list.remove(".DS_Store")
+            test_images_list = self.filter_out_list(list_to_be_edited=test_images_list)
 
-            for i, img in enumerate(test_images_list[0:number_of_cols]):
+            for i, img in enumerate(test_images_list[0:number_of_test_to_pred]):
                 path_to_img = (
                     SETTING.PREPROCESSING_SETTING.TRAIN_TEST_VAL_SPLIT_DIR_ADDRESS
                     / SETTING.PREPROCESSING_SETTING.TRAIN_TEST_SPLIT_DIR_NAMES[1]
@@ -337,7 +347,14 @@ class BitVision:
                         color="red",
                     )
 
+            # save the figure in the figures folder
+            fig_name = f"prediction_{category}.png"
+            fig_path = (SETTING.FIGURE_SETTING.FIG_PRED_OUT_DIR_ADDRESS / fig_name).resolve()
+            if not os.path.exists(fig_path.parent):
+                os.makedirs(fig_path.parent)
+            plt.savefig(fig_path)
             plt.show()
+            plt.tight_layout()
 
 
 if __name__ == "__main__":

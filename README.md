@@ -26,3 +26,7 @@ A[Categories\nproperty] --> B[Data Details\nproperty]
 B --> C[Assemble Model] --> D[Compile Model] --> E[Rescale Images\nTrain and Val] 
 --> F[Fit Model] --> G[Save Model]
 ```
+
+# CNN Model Prediction on Test Data
+![alt text](/Users/amin/Downloads/DrillBitVision/figures/prediction_pdc_bit.png "Logo Title Text 1")
+![alt text](/Users/amin/Downloads/DrillBitVision/figures/prediction_rollercone_bit.png "Logo Title Text 1")

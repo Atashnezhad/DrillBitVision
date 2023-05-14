@@ -5,7 +5,11 @@ from tensorflow import keras
 from pydantic import BaseModel
 
 
-class AugmentionSetting(BaseModel):
+class DataAddressSetting(BaseModel):
+    MAIN_DATA_DIR_ADDRESS: str = Path(__file__).parent / ".." / "dataset"
+
+
+class AugmentationSetting(BaseModel):
     ROTATION_RANGE: int = 25
     WIDTH_SHIFT_RANGE: float = 0.0
     HEIGHT_SHIFT_RANGE: float = 0.0
@@ -23,9 +27,15 @@ class AugmentionSetting(BaseModel):
     AUGMENTED_IMAGES_SAVE_PREFIX: str = "augmented_image"
     AUGMENTED_IMAGES_SAVE_FORMAT: str = "jpeg"
 
+    NUMBER_OF_IMAGES_TOBE_GENERATED: int = 200
+
 
 class CategorySetting(BaseModel):
     CATEGORIES: list = ["pdc_bit", "rollercone_bit"]
+
+
+class IgnoreSetting(BaseModel):
+    IGNORE_LIST: list = [".DS_Store", ".gif"]
 
 
 class PreprocessingSetting(BaseModel):
@@ -68,21 +78,22 @@ class ModelSetting(BaseModel):
     SAVE_BEST_ONLY: bool = True
     MODE: str = "max"
 
-    # predict
-    FIGURE_SIZE: tuple = (20, 10)
-    NUMBER_OF_FIGURES_IN_ROW: int = 7
+    NUMBER_OF_TEST_TO_PRED: int = 35
 
 
 class FigureSetting(BaseModel):
     # in the predict method of BitVision class
-    FIGURE_SIZE_IN_PRED_MODEL: tuple = (20, 10)
-    NUM_ROWS_IN_PRED_MODEL: int = 1
+    FIGURE_SIZE_IN_PRED_MODEL: tuple = (20, 15)
+    NUM_ROWS_IN_PRED_MODEL: int = 5
+    NUM_COLS_IN_PRED_MODEL: int = 7
+    FIG_PRED_OUT_DIR_ADDRESS: str = (Path(__file__) / ".." / ".." / "figures")
+
     # in the plot_history method of BitVision class
     FIGURE_SIZE_IN_PLOT_HIST: tuple = (17, 10)
     NUM_ROWS_IN_PLOT_HIST: int = 1
     NUM_COLS_IN_PLOT_HIST: int = 2
 
-    NUMBER_OF_FIGURES_IN_ROW: int = 7
+
 
 
 class RandomSeedSetting(BaseModel):
@@ -99,13 +110,15 @@ class FlowFromDirectorySetting(BaseModel):
 
 
 class Setting(BaseModel):
-    AUGMENTATION_SETTING: AugmentionSetting = AugmentionSetting()
+    AUGMENTATION_SETTING: AugmentationSetting = AugmentationSetting()
     PREPROCESSING_SETTING: PreprocessingSetting = PreprocessingSetting()
     CATEGORY_SETTING: CategorySetting = CategorySetting()
     MODEL_SETTING: ModelSetting = ModelSetting()
     RANDOM_SEED_SETTING: RandomSeedSetting = RandomSeedSetting()
     FLOW_FROM_DIRECTORY_SETTING: FlowFromDirectorySetting = FlowFromDirectorySetting()
     FIGURE_SETTING: FigureSetting = FigureSetting()
+    IGNORE_SETTING: IgnoreSetting = IgnoreSetting()
+    DATA_ADDRESS_SETTING: DataAddressSetting = DataAddressSetting()
 
 
 SETTING = Setting()
