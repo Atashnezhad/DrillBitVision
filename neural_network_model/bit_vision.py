@@ -90,6 +90,7 @@ class BitVision:
         self.assemble_deep_net_model()
         self.train_vali_gens = {}
         self.model_history = None
+        self.model_class_indices: Dict[str, int] = {}
 
     @property
     def categories(self) -> List[str]:
@@ -99,6 +100,9 @@ class BitVision:
         """
         # get the list of dirs in the resource_dir
         subdir_name = os.listdir(self.train_test_val_dir)
+        # check if there is .DS_Store in the subdir_name if so remove it
+        if ".DS_Store" in subdir_name:
+            subdir_name.remove(".DS_Store")
         subdir_path = self.train_test_val_dir / subdir_name[0]
         categories_name = os.listdir(subdir_path)
         return categories_name
@@ -218,6 +222,9 @@ class BitVision:
                 interpolation="nearest",
             )
             self.train_vali_gens[subdir] = generator
+            self.model_class_indices = dict(
+                zip(generator.class_indices.values(), generator.class_indices.keys())
+            )
 
             logger.info(f"Rescaling {subdir} data, {generator.class_indices}:")
 
@@ -290,12 +297,16 @@ class BitVision:
                 / SETTING.PREPROCESSING_SETTING.TRAIN_TEST_SPLIT_DIR_NAMES[1]
                 / category
             )
+            # check if .DS_Store is in the list if so remove it
+            if ".DS_Store" in test_images_list:
+                test_images_list.remove(".DS_Store")
 
             for i, img in enumerate(test_images_list[0:number_of_cols]):
                 path_to_img = (
-                    SETTING.PREPROCESSING_SETTING.TRAIN_TEST_VAL_SPLIT_DIR_ADDRESS /
-                    SETTING.PREPROCESSING_SETTING.TRAIN_TEST_SPLIT_DIR_NAMES[1] / category /
-                    str(img)
+                    SETTING.PREPROCESSING_SETTING.TRAIN_TEST_VAL_SPLIT_DIR_ADDRESS
+                    / SETTING.PREPROCESSING_SETTING.TRAIN_TEST_SPLIT_DIR_NAMES[1]
+                    / category
+                    / str(img)
                 ).resolve()
 
                 img = load_img(
@@ -309,10 +320,22 @@ class BitVision:
                 img_batch = np.expand_dims(img, axis=0)
                 img_preprocessed = preprocess_input(img_batch)
                 # Generate feature output by predicting on the input image
-                # prediction = model.predict_classes(img)
                 prediction = model.predict(img_preprocessed)
                 prediction = np.argmax(prediction, axis=1)
-                print(prediction)
+                logger.info(
+                    f"Prediction: {self.model_class_indices.get(prediction[0])}, category: {category}"
+                )
+                # check if the prediction is correct or not and set the title accordingly
+                # and if it is not correct make the color of the title red
+                if self.model_class_indices.get(prediction[0]) == category:
+                    ax.set_title(
+                        f"{self.model_class_indices.get(prediction[0])}", color="green"
+                    )
+                else:
+                    ax.set_title(
+                        f"{self.model_class_indices.get(prediction[0])}",
+                        color="red",
+                    )
 
             plt.show()
 
@@ -323,7 +346,7 @@ if __name__ == "__main__":
     # print(obj.data_details)
     # obj.plot_image_category()
     # obj.compile_model()
-    # obj.rescaling()
+    obj.rescaling()
     # obj.train_model()
     # obj.plot_history()
 
