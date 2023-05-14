@@ -28,5 +28,5 @@ B --> C[Assemble Model] --> D[Compile Model] --> E[Rescale Images\nTrain and Val
 ```
 
 # CNN Model Prediction on Test Data
-![alt text](../DrillBitVision/figures/prediction_pdc_bit.png "Logo Title Text 1")
-![alt text](../DrillBitVision/figures/prediction_rollercone_bit.png "Logo Title Text 1")
+![alt text](../figures/prediction_pdc_bit.png "Logo Title Text 1")
+![alt text](../figures/prediction_rollercone_bit.png "Logo Title Text 1")
