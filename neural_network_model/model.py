@@ -7,6 +7,7 @@ from pydantic import BaseModel
 
 class DataAddressSetting(BaseModel):
     MAIN_DATA_DIR_ADDRESS: str = Path(__file__).parent / ".." / "dataset"
+    TEST_DIR_ADDRESS: str = Path(__file__).parent / ".." / "dataset_train_test_val" / "test"
 
 
 class AugmentationSetting(BaseModel):
@@ -94,8 +95,6 @@ class FigureSetting(BaseModel):
     NUM_COLS_IN_PLOT_HIST: int = 2
 
 
-
-
 class RandomSeedSetting(BaseModel):
     SEED: int = 1
 
@@ -109,6 +108,10 @@ class FlowFromDirectorySetting(BaseModel):
     SEED: int = 1234
 
 
+class DataGenSetting(BaseModel):
+    RESCALE: float = 1.0 / 255.0
+
+
 class Setting(BaseModel):
     AUGMENTATION_SETTING: AugmentationSetting = AugmentationSetting()
     PREPROCESSING_SETTING: PreprocessingSetting = PreprocessingSetting()
@@ -119,6 +122,7 @@ class Setting(BaseModel):
     FIGURE_SETTING: FigureSetting = FigureSetting()
     IGNORE_SETTING: IgnoreSetting = IgnoreSetting()
     DATA_ADDRESS_SETTING: DataAddressSetting = DataAddressSetting()
+    DATA_GEN_SETTING: DataGenSetting = DataGenSetting()
 
 
 SETTING = Setting()

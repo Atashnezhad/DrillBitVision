@@ -356,6 +356,25 @@ class BitVision:
             plt.show()
             plt.tight_layout()
 
+        datagen = image.ImageDataGenerator(SETTING.DATA_GEN_SETTING.RESCALE)
+        DoubleCheck_generator = datagen.flow_from_directory(
+            directory=SETTING.DATA_ADDRESS_SETTING.TEST_DIR_ADDRESS,
+            target_size=SETTING.FLOW_FROM_DIRECTORY_SETTING.TARGET_SIZE,
+            color_mode=SETTING.FLOW_FROM_DIRECTORY_SETTING.COLOR_MODE,
+            classes=None,
+            class_mode=SETTING.FLOW_FROM_DIRECTORY_SETTING.CLASS_MODE,
+            batch_size=SETTING.FLOW_FROM_DIRECTORY_SETTING.BATCH_SIZE,
+            shuffle=SETTING.FLOW_FROM_DIRECTORY_SETTING.SHUFFLE,
+            seed=SETTING.FLOW_FROM_DIRECTORY_SETTING.SEED,
+            save_to_dir=None,
+            save_prefix="",
+            save_format="png",
+            follow_links=False,
+            subset=None,
+            interpolation="nearest")
+
+        model.evaluate(DoubleCheck_generator)
+
 
 if __name__ == "__main__":
     obj = BitVision()
