@@ -117,13 +117,18 @@ class BitVision:
         resource_dir = Path(__file__).parent / ".." / self.train_test_val_dir
         # get the list of dirs in the resource_dir
         subdir_name = os.listdir(resource_dir)
+        # check if there is .DS_Store in the subdir_name if so remove it
+        subdir_name = self.filter_out_list(list_to_be_edited=subdir_name)
         data = {}
         # for each subdir in the resource_dir, get the list of files
         for subdir in subdir_name:
             data[subdir] = {}
             subdir_path = resource_dir / subdir
-            for category in os.listdir(subdir_path):
+            subdir_path_lisr = self.filter_out_list(list_to_be_edited=os.listdir(subdir_path))
+            for category in subdir_path_lisr:
                 category_path = subdir_path / category
+                #  check if there is .DS_Store in the subdir_name if so remove it
+                # category_path = self.filter_out_list(list_to_be_edited=category_path)
                 # for each file in the category, find the number of files
                 num_files = len(os.listdir(category_path))
                 # logger.info(f"Number of files in {category_path.resolve()} is {num_files}")
@@ -231,7 +236,7 @@ class BitVision:
 
     def check_points(self) -> ModelCheckpoint:
         check_points = ModelCheckpoint(
-            SETTING.MODEL_SETTING.SAVE_FILE_PATH,
+            SETTING.MODEL_SETTING.MODEL_PATH,
             monitor=SETTING.MODEL_SETTING.MONITOR,
             verbose=SETTING.MODEL_SETTING.CHECK_POINT_VERBOSE,
             save_best_only=SETTING.MODEL_SETTING.SAVE_BEST_ONLY,
@@ -256,8 +261,8 @@ class BitVision:
             callbacks=[self.check_points()],
         )
 
-        self.model.save(SETTING.MODEL_SETTING.SAVE_FILE_PATH)
-        logger.info(f"Model saved to {SETTING.MODEL_SETTING.SAVE_FILE_PATH}")
+        self.model.save(SETTING.MODEL_SETTING.MODEL_PATH)
+        logger.info(f"Model saved to {SETTING.MODEL_SETTING.MODEL_PATH}")
         self.model_history = model_history
 
     def plot_history(self):
@@ -378,14 +383,12 @@ class BitVision:
 
 if __name__ == "__main__":
     obj = BitVision()
-    # print(obj.categories)
-    # print(obj.data_details)
+    print(obj.categories)
+    print(obj.data_details)
     # obj.plot_image_category()
     # obj.compile_model()
     obj.rescaling()
     # obj.train_model()
     # obj.plot_history()
 
-    model_name = "model_epoch_39_loss_0.28_acc_0.79_val_acc_0.66_.h5"
-    model_path = Path(__file__) / ".." / "deep_model" / model_name
-    obj.predict(model_path=SETTING.MODEL_SETTING.SAVE_FILE_PATH)
+    obj.predict(model_path=SETTING.MODEL_SETTING.MODEL_PATH)

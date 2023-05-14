@@ -36,7 +36,7 @@ class CategorySetting(BaseModel):
 
 
 class IgnoreSetting(BaseModel):
-    IGNORE_LIST: list = [".DS_Store", ".gif"]
+    IGNORE_LIST: list = [".DS_Store"]
 
 
 class PreprocessingSetting(BaseModel):
@@ -50,11 +50,8 @@ class PreprocessingSetting(BaseModel):
 
 
 class ModelSetting(BaseModel):
-    MODELS_DIR_ADDRESS: str = Path(__file__).parent / ".." / "deep_model"
-    SAVE_FILE_PATH: str = (
-        MODELS_DIR_ADDRESS
-        / "model_epoch_{epoch:02d}_loss_{loss:.2f}_acc_{accuracy:.2f}_val_acc_{"
-        "val_accuracy:.2f}_.h5"
+    MODEL_PATH: str = (
+        Path(__file__).parent / ".." / "deep_model" / "model_epoch_39_loss_0.28_acc_0.79_val_acc_0.66_.h5"
     )
 
     # compile

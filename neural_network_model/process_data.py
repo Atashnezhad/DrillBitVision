@@ -165,12 +165,12 @@ class Preprocessing:
                 img_address = self.image_dict[image_category]["image_list"][
                     rand_img_num
                 ]
-                for case in SETTING.IGNORE_SETTING.IGNORE_List:
+                for case in SETTING.IGNORE_SETTING.IGNORE_LIST:
                     if case == img_address.name:
                         logger.info(f"Found {case} in {image_category} folder")
                         continue
                 # check if the image name is in the ignore list, if so continue
-                if img_address in SETTING.IGNORE_SETTING.IGNORE_List:
+                if img_address in SETTING.IGNORE_SETTING.IGNORE_LIST:
                     continue
 
                 logger.info(f"Image address: {img_address}")
