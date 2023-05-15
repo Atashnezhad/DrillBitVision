@@ -61,7 +61,7 @@ class Preprocessing:
         for category in category_list:
             downloader.download(
                 category,
-                limit=200,
+                limit=SETTING.DOWNLOAD_IMAGE_SETTING.LIMIT,
                 output_dir=Path(__file__).parent / ".." / "dataset",
                 adult_filter_off=True,
                 force_replace=False,

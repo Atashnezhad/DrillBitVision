@@ -10,6 +10,10 @@ class DataAddressSetting(BaseModel):
     TEST_DIR_ADDRESS: str = Path(__file__).parent / ".." / "dataset_train_test_val" / "test"
 
 
+class DownloadImageSettig(BaseModel):
+    LIMIT: int = 50
+
+
 class AugmentationSetting(BaseModel):
     ROTATION_RANGE: int = 25
     WIDTH_SHIFT_RANGE: float = 0.0
@@ -120,6 +124,7 @@ class Setting(BaseModel):
     IGNORE_SETTING: IgnoreSetting = IgnoreSetting()
     DATA_ADDRESS_SETTING: DataAddressSetting = DataAddressSetting()
     DATA_GEN_SETTING: DataGenSetting = DataGenSetting()
+    DOWNLOAD_IMAGE_SETTING: DownloadImageSettig = DownloadImageSettig()
 
 
 SETTING = Setting()
