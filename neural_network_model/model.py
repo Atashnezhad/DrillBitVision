@@ -1,16 +1,18 @@
 from pathlib import Path
 from typing import List
 
-from tensorflow import keras
 from pydantic import BaseModel
+from tensorflow import keras
 
 
 class DataAddressSetting(BaseModel):
     MAIN_DATA_DIR_ADDRESS: str = Path(__file__).parent / ".." / "dataset"
-    TEST_DIR_ADDRESS: str = Path(__file__).parent / ".." / "dataset_train_test_val" / "test"
+    TEST_DIR_ADDRESS: str = (
+        Path(__file__).parent / ".." / "dataset_train_test_val" / "test"
+    )
 
 
-class DownloadImageSettig(BaseModel):
+class DownloadImageSetting(BaseModel):
     LIMIT: int = 50
 
 
@@ -55,7 +57,10 @@ class PreprocessingSetting(BaseModel):
 
 class ModelSetting(BaseModel):
     MODEL_PATH: str = (
-        Path(__file__).parent / ".." / "deep_model" / "model_epoch_39_loss_0.28_acc_0.79_val_acc_0.66_.h5"
+        Path(__file__).parent
+        / ".."
+        / "deep_model"
+        / "model_epoch_39_loss_0.28_acc_0.79_val_acc_0.66_.h5"
     )
 
     # compile
@@ -63,7 +68,7 @@ class ModelSetting(BaseModel):
     METRICS: List = ["accuracy"]
 
     # fit generator
-    EPOCHS: int = 3
+    EPOCHS: int = 10
     FIT_GEN_VERBOSE: int = 1
     VALIDATION_STEPS: int = 2
     CLASS_WEIGHT: dict = None
@@ -88,7 +93,7 @@ class FigureSetting(BaseModel):
     FIGURE_SIZE_IN_PRED_MODEL: tuple = (20, 15)
     NUM_ROWS_IN_PRED_MODEL: int = 5
     NUM_COLS_IN_PRED_MODEL: int = 7
-    FIG_PRED_OUT_DIR_ADDRESS: str = (Path(__file__) / ".." / ".." / "figures")
+    FIG_PRED_OUT_DIR_ADDRESS: str = Path(__file__) / ".." / ".." / "figures"
 
     # in the plot_history method of BitVision class
     FIGURE_SIZE_IN_PLOT_HIST: tuple = (17, 10)
@@ -113,6 +118,15 @@ class DataGenSetting(BaseModel):
     RESCALE: float = 1.0 / 255.0
 
 
+class GradCamSetting(BaseModel):
+    IMG_PATH: str = Path(__file__).parent / ".." / "dataset" / "pdc_bit" / "Image_1.png"
+
+    LAST_CONV_LAYER_NAME: str = "conv2d_2"
+    IMAGE_NEW_NAME: str = Path(__file__).parent / ".." / "figures" / "grad_cam_pdc_1.png"
+
+    ALPHA: float = 0.7
+
+
 class Setting(BaseModel):
     AUGMENTATION_SETTING: AugmentationSetting = AugmentationSetting()
     PREPROCESSING_SETTING: PreprocessingSetting = PreprocessingSetting()
@@ -124,7 +138,8 @@ class Setting(BaseModel):
     IGNORE_SETTING: IgnoreSetting = IgnoreSetting()
     DATA_ADDRESS_SETTING: DataAddressSetting = DataAddressSetting()
     DATA_GEN_SETTING: DataGenSetting = DataGenSetting()
-    DOWNLOAD_IMAGE_SETTING: DownloadImageSettig = DownloadImageSettig()
+    DOWNLOAD_IMAGE_SETTING: DownloadImageSetting = DownloadImageSetting()
+    GRAD_CAM_SETTING: GradCamSetting = GradCamSetting()
 
 
 SETTING = Setting()

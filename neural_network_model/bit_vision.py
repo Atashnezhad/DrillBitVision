@@ -1,59 +1,45 @@
-# import pandas as pd
 import logging
-import os
 import random
-import shutil
 
 from keras import Sequential
 from keras.layers import (
-    Conv2D,
     BatchNormalization,
-    MaxPooling2D,
+    Conv2D,
+    Dense,
     Dropout,
     Flatten,
-    Dense,
+    MaxPooling2D,
 )
 
 from neural_network_model.model import SETTING
 
 # set seed to get the same random numbers each time
 random.seed(1)
-import matplotlib.pyplot as plt
 
-# from tensorflow.keras.callbacks import ModelCheckpoint
-from keras.callbacks import ModelCheckpoint
-
-# import sys
+import os
 import warnings
 from pathlib import Path
 from typing import Any, Dict, List
 
-import os
-import shutil
-import sys
-import warnings
-from tensorflow.keras.applications.resnet50 import preprocess_input, decode_predictions
+# from tensorflow.keras.callbacks import ModelCheckpoint
+from keras.callbacks import ModelCheckpoint
+from tensorflow.keras.applications.resnet50 import decode_predictions, preprocess_input
 
 warnings.filterwarnings("ignore")
-from collections import Counter
-import random
 
 import numpy as np
-import matplotlib.pyplot as plt
-
-# import tensorflow as tf
-from tensorflow import keras
 import tensorflow
+from tensorflow import keras
 
 warnings.filterwarnings("ignore")
-# from collections import Counter
-# import numpy as np
-# import matplotlib.pyplot as plt
-# # import tensorflow as tf
-# from tensorflow import keras
-# import tensorflow
 
+import matplotlib.cm as cm
+import matplotlib.pyplot as plt
+import tensorflow as tf
 
+# Display
+from IPython.display import Image, display
+from tensorflow import keras
 from tensorflow.keras.preprocessing import image
 from tensorflow.keras.preprocessing.image import (
     ImageDataGenerator,
@@ -124,7 +110,9 @@ class BitVision:
         for subdir in subdir_name:
             data[subdir] = {}
             subdir_path = resource_dir / subdir
-            subdir_path_lisr = self.filter_out_list(list_to_be_edited=os.listdir(subdir_path))
+            subdir_path_lisr = self.filter_out_list(
+                list_to_be_edited=os.listdir(subdir_path)
+            )
             for category in subdir_path_lisr:
                 category_path = subdir_path / category
                 #  check if there is .DS_Store in the subdir_name if so remove it
@@ -200,7 +188,7 @@ class BitVision:
             axs[self.categories.index(category)].set_title(category)
         plt.show()
 
-    def rescaling(self):
+    def _rescaling(self):
         """
         This function is used to rescale the images.
         The images were augmented before in the preprocessing step.
@@ -208,7 +196,7 @@ class BitVision:
         """
         my_list = ["train", "val"]
         for subdir in my_list:
-            datagen = image.ImageDataGenerator(rescale=1.0 / 255)
+            datagen = image.ImageDataGenerator(rescale=SETTING.DATA_GEN_SETTING.RESCALE)
 
             generator = datagen.flow_from_directory(
                 directory=SETTING.PREPROCESSING_SETTING.TRAIN_TEST_VAL_SPLIT_DIR_ADDRESS
@@ -246,6 +234,7 @@ class BitVision:
         return check_points
 
     def train_model(self):
+        self._rescaling()
         model_history = self.model.fit_generator(
             generator=self.train_vali_gens["train"],
             epochs=SETTING.MODEL_SETTING.EPOCHS,
@@ -281,6 +270,10 @@ class BitVision:
             axs[i].set_ylabel(key)
             axs[i].set_xlabel("epoch")
             axs[i].legend(["train", "val"], loc="upper left")
+        fig_path = (
+            SETTING.FIGURE_SETTING.FIG_PRED_OUT_DIR_ADDRESS / "history.png"
+        ).resolve()
+        plt.savefig(fig_path)
         plt.show()
 
     @staticmethod
@@ -294,7 +287,7 @@ class BitVision:
         return list_to_be_edited
 
     def predict(self, *args, **kwargs):
-        model_path = kwargs.get("model_path", None)
+        model_path = kwargs.get("model_path", SETTING.MODEL_SETTING.MODEL_PATH)
         if model_path is None:
             raise ValueError("model_path is None")
 
@@ -354,7 +347,9 @@ class BitVision:
 
             # save the figure in the figures folder
             fig_name = f"prediction_{category}.png"
-            fig_path = (SETTING.FIGURE_SETTING.FIG_PRED_OUT_DIR_ADDRESS / fig_name).resolve()
+            fig_path = (
+                SETTING.FIGURE_SETTING.FIG_PRED_OUT_DIR_ADDRESS / fig_name
+            ).resolve()
             if not os.path.exists(fig_path.parent):
                 os.makedirs(fig_path.parent)
             plt.savefig(fig_path)
@@ -376,19 +371,153 @@ class BitVision:
             save_format="png",
             follow_links=False,
             subset=None,
-            interpolation="nearest")
+            interpolation="nearest",
+        )
 
         model.evaluate(DoubleCheck_generator)
+
+    def grad_cam_viz(self, *args, **kwargs):
+        model_path = kwargs.get("model_path", SETTING.MODEL_SETTING.MODEL_PATH)
+        if model_path is None:
+            raise ValueError("model_path is None")
+
+        model = keras.models.load_model(model_path)
+        logger.info(f"Model loaded from {model_path}")
+
+        # print the model layers
+        for idx in range(len(model.layers)):
+            print(model.get_layer(index=idx).name)
+
+        model_builder = keras.applications.xception.Xception
+        preprocess_input = keras.applications.xception.preprocess_input
+        decode_predictions = keras.applications.xception.decode_predictions
+
+        last_conv_layer_name = SETTING.GRAD_CAM_SETTING.LAST_CONV_LAYER_NAME
+
+        # The local path to our target image
+        img_path = SETTING.GRAD_CAM_SETTING.IMG_PATH
+
+        # load the image and show it
+        img = load_img(
+            img_path, target_size=SETTING.FLOW_FROM_DIRECTORY_SETTING.TARGET_SIZE
+        )
+        plt.imshow(img)
+        plt.show()
+
+        # Prepare image
+        img_array = preprocess_input(
+            BitVision._get_img_array(
+                img_path, size=SETTING.FLOW_FROM_DIRECTORY_SETTING.TARGET_SIZE
+            )
+        )
+        # Make model
+        # model = model_builder(weights="imagenet")
+        # Remove last layer's softmax
+        model.layers[-1].activation = None
+        # Print what the top predicted class is
+        preds = model.predict(img_array)
+        # print("Predicted:", decode_predictions(preds, top=1)[0])
+        # Generate class activation heatmap
+        heatmap = BitVision._make_gradcam_heatmap(
+            img_array, model, last_conv_layer_name
+        )
+
+        # Display heatmap
+        plt.matshow(heatmap)
+        plt.show()
+        BitVision._save_and_display_gradcam(
+            img_path, heatmap, cam_path=SETTING.GRAD_CAM_SETTING.IMAGE_NEW_NAME
+        )
+
+    @staticmethod
+    def _get_img_array(img_path, size):
+        # `img` is a PIL image of size 299x299
+        img = keras.preprocessing.image.load_img(img_path, target_size=size)
+        # `array` is a float32 Numpy array of shape (299, 299, 3)
+        array = keras.preprocessing.image.img_to_array(img)
+        # We add a dimension to transform our array into a "batch"
+        # of size (1, 299, 299, 3)
+        array = np.expand_dims(array, axis=0)
+        return array
+
+    @staticmethod
+    def _make_gradcam_heatmap(img_array, model, last_conv_layer_name, pred_index=None):
+        # First, we create a model that maps the input image to the activations
+        # of the last conv layer as well as the output predictions
+        grad_model = tf.keras.models.Model(
+            [model.inputs], [model.get_layer(last_conv_layer_name).output, model.output]
+        )
+
+        # Then, we compute the gradient of the top predicted class for our input image
+        # with respect to the activations of the last conv layer
+        with tf.GradientTape() as tape:
+            last_conv_layer_output, preds = grad_model(img_array)
+            if pred_index is None:
+                pred_index = tf.argmax(preds[0])
+            class_channel = preds[:, pred_index]
+
+        # This is the gradient of the output neuron (top predicted or chosen)
+        # with regard to the output feature map of the last conv layer
+        grads = tape.gradient(class_channel, last_conv_layer_output)
+
+        # This is a vector where each entry is the mean intensity of the gradient
+        # over a specific feature map channel
+        pooled_grads = tf.reduce_mean(grads, axis=(0, 1, 2))
+
+        # We multiply each channel in the feature map array
+        # by "how important this channel is" with regard to the top predicted class
+        # then sum all the channels to obtain the heatmap class activation
+        last_conv_layer_output = last_conv_layer_output[0]
+        heatmap = last_conv_layer_output @ pooled_grads[..., tf.newaxis]
+        heatmap = tf.squeeze(heatmap)
+
+        # For visualization purpose, we will also normalize the heatmap between 0 & 1
+        heatmap = tf.maximum(heatmap, 0) / tf.math.reduce_max(heatmap)
+        return heatmap.numpy()
+
+    @staticmethod
+    def _save_and_display_gradcam(
+        img_path,
+        heatmap,
+        cam_path=SETTING.GRAD_CAM_SETTING.IMAGE_NEW_NAME,
+        alpha=SETTING.GRAD_CAM_SETTING.ALPHA,
+    ):
+        # Load the original image
+        img = keras.preprocessing.image.load_img(img_path)
+        img = keras.preprocessing.image.img_to_array(img)
+
+        # Rescale heatmap to a range 0-255
+        heatmap = np.uint8((1 / SETTING.DATA_GEN_SETTING.RESCALE) * heatmap)
+
+        # Use jet colormap to colorize heatmap
+        jet = cm.get_cmap("jet")
+
+        # Use RGB values of the colormap
+        jet_colors = jet(np.arange(256))[:, :3]
+        jet_heatmap = jet_colors[heatmap]
+
+        # Create an image with RGB colorized heatmap
+        jet_heatmap = keras.preprocessing.image.array_to_img(jet_heatmap)
+        jet_heatmap = jet_heatmap.resize((img.shape[1], img.shape[0]))
+        jet_heatmap = keras.preprocessing.image.img_to_array(jet_heatmap)
+
+        # Superimpose the heatmap on original image
+        superimposed_img = jet_heatmap * alpha + img
+        superimposed_img = keras.preprocessing.image.array_to_img(superimposed_img)
+
+        # Save the superimposed image
+        superimposed_img.save(cam_path)
 
 
 if __name__ == "__main__":
     obj = BitVision()
-    print(obj.categories)
-    print(obj.data_details)
+    # print(obj.categories)
+    # print(obj.data_details)
     # obj.plot_image_category()
     # obj.compile_model()
-    obj.rescaling()
     # obj.train_model()
     # obj.plot_history()
 
-    obj.predict(model_path=SETTING.MODEL_SETTING.MODEL_PATH)
+    # obj.predict()
+
+    obj.grad_cam_viz()

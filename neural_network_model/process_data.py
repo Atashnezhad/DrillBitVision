@@ -4,14 +4,14 @@ import random
 import shutil
 
 from bing_image_downloader import downloader
-
-from neural_network_model.model import SETTING
 from tensorflow.keras.preprocessing import image
 from tensorflow.keras.preprocessing.image import (
     ImageDataGenerator,
     img_to_array,
     load_img,
 )
+
+from neural_network_model.model import SETTING
 
 # set seed to get the same random numbers each time
 random.seed(SETTING.RANDOM_SEED_SETTING.SEED)
@@ -266,7 +266,6 @@ class Preprocessing:
 
     @staticmethod
     def copy_images(images, categ, dest_folder):
-
         # check if the dir is empty, if not delete all the files
         if os.listdir(
             SETTING.PREPROCESSING_SETTING.TRAIN_TEST_VAL_SPLIT_DIR_ADDRESS
