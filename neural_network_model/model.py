@@ -60,7 +60,7 @@ class ModelSetting(BaseModel):
         Path(__file__).parent
         / ".."
         / "deep_model"
-        / "model_epoch_39_loss_0.28_acc_0.79_val_acc_0.66_.h5"
+        / "model_epoch_27_loss_0.52_acc_0.64_val_acc_0.62_.h5"
     )
 
     # compile
@@ -119,12 +119,26 @@ class DataGenSetting(BaseModel):
 
 
 class GradCamSetting(BaseModel):
-    IMG_PATH: str = Path(__file__).parent / ".." / "dataset" / "pdc_bit" / "Image_1.png"
+    IMG_PATH: str = (
+        Path(__file__).parent / ".." / "dataset" / "pdc_bit" / "1683696188809.jpg"
+    )
 
     LAST_CONV_LAYER_NAME: str = "conv2d_2"
-    IMAGE_NEW_NAME: str = Path(__file__).parent / ".." / "figures" / "grad_cam_pdc_1.png"
+    IMAGE_NEW_NAME: str = (
+        Path(__file__).parent / ".." / "figures" / "grad_cam_pdc_1683696188809.png"
+    )
 
     ALPHA: float = 0.7
+
+
+class GoogleDriveSetting(BaseModel):
+    CREDENTIALS_PATH: str = (
+        Path(__file__).parent
+        / ".."
+        / "google_drive_credential"
+        / "client_secret_291282953694-24tr1chov7jcgoma2niil3amn3ome5b7.apps.googleusercontent.com.json"
+    )
+    FOLDER_ID: str = "1yHW5p5PMg3Vae7aZDj_Us9iYnvea8vUQ"
 
 
 class Setting(BaseModel):
@@ -140,6 +154,7 @@ class Setting(BaseModel):
     DATA_GEN_SETTING: DataGenSetting = DataGenSetting()
     DOWNLOAD_IMAGE_SETTING: DownloadImageSetting = DownloadImageSetting()
     GRAD_CAM_SETTING: GradCamSetting = GradCamSetting()
+    GOOGLE_DRIVE_SETTING: GoogleDriveSetting = GoogleDriveSetting()
 
 
 SETTING = Setting()
