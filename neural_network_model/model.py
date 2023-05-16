@@ -139,6 +139,13 @@ class GoogleDriveSetting(BaseModel):
     FOLDER_ID: str = "1yHW5p5PMg3Vae7aZDj_Us9iYnvea8vUQ"
 
 
+class S3BucketSetting(BaseModel):
+    BUCKET_NAME: str = "bitimages123"
+    # BUCKET_REGION: str = "us-east-2"
+    BUCKET_KEY: str = "pdc_bit/Image_1.png"
+    BUCKET_FILE_NAME: str = "Image_1.png"
+
+
 class Setting(BaseModel):
     AUGMENTATION_SETTING: AugmentationSetting = AugmentationSetting()
     PREPROCESSING_SETTING: PreprocessingSetting = PreprocessingSetting()
@@ -153,6 +160,7 @@ class Setting(BaseModel):
     DOWNLOAD_IMAGE_SETTING: DownloadImageSetting = DownloadImageSetting()
     GRAD_CAM_SETTING: GradCamSetting = GradCamSetting()
     GOOGLE_DRIVE_SETTING: GoogleDriveSetting = GoogleDriveSetting()
+    S3_BUCKET_SETTING: S3BucketSetting = S3BucketSetting()
 
 
 SETTING = Setting()
