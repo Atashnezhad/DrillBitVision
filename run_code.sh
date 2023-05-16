@@ -1,10 +1,18 @@
 #!/bin/bash
 
+# Clone the GitHub repository
+git clone https://github.com/Atashnezhad/DrillBitVision.git
 
-pip install -r DrillBitVision/requirements.txt
+# Change directory to the repository folder
+cd DrillBitVision
 
-ls DrillBitVision/
-# !rm -rf DrillBitVision/dataset
+# Install the requirements
+pip install -r requirements.txt
 
-python3 DrillBitVision/neural_network_model/process_data.py
-python3 DrillBitVision/neural_network_model/bit_vision.py
+# Run the modules
+python process_data.py
+python bit_vision.py
+
+# Add more module calls as needed
+
+# End of script

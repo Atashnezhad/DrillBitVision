@@ -68,7 +68,7 @@ class ModelSetting(BaseModel):
     METRICS: List = ["accuracy"]
 
     # fit generator
-    EPOCHS: int = 10
+    EPOCHS: int = 5
     FIT_GEN_VERBOSE: int = 1
     VALIDATION_STEPS: int = 2
     CLASS_WEIGHT: dict = None
@@ -119,13 +119,11 @@ class DataGenSetting(BaseModel):
 
 
 class GradCamSetting(BaseModel):
-    IMG_PATH: str = (
-        Path(__file__).parent / ".." / "dataset" / "pdc_bit" / "1683696188809.jpg"
-    )
+    IMG_PATH: str = Path(__file__).parent / ".." / "dataset" / "pdc_bit" / "Image_1.png"
 
     LAST_CONV_LAYER_NAME: str = "conv2d_2"
     IMAGE_NEW_NAME: str = (
-        Path(__file__).parent / ".." / "figures" / "grad_cam_pdc_1683696188809.png"
+        Path(__file__).parent / ".." / "figures" / "grad_cam_pdc_Image_1.png"
     )
 
     ALPHA: float = 0.7

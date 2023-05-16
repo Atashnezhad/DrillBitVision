@@ -19,7 +19,7 @@ random.seed(1)
 import os
 import warnings
 from pathlib import Path
-from typing import Any, Dict, List
+from typing import Dict, List
 
 # from tensorflow.keras.callbacks import ModelCheckpoint
 from keras.callbacks import ModelCheckpoint
@@ -38,7 +38,6 @@ import matplotlib.pyplot as plt
 import tensorflow as tf
 
 # Display
-from IPython.display import Image, display
 from tensorflow import keras
 from tensorflow.keras.preprocessing import image
 from tensorflow.keras.preprocessing.image import (
@@ -517,7 +516,5 @@ if __name__ == "__main__":
     # obj.compile_model()
     # obj.train_model()
     # obj.plot_history()
-
     # obj.predict()
-
     obj.grad_cam_viz()
