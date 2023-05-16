@@ -142,6 +142,7 @@ class GoogleDriveSetting(BaseModel):
 class S3BucketSetting(BaseModel):
     BUCKET_NAME: str = "bitimages123"
     BUCKET_MAIN_FOLDER_NAME: str = "dataset"
+    SUBFOLDER_NAME: list = ["pdc_bit", "rollercone_bit"]
     DOWNLOAD_LOCATION: str = (Path(__file__).parent / ".." / "s3_dataset").resolve()
 
 
