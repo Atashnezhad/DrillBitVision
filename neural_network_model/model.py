@@ -141,9 +141,8 @@ class GoogleDriveSetting(BaseModel):
 
 class S3BucketSetting(BaseModel):
     BUCKET_NAME: str = "bitimages123"
-    # BUCKET_REGION: str = "us-east-2"
-    BUCKET_KEY: str = "pdc_bit/Image_1.png"
-    BUCKET_FILE_NAME: str = "Image_1.png"
+    BUCKET_MAIN_FOLDER_NAME: str = "dataset"
+    DOWNLOAD_LOCATION: str = (Path(__file__).parent / ".." / "s3_dataset").resolve()
 
 
 class Setting(BaseModel):

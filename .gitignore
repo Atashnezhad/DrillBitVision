@@ -14,3 +14,4 @@ dataset_augmented/
 dataset_train_test_val/
 deep_model/
 google_drive_credential/
+s3_dataset/
