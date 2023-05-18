@@ -9,8 +9,9 @@ from neural_network_model.model import SETTING
 class MyS3:
     """
     This class is used to download the images from the S3 bucket
-
     """
+
+    # TODO: add the upload method
 
     def __init__(self, *args, **kwargs):
         self.access_key: str = (
