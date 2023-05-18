@@ -12,6 +12,7 @@ from tensorflow.keras.preprocessing.image import (
 )
 
 from neural_network_model.model import SETTING
+from neural_network_model.s3 import MyS3
 
 # set seed to get the same random numbers each time
 random.seed(SETTING.RANDOM_SEED_SETTING.SEED)
@@ -20,7 +21,7 @@ import random
 # import sys
 import warnings
 from pathlib import Path
-from typing import Dict, List
+from typing import Dict, List, Any
 
 # import shutil
 from tqdm import tqdm
@@ -55,7 +56,23 @@ class Preprocessing:
         self.categories_name_folders = None
 
     @staticmethod
-    def download_images(category_list=None) -> None:
+    def download_images(category_list=None, from_s3=False) -> None:
+
+        if from_s3:
+            # download the images from the S3 bucket
+            s3 = MyS3()
+
+            # Specify your bucket name and subfolders
+            bucket_name = SETTING.S3_BUCKET_SETTING.BUCKET_NAME
+            subfolders = SETTING.S3_BUCKET_SETTING.SUBFOLDER_NAME
+            download_location_address = SETTING.S3_BUCKET_SETTING.DOWNLOAD_LOCATION
+
+            s3.download_files_from_subfolders(
+                bucket_name, subfolders, download_location_address
+            )
+            logger.info("Downloaded images from S3 bucket")
+            return
+
         if category_list is None:
             category_list = SETTING.CATEGORY_SETTING.CATEGORIES
         for category in category_list:
@@ -303,8 +320,15 @@ class Preprocessing:
 
 
 if __name__ == "__main__":
-    obj = Preprocessing(dataset_address=Path(__file__).parent / ".." / "dataset")
     # Preprocessing.download_images()
+    # obj = Preprocessing(dataset_address=Path(__file__).parent / ".." / "dataset")
+
+    # or download the data from s3. this is after you have downloaded the data
+    # using Process.download_images() and uploaded it to s3
+    # this way the data would be consistent for all the team members
+    Preprocessing.download_images(from_s3=True)
+    obj = Preprocessing(dataset_address=Path(__file__).parent / ".." / "s3_dataset")
+
     print(obj.image_dict)
     obj.augment_data(number_of_images_tobe_gen=200)
     obj.train_test_split()

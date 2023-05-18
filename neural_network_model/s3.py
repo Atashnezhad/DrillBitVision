@@ -34,43 +34,16 @@ class MyS3:
         )
         self.region: str = SETTING.S3_BUCKET_SETTING.REGION_NAME or kwargs.get("region")
 
-    def download(self):
+    def download_files_from_subfolders(
+        self, bucket_name, subfolders, download_location_address
+    ):
+
         # check if the download location exists, if not create it
         if not os.path.exists(self.download_location_address):
             pathlib.Path(self.download_location_address).mkdir(
                 parents=True, exist_ok=True
             )
 
-        # Create an S3 client
-        client = boto3.client(
-            "s3",
-            region_name=self.region,
-            aws_access_key_id=self.access_key,
-            aws_secret_access_key=self.secret_key,
-        )
-
-        # Iterate over the subfolders in the S3 bucket
-        for subfolder_name in self.subfolder_name:
-            # Get the objects in the subfolder
-            objects = client.list_objects_v2(
-                Bucket=self.bucket_name, Prefix=subfolder_name
-            )
-
-            # Iterate over the objects in the subfolder
-            for object in objects["Contents"]:
-                # Get the key of the object
-                object_key = object["Key"]
-
-                # Download the object to the local directory
-                filename = (self.download_location_address / "dataset/pdc").resolve()
-                client.download_file(self.bucket_name, object_key, filename)
-
-        # Print a message to indicate that the download is complete
-        print("Download complete!")
-
-    def download_files_from_subfolders(
-        self, bucket_name, subfolders, download_location_address
-    ):
         s3 = boto3.client(
             "s3",
             region_name=self.region,
@@ -81,11 +54,15 @@ class MyS3:
         for subfolder in subfolders:
             response = s3.list_objects_v2(Bucket=bucket_name, Prefix=subfolder)
 
+            # make a directory for the subfolder
+            pathlib.Path(download_location_address / subfolder.split("/")[-1]).mkdir()
+
             if "Contents" in response:
                 for obj in response["Contents"]:
                     file_key = obj["Key"]
                     file_name = file_key.split("/")[-1]
-                    file_path = download_location_address / file_name
+                    subfolder_name = file_key.split("/")[-2]
+                    file_path = download_location_address / subfolder_name / file_name
                     s3.download_file(bucket_name, file_key, file_path)
 
 

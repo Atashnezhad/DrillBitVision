@@ -141,10 +141,10 @@ class S3BucketSetting(BaseModel):
     DOWNLOAD_LOCATION: str = (Path(__file__).parent / ".." / "s3_dataset").resolve()
     REGION_NAME: str = "us-east-2"
     # s3 access credentials
-    AWS_S3_SECRET_KEY: str = "Cz8KArTmOfuEPuuJxeWjROsUu9ellBW0qLTc0tQ0" or os.getenv(
-        "S3_AWS_SECRET_ACCESS_KEY="
+    AWS_S3_SECRET_KEY: str = os.getenv(
+        "S3_AWS_SECRET_ACCESS_KEY"
     )
-    AWS_S3_ACCESS_KEY: str = "AKIA33OJLZR76747B6UB" or os.getenv("S3_AWS_ACCESS_KEY=")
+    AWS_S3_ACCESS_KEY: str = os.getenv("S3_AWS_ACCESS_KEY")
 
 
 class Setting(BaseModel):
