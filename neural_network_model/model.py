@@ -13,7 +13,7 @@ class DataAddressSetting(BaseModel):
         / ".."
         / "dataset_train_test_val"
         / "test"  # check the TRAIN_TEST_SPLIT_DIR_NAMES in
-        # the PreprocessingSetting
+        # the PreprocessingSetting make sure test is in the list
     )
 
 
