@@ -1,3 +1,4 @@
+import os
 from pathlib import Path
 from typing import List
 
@@ -8,7 +9,11 @@ from tensorflow import keras
 class DataAddressSetting(BaseModel):
     MAIN_DATA_DIR_ADDRESS: str = Path(__file__).parent / ".." / "dataset"
     TEST_DIR_ADDRESS: str = (
-        Path(__file__).parent / ".." / "dataset_train_test_val" / "test"
+        Path(__file__).parent
+        / ".."
+        / "dataset_train_test_val"
+        / "test"  # check the TRAIN_TEST_SPLIT_DIR_NAMES in
+        # the PreprocessingSetting
     )
 
 
@@ -129,21 +134,17 @@ class GradCamSetting(BaseModel):
     ALPHA: float = 0.7
 
 
-class GoogleDriveSetting(BaseModel):
-    CREDENTIALS_PATH: str = (
-        Path(__file__).parent
-        / ".."
-        / "google_drive_credential"
-        / "client_secret_291282953694-24tr1chov7jcgoma2niil3amn3ome5b7.apps.googleusercontent.com.json"
-    )
-    FOLDER_ID: str = "1yHW5p5PMg3Vae7aZDj_Us9iYnvea8vUQ"
-
-
 class S3BucketSetting(BaseModel):
     BUCKET_NAME: str = "bitimages123"
-    BUCKET_MAIN_FOLDER_NAME: str = "dataset"
-    SUBFOLDER_NAME: list = ["pdc_bit", "rollercone_bit"]
+    PARENT_FOLDER_NAME: str = "dataset"
+    SUBFOLDER_NAME: list = ["dataset/pdc_bit", "dataset/rollercone_bit"]
     DOWNLOAD_LOCATION: str = (Path(__file__).parent / ".." / "s3_dataset").resolve()
+    REGION_NAME: str = "us-east-2"
+    # s3 access credentials
+    AWS_S3_SECRET_KEY: str = "Cz8KArTmOfuEPuuJxeWjROsUu9ellBW0qLTc0tQ0" or os.getenv(
+        "S3_AWS_SECRET_ACCESS_KEY="
+    )
+    AWS_S3_ACCESS_KEY: str = "AKIA33OJLZR76747B6UB" or os.getenv("S3_AWS_ACCESS_KEY=")
 
 
 class Setting(BaseModel):
@@ -159,7 +160,6 @@ class Setting(BaseModel):
     DATA_GEN_SETTING: DataGenSetting = DataGenSetting()
     DOWNLOAD_IMAGE_SETTING: DownloadImageSetting = DownloadImageSetting()
     GRAD_CAM_SETTING: GradCamSetting = GradCamSetting()
-    GOOGLE_DRIVE_SETTING: GoogleDriveSetting = GoogleDriveSetting()
     S3_BUCKET_SETTING: S3BucketSetting = S3BucketSetting()
 
 

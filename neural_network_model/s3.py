@@ -1,54 +1,102 @@
+from typing import List
+
 import boto3
 import os
 import pathlib
 from neural_network_model.model import SETTING
 
-# AWS credentials
-ACCESS_KEY = ''
-SECRET_KEY = ''
 
-# S3 bucket details
-BUCKET_NAME = SETTING.S3_BUCKET_SETTING.BUCKET_NAME
-FOLDER_NAME = SETTING.S3_BUCKET_SETTING.BUCKET_MAIN_FOLDER_NAME
-SUBFOLDERS = SETTING.S3_BUCKET_SETTING.SUBFOLDER_NAME
-# Specify the desired download location here
-DOWNLOAD_LOCATION = SETTING.S3_BUCKET_SETTING.DOWNLOAD_LOCATION
-# check if the download location exists, if not create it
-if not os.path.exists(DOWNLOAD_LOCATION):
-    pathlib.Path(DOWNLOAD_LOCATION).mkdir(parents=True, exist_ok=True)
+class MyS3:
+    """
+    This class is used to download the images from the S3 bucket
 
-# Set the AWS region
-region = "us-east-2"
+    """
 
-# Create an S3 client
-client = boto3.client(
-    "s3", region_name=region,
-    aws_access_key_id=ACCESS_KEY,
-    aws_secret_access_key=SECRET_KEY
-)
+    def __init__(self, *args, **kwargs):
+        self.access_key: str = (
+            SETTING.S3_BUCKET_SETTING.AWS_S3_ACCESS_KEY or kwargs.get("ACCESS_KEY")
+        )
+        self.secret_key: str = (
+            SETTING.S3_BUCKET_SETTING.AWS_S3_SECRET_KEY or kwargs.get("SECRET_KEY")
+        )
+        self.bucket_name: str = SETTING.S3_BUCKET_SETTING.BUCKET_NAME or kwargs.get(
+            "BUCKET_NAME"
+        )
+        self.parent_folder_name: str = (
+            SETTING.S3_BUCKET_SETTING.PARENT_FOLDER_NAME or kwargs.get("FOLDER_NAME")
+        )
+        self.subfolder_name: List[
+            str
+        ] = SETTING.S3_BUCKET_SETTING.SUBFOLDER_NAME or kwargs.get("SUBFOLDERS")
+        self.download_location_address = (
+            SETTING.S3_BUCKET_SETTING.DOWNLOAD_LOCATION
+            or kwargs.get("DOWNLOAD_LOCATION")
+        )
+        self.region: str = SETTING.S3_BUCKET_SETTING.REGION_NAME or kwargs.get("region")
 
-# Get the name of the S3 bucket
-bucket_name = BUCKET_NAME
+    def download(self):
+        # check if the download location exists, if not create it
+        if not os.path.exists(self.download_location_address):
+            pathlib.Path(self.download_location_address).mkdir(
+                parents=True, exist_ok=True
+            )
 
-# Get the names of the subfolders in the S3 bucket
-subfolder_names = SUBFOLDERS
+        # Create an S3 client
+        client = boto3.client(
+            "s3",
+            region_name=self.region,
+            aws_access_key_id=self.access_key,
+            aws_secret_access_key=self.secret_key,
+        )
 
-# Create a local directory to store the downloaded files
-local_directory = DOWNLOAD_LOCATION
+        # Iterate over the subfolders in the S3 bucket
+        for subfolder_name in self.subfolder_name:
+            # Get the objects in the subfolder
+            objects = client.list_objects_v2(
+                Bucket=self.bucket_name, Prefix=subfolder_name
+            )
 
-# Iterate over the subfolders in the S3 bucket
-for subfolder_name in subfolder_names:
+            # Iterate over the objects in the subfolder
+            for object in objects["Contents"]:
+                # Get the key of the object
+                object_key = object["Key"]
 
-    # Get the objects in the subfolder
-    objects = client.list_objects(Bucket=bucket_name, Prefix=subfolder_name)
+                # Download the object to the local directory
+                filename = (self.download_location_address / "dataset/pdc").resolve()
+                client.download_file(self.bucket_name, object_key, filename)
 
-    # Iterate over the objects in the subfolder
-    for object in objects["Contents"]:
-        # Get the key of the object
-        object_key = object["Key"]
+        # Print a message to indicate that the download is complete
+        print("Download complete!")
 
-        # Download the object to the local directory
-        client.download_file(bucket_name, object_key, local_directory + "/" + object_key)
+    def download_files_from_subfolders(
+        self, bucket_name, subfolders, download_location_address
+    ):
+        s3 = boto3.client(
+            "s3",
+            region_name=self.region,
+            aws_access_key_id=self.access_key,
+            aws_secret_access_key=self.secret_key,
+        )
 
-# Print a message to indicate that the download is complete
-print("Download complete!")
+        for subfolder in subfolders:
+            response = s3.list_objects_v2(Bucket=bucket_name, Prefix=subfolder)
+
+            if "Contents" in response:
+                for obj in response["Contents"]:
+                    file_key = obj["Key"]
+                    file_name = file_key.split("/")[-1]
+                    file_path = download_location_address / file_name
+                    s3.download_file(bucket_name, file_key, file_path)
+
+
+if __name__ == "__main__":
+    obj = MyS3()
+    # obj.download()
+
+    # Specify your bucket name and subfolders
+    bucket_name = SETTING.S3_BUCKET_SETTING.BUCKET_NAME
+    subfolders = SETTING.S3_BUCKET_SETTING.SUBFOLDER_NAME
+    download_location_address = SETTING.S3_BUCKET_SETTING.DOWNLOAD_LOCATION
+
+    # Download the files from the subfolders
+    obj.download_files_from_subfolders(bucket_name, subfolders, download_location_address)
