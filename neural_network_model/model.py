@@ -141,9 +141,7 @@ class S3BucketSetting(BaseModel):
     DOWNLOAD_LOCATION: str = (Path(__file__).parent / ".." / "s3_dataset").resolve()
     REGION_NAME: str = "us-east-2"
     # s3 access credentials
-    AWS_S3_SECRET_KEY: str = os.getenv(
-        "S3_AWS_SECRET_ACCESS_KEY"
-    )
+    AWS_S3_SECRET_KEY: str = os.getenv("S3_AWS_SECRET_ACCESS_KEY")
     AWS_S3_ACCESS_KEY: str = os.getenv("S3_AWS_ACCESS_KEY")
 
 
@@ -155,7 +153,9 @@ class Ec2Setting(BaseModel):
     REGION_NAME: str = "us-east-2"
 
     KEY_NAME: str = "bitvision_ec2"
-    PEM_FILE_ADDRESS: str = Path(__file__).parent / ".." / "ec2_key" / "bitvision_ec2.pem"
+    PEM_FILE_ADDRESS: str = (
+        Path(__file__).parent / ".." / "ec2_key" / "bitvision_ec2.pem"
+    )
 
     SSH_USER: str = "ec2-user"
 

@@ -14,5 +14,3 @@ def test_model_predict_no_model_path(obj):
         obj.predict()
         # assert ValueError model_path is None
         assert ValueError == "model_path is None"
-
-

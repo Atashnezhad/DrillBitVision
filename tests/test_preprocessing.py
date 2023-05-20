@@ -19,18 +19,19 @@ def myfunc(*args, **kwargs):
     print(kwargs)
     return None
 
+
 # TODO: work on this tests
 def test_augment_data():
     # Testing code with the `image_dict` mocked
-    with mock.patch.object(Preprocessing, 'image_dict') as mocked_image_dict:
+    with mock.patch.object(Preprocessing, "image_dict") as mocked_image_dict:
         mocked_image_dict.return_value = {
-            'category1': {
-                'image_list': ['/path/to/image1.jpg', '/path/to/image2.jpg'],
-                'number_of_images': 2
+            "category1": {
+                "image_list": ["/path/to/image1.jpg", "/path/to/image2.jpg"],
+                "number_of_images": 2,
             },
-            'category2': {
-                'image_list': ['/path/to/image3.jpg', '/path/to/image4.jpg'],
-                'number_of_images': 2
+            "category2": {
+                "image_list": ["/path/to/image3.jpg", "/path/to/image4.jpg"],
+                "number_of_images": 2,
             },
         }
 
@@ -42,13 +43,13 @@ def test_augment_data():
 
 def my_dict():
     return {
-        'category1': {
-            'image_list': ['/path/to/image1.jpg', '/path/to/image2.jpg'],
-            'number_of_images': 2
+        "category1": {
+            "image_list": ["/path/to/image1.jpg", "/path/to/image2.jpg"],
+            "number_of_images": 2,
         },
-        'category2': {
-            'image_list': ['/path/to/image3.jpg', '/path/to/image4.jpg'],
-            'number_of_images': 2
+        "category2": {
+            "image_list": ["/path/to/image3.jpg", "/path/to/image4.jpg"],
+            "number_of_images": 2,
         },
     }
 
@@ -60,13 +61,13 @@ def test_augment_data_2():
     # Start patching the image_dict property
     mocked_image_dict.start()
     mocked_image_dict.return_value = {
-        'category1': {
-            'image_list': ['/path/to/image1.jpg', '/path/to/image2.jpg'],
-            'number_of_images': 2
+        "category1": {
+            "image_list": ["/path/to/image1.jpg", "/path/to/image2.jpg"],
+            "number_of_images": 2,
         },
-        'category2': {
-            'image_list': ['/path/to/image3.jpg', '/path/to/image4.jpg'],
-            'number_of_images': 2
+        "category2": {
+            "image_list": ["/path/to/image3.jpg", "/path/to/image4.jpg"],
+            "number_of_images": 2,
         },
     }
     # Test code that uses the mocked image_dict
@@ -84,22 +85,19 @@ from unittest.mock import patch
 
 
 class TestPreprocessing(unittest.TestCase):
-
     def setUp(self):
         self.preprocessing = Preprocessing()
         self.image_dict_mock = mock.Mock()
         self.image_dict_mock.return_value = {
             "category1": ["image1", "image2"],
-            "category2": ["image3", "image4"]
+            "category2": ["image3", "image4"],
         }
 
         with patch.object(self.preprocessing, "image_dict", self.image_dict_mock):
             self.test_image_dict()
 
     def test_image_dict(self):
-        self.assertEqual(self.preprocessing.image_dict, {
-            "category1": ["image1", "image2"],
-            "category2": ["image3", "image4"]
-        })
-
-
+        self.assertEqual(
+            self.preprocessing.image_dict,
+            {"category1": ["image1", "image2"], "category2": ["image3", "image4"]},
+        )

@@ -57,7 +57,6 @@ class Preprocessing:
 
     @staticmethod
     def download_images(category_list=None, from_s3=False) -> None:
-
         if from_s3:
             # download the images from the S3 bucket
             s3 = MyS3()
