@@ -2,8 +2,12 @@ import os
 from pathlib import Path
 from typing import List
 
+from dotenv import load_dotenv
 from pydantic import BaseModel
 from tensorflow import keras
+
+# Load environment variables from .env file
+load_dotenv()
 
 
 class DataAddressSetting(BaseModel):
@@ -148,6 +152,7 @@ class S3BucketSetting(BaseModel):
 class Ec2Setting(BaseModel):
     ACCESS_KEY: str = os.getenv("EC2_ACCESS_KEY")
     SECRET_KEY: str = os.getenv("EC2_SECRET_KEY")
+    SECURITY_GROUP_ID: str = os.environ.get("EC2_SECURITY_GROUP_ID")
     AMI_ID: str = "ami-08333bccc35d71140"
     INSTANCE_TYPE: str = "t2.micro"
     REGION_NAME: str = "us-east-2"
@@ -181,3 +186,8 @@ class Setting(BaseModel):
 
 
 SETTING = Setting()
+
+
+if __name__ == "__main__":
+    # print(SETTING)
+    print(SETTING.EC2_SETTING.SECURITY_GROUP_ID)

@@ -1,8 +1,9 @@
+import os
+import pathlib
 from typing import List
 
 import boto3
-import os
-import pathlib
+
 from neural_network_model.model import SETTING
 
 

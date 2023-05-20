@@ -1,3 +1,5 @@
+#SHELL := /bin/bash
+
 # make a parameter to save date and time of execution
 DATE := $(shell date +%Y-%m-%d_%H-%M-%S)
 

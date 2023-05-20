@@ -3,9 +3,7 @@ from neural_network_model.model import SETTING
 import boto3
 import paramiko
 import os
-from dotenv import load_dotenv
-# Load environment variables from .env file
-load_dotenv()
+
 
 # AWS credentials
 ACCESS_KEY = SETTING.EC2_SETTING.ACCESS_KEY
@@ -73,10 +71,6 @@ class MyEC2:
         self.instance_id = response["Instances"][0]["InstanceId"]
 
     def set_up_security_groups(self):
-        # Specify your AWS credentials
-        access_key = "YOUR_ACCESS_KEY"
-        secret_key = "YOUR_SECRET_KEY"
-        region = "us-west-2"  # Specify the region where you want to create the security group
 
         # Create a Boto3 client for EC2
         ec2_client = boto3.client(
