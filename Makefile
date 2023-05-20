@@ -67,3 +67,8 @@ run-black:
 .PHONY: pip-freeze
 pip-freeze:
 	@pip freeze > requirements.txt
+
+# if a file like .env is not ignored although it should be, run this command
+.PHONY: remove-env
+remove-env:
+	@git rm --cached .env
