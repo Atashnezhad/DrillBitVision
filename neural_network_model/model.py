@@ -47,7 +47,7 @@ class CategorySetting(BaseModel):
 
 
 class IgnoreSetting(BaseModel):
-    IGNORE_LIST: list = [".DS_Store"]
+    IGNORE_LIST: list = [".DS_Store", ".pytest_cache", "__pycache__"]
 
 
 class PreprocessingSetting(BaseModel):
@@ -147,6 +147,22 @@ class S3BucketSetting(BaseModel):
     AWS_S3_ACCESS_KEY: str = os.getenv("S3_AWS_ACCESS_KEY")
 
 
+class Ec2Setting(BaseModel):
+    ACCESS_KEY: str = os.getenv("EC2_ACCESS_KEY")
+    SECRET_KEY: str = os.getenv("EC2_SECRET_KEY")
+    AMI_ID: str = "ami-08333bccc35d71140"
+    INSTANCE_TYPE: str = "t2.micro"
+    REGION_NAME: str = "us-east-2"
+
+    KEY_NAME: str = "bitvision_ec2"
+    PEM_FILE_ADDRESS: str = Path(__file__).parent / ".." / "ec2_key" / "bitvision_ec2.pem"
+
+    SSH_USER: str = "ec2-user"
+
+    REPO_URL: str = "https://github.com/Atashnezhad/DrillBitVision.git"
+    BRANCH_NAME: str = "main"
+
+
 class Setting(BaseModel):
     AUGMENTATION_SETTING: AugmentationSetting = AugmentationSetting()
     PREPROCESSING_SETTING: PreprocessingSetting = PreprocessingSetting()
@@ -161,6 +177,7 @@ class Setting(BaseModel):
     DOWNLOAD_IMAGE_SETTING: DownloadImageSetting = DownloadImageSetting()
     GRAD_CAM_SETTING: GradCamSetting = GradCamSetting()
     S3_BUCKET_SETTING: S3BucketSetting = S3BucketSetting()
+    EC2_SETTING: Ec2Setting = Ec2Setting()
 
 
 SETTING = Setting()
