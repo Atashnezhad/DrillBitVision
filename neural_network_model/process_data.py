@@ -5,11 +5,8 @@ import shutil
 
 from bing_image_downloader import downloader
 from tensorflow.keras.preprocessing import image
-from tensorflow.keras.preprocessing.image import (
-    ImageDataGenerator,
-    img_to_array,
-    load_img,
-)
+from tensorflow.keras.preprocessing.image import (ImageDataGenerator,
+                                                  img_to_array, load_img)
 
 from neural_network_model.model import SETTING
 from neural_network_model.s3 import MyS3
@@ -17,11 +14,10 @@ from neural_network_model.s3 import MyS3
 # set seed to get the same random numbers each time
 random.seed(SETTING.RANDOM_SEED_SETTING.SEED)
 import random
-
 # import sys
 import warnings
 from pathlib import Path
-from typing import Dict, List, Any
+from typing import Any, Dict, List
 
 # import shutil
 from tqdm import tqdm
@@ -57,7 +53,6 @@ class Preprocessing:
 
     @staticmethod
     def download_images(category_list=None, from_s3=False) -> None:
-
         if from_s3:
             # download the images from the S3 bucket
             s3 = MyS3()

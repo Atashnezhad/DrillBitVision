@@ -1,3 +1,5 @@
+#SHELL := /bin/bash
+
 # make a parameter to save date and time of execution
 DATE := $(shell date +%Y-%m-%d_%H-%M-%S)
 
@@ -67,3 +69,8 @@ run-black:
 .PHONY: pip-freeze
 pip-freeze:
 	@pip freeze > requirements.txt
+
+# if a file like .env is not ignored although it should be, run this command
+.PHONY: remove-env
+remove-env:
+	@git rm --cached .env

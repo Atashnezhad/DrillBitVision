@@ -1,8 +1,9 @@
+import os
+import pathlib
 from typing import List
 
 import boto3
-import os
-import pathlib
+
 from neural_network_model.model import SETTING
 
 
@@ -38,7 +39,6 @@ class MyS3:
     def download_files_from_subfolders(
         self, bucket_name, subfolders, download_location_address
     ):
-
         # check if the download location exists, if not create it
         if not os.path.exists(self.download_location_address):
             pathlib.Path(self.download_location_address).mkdir(
@@ -77,4 +77,6 @@ if __name__ == "__main__":
     download_location_address = SETTING.S3_BUCKET_SETTING.DOWNLOAD_LOCATION
 
     # Download the files from the subfolders
-    obj.download_files_from_subfolders(bucket_name, subfolders, download_location_address)
+    obj.download_files_from_subfolders(
+        bucket_name, subfolders, download_location_address
+    )
