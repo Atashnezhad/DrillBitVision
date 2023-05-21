@@ -200,5 +200,4 @@ SETTING = Setting()
 
 
 if __name__ == "__main__":
-    # print(SETTING)
     print(SETTING.EC2_SETTING.SECURITY_GROUP_ID)

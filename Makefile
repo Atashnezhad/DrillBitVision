@@ -73,4 +73,10 @@ pip-freeze:
 # if a file like .env is not ignored although it should be, run this command
 .PHONY: remove-env
 remove-env:
-	@git rm --cached .env
+	@git rm -r --cached .env
+
+# build tha package
+.PHONY: build
+build:
+	@python3 -m build
+	@python setup.py bdist_wheel sdist

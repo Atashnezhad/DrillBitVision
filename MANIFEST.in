@@ -1,0 +1,16 @@
+include *.txt
+include *.md
+include *.pkl
+recursive-include ./neural_network_model/*
+
+include ./neural_network_model/*
+include neural_network_model/VERSION
+
+
+include ./requirements.txt
+include ./requirements-test.txt
+exclude *.log
+exclude *.cfg
+
+recursive-exclude * __pycache__
+recursive-exclude * *.py[co]

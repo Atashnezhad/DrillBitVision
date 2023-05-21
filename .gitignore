@@ -17,5 +17,6 @@ google_drive_credential/
 s3_dataset/
 ec2_key/
 .env
-
+dist/
+drillvision.egg-info/
 
