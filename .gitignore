@@ -20,3 +20,4 @@ ec2_key/
 dist/
 drillvision.egg-info/
 
+/build/
