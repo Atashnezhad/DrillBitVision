@@ -152,20 +152,30 @@ class S3BucketSetting(BaseModel):
 class Ec2Setting(BaseModel):
     ACCESS_KEY: str = os.getenv("EC2_ACCESS_KEY")
     SECRET_KEY: str = os.getenv("EC2_SECRET_KEY")
-    SECURITY_GROUP_ID: str = os.environ.get("EC2_SECURITY_GROUP_ID")
+
     AMI_ID: str = "ami-08333bccc35d71140"
     INSTANCE_TYPE: str = "t2.micro"
     REGION_NAME: str = "us-east-2"
 
     KEY_NAME: str = "bitvision_ec2"
     PEM_FILE_ADDRESS: str = (
-        Path(__file__).parent / ".." / "ec2_key" / "bitvision_ec2.pem"
-    )
+        Path(__file__).parent / "ec2_key" / "bitvision_ec2.pem"
+    ).resolve()
 
     SSH_USER: str = "ec2-user"
 
+    # security group
+    SECURITY_GROUP_ID: str = os.environ.get("EC2_SECURITY_GROUP_ID")
+    SECURITY_GROUP_DESCRIPTION: str = "bitvision_security_group"
+    SECURITY_GROUP_NAME: str = "bitvision_security_group"
+    VPC_ID: str = "vpc-020d4d0022fbc35b3"
+
+
+class GitHubSetting(BaseModel):
     REPO_URL: str = "https://github.com/Atashnezhad/DrillBitVision.git"
     BRANCH_NAME: str = "main"
+
+    FOLDER_NAME: str = "myproject"
 
 
 class Setting(BaseModel):
@@ -183,6 +193,7 @@ class Setting(BaseModel):
     GRAD_CAM_SETTING: GradCamSetting = GradCamSetting()
     S3_BUCKET_SETTING: S3BucketSetting = S3BucketSetting()
     EC2_SETTING: Ec2Setting = Ec2Setting()
+    GITHUB_SETTING: GitHubSetting = GitHubSetting()
 
 
 SETTING = Setting()

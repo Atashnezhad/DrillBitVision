@@ -3,7 +3,12 @@ from neural_network_model.model import SETTING
 import boto3
 import paramiko
 import os
+import logging
 
+
+# Initialize the logger
+logger = logging.getLogger()
+logger.setLevel(logging.INFO)
 
 # AWS credentials
 ACCESS_KEY = SETTING.EC2_SETTING.ACCESS_KEY
@@ -15,11 +20,6 @@ INSTANCE_TYPE = SETTING.EC2_SETTING.INSTANCE_TYPE  # t2.micro
 KEY_NAME = SETTING.EC2_SETTING.KEY_NAME  # 'your_key_name'
 # SECURITY_GROUP = 'your_security_group'
 REGION = SETTING.EC2_SETTING.REGION_NAME  # 'your_region'
-
-# Git repository details
-REPO_URL = SETTING.EC2_SETTING.REPO_URL  # 'your_repository_url'
-# REPO_FOLDER = 'your_repository_folder'
-BRANCH_NAME = SETTING.EC2_SETTING.BRANCH_NAME  # 'your_branch_name'
 
 # SSH key details
 PEM_FILE = SETTING.EC2_SETTING.PEM_FILE_ADDRESS  # 'your_pem_file.pem'
@@ -47,8 +47,9 @@ class MyEC2:
         self.pem_file = kwargs.get("pem_file") or SETTING.EC2_SETTING.PEM_FILE_ADDRESS
         self.ssh_username = kwargs.get("ssh_username") or SETTING.EC2_SETTING.SSH_USER
 
-        self.ec2: boto3.Session.client = None
+        self.ec2_resource = None
         self.instance_id = None
+        logger.info("EC2 instance is running")
 
     def spin_up_instance(self):
         # Connect to AWS
@@ -57,18 +58,19 @@ class MyEC2:
             aws_secret_access_key=self.secret_key,
             region_name=self.region,
         )
-        self.ec2 = session.client("ec2")
+        self.ec2_resource = session.resource("ec2")
 
         # Spin up an EC2 instance
-        response = self.ec2.run_instances(
+        response = self.ec2_resource.create_instances(
             ImageId=self.ami_id,
             InstanceType=self.instance_type,
             KeyName=self.key_name,
-            # SecurityGroups=[SECURITY_GROUP],
+            SecurityGroups=[SETTING.EC2_SETTING.SECURITY_GROUP_NAME],
             MinCount=1,
             MaxCount=1,
         )
-        self.instance_id = response["Instances"][0]["InstanceId"]
+        self.instance_id = response[0].id
+        logger.info(f"EC2 instance {self.instance_id} is running")
 
     def set_up_security_groups(self):
 
@@ -82,9 +84,9 @@ class MyEC2:
 
         # Create a security group
         response = ec2_client.create_security_group(
-            Description="My Security Group",
-            GroupName="my-security-group",
-            VpcId="your-vpc-id",
+            Description=SETTING.EC2_SETTING.SECURITY_GROUP_DESCRIPTION,
+            GroupName=SETTING.EC2_SETTING.SECURITY_GROUP_NAME,
+            VpcId=SETTING.EC2_SETTING.VPC_ID,
         )
 
         # Add inbound rule to allow incoming SSH traffic
@@ -105,18 +107,28 @@ class MyEC2:
             GroupId=response["GroupId"],
             IpPermissions=[{"IpProtocol": "-1", "IpRanges": [{"CidrIp": "0.0.0.0/0"}]}],
         )
+        logger.info("Security group created")
 
     def run_commands(self, *args, **kwargs):
-        repo_url = kwargs.get("repo_url")
-        repo_folder = kwargs.get("repo_folder")
-        branch_name = kwargs.get("branch_name")
+        repo_url = kwargs.get("repo_url") or SETTING.GITHUB_SETTING.REPO_URL
+        repo_folder = kwargs.get("repo_folder") or SETTING.GITHUB_SETTING.FOLDER_NAME
+        branch_name = kwargs.get("branch_name") or SETTING.GITHUB_SETTING.BRANCH_NAME
+
+        # Create an EC2 client
+        ec2_client = boto3.client(
+            'ec2',
+            aws_access_key_id=self.access_key,
+            aws_secret_access_key=self.secret_key,
+            region_name=self.region
+        )
 
         # Wait for the instance to be running
-        # ec2.wait_until_running(InstanceIds=[instance_id])
-        # print('EC2 instance is running')
+        waiter = ec2_client.get_waiter('instance_running')
+        waiter.wait(InstanceIds=[self.instance_id])
+        logger.info('EC2 instance is running')
 
         # Get the public IP address of the instance
-        response = self.ec2.describe_instances(InstanceIds=[self.instance_id])
+        response = ec2_client.describe_instances(InstanceIds=[self.instance_id])
         public_ip = response["Reservations"][0]["Instances"][0]["PublicIpAddress"]
 
         # SSH into the instance
@@ -145,8 +157,21 @@ class MyEC2:
         ssh.close()
 
         # Terminate the EC2 instance
-        self.ec2.terminate_instances(InstanceIds=[self.instance_id])
+        self.terminate_instance()
         print("EC2 instance terminated")
+
+    def terminate_instance(self):
+        # Create an EC2 client
+        ec2_client = boto3.client(
+            'ec2',
+            aws_access_key_id=self.access_key,
+            aws_secret_access_key=self.secret_key,
+            region_name=self.region
+        )
+
+        # Terminate the EC2 instance
+        ec2_client.terminate_instances(InstanceIds=[self.instance_id])
+        logger.info(f"EC2 instance {self.instance_id} has been terminated")
 
 
 if __name__ == "__main__":
@@ -161,11 +186,15 @@ if __name__ == "__main__":
         pem_file=PEM_FILE,
         ssh_username=SSH_USERNAME,
     )
+
+    # Set up security groups
+    # ec2.set_up_security_groups()
+
     ec2.spin_up_instance()
 
     # Run commands on the EC2 instance
-    # ec2.run_commands(
-    #     repo_url=REPO_URL,
-    #     repo_folder=SETTING.EC2_SETTING.REPO_FOLDER,
-    #     branch_name=BRANCH_NAME
-    # )
+    ec2.run_commands(
+        repo_url=SETTING.GITHUB_SETTING.REPO_URL,
+        repo_folder=SETTING.GITHUB_SETTING.FOLDER_NAME,
+        branch_name=SETTING.GITHUB_SETTING.BRANCH_NAME,
+    )
