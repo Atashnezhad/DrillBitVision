@@ -80,3 +80,13 @@ remove-env:
 build:
 	@python3 -m build
 	@python setup.py bdist_wheel sdist
+
+# check using twine if the dist/*
+.PHONY: check
+check:
+	@twine check dist/*
+
+# upload to test pypi
+.PHONY: upload-test
+upload-test:
+	@twine upload --repository testpypi dist/*
