@@ -262,13 +262,17 @@ class Preprocessing:
                     os.makedirs(train_test_val_split_dir_address / dir_name / category)
         logger.info(f"Created category dirs under train, test and validation dirs")
 
-        self.populated_augmented_images_into_train_test_val_dirs()
-
-    def populated_augmented_images_into_train_test_val_dirs(self, *arges, **kwargs):
-        dataset_augmented_dir_address = (
-            kwargs.get("dataset_augmented")
-            or SETTING.AUGMENTATION_SETTING.AUGMENTED_IMAGES_DIR_ADDRESS
+        self._populated_augmented_images_into_train_test_val_dirs(
+            augmented_data_address, train_test_val_split_dir_address
         )
+
+    def _populated_augmented_images_into_train_test_val_dirs(self, *arges, **kwargs):
+        dataset_augmented_dir_address = arges[0]
+        train_test_val_split_dir_address = arges[1]
+        # dataset_augmented_dir_address = (
+        #         kwargs.get("dataset_augmented")
+        #         or SETTING.AUGMENTATION_SETTING.AUGMENTED_IMAGES_DIR_ADDRESS
+        # )
 
         for category in self.categories_name_folders:
             # get the list of images in the dataset_augmented category (i.e. pdc_bit) folder
@@ -291,18 +295,42 @@ class Preprocessing:
             test_list = selected_items[num_train : num_train + num_test]
             val_list = selected_items[num_train + num_test :]
             # copy the images from the dataset_augmented pdc_bit folder to the train, test and validation folders
-            self.copy_images(train_list, category, "train")
-            self.copy_images(test_list, category, "test")
-            self.copy_images(val_list, category, "val")
+            self._copy_images(
+                train_list,
+                category,
+                "train",
+                dataset_augmented_dir_address,
+                train_test_val_split_dir_address,
+            )
+            self._copy_images(
+                test_list,
+                category,
+                "test",
+                dataset_augmented_dir_address,
+                train_test_val_split_dir_address,
+            )
+            self._copy_images(
+                val_list,
+                category,
+                "val",
+                dataset_augmented_dir_address,
+                train_test_val_split_dir_address,
+            )
 
     @staticmethod
-    def copy_images(images, categ, dest_folder, *args, **kwargs):
+    def _copy_images(
+        images,
+        categ,
+        dest_folder,
+        dataset_augmented_dir_address,
+        train_test_val_split_dir_address,
+    ):
         train_test_val_split_dir_address = (
-            kwargs.get("train_test_val_split_dir_address")
+            train_test_val_split_dir_address
             or SETTING.PREPROCESSING_SETTING.TRAIN_TEST_VAL_SPLIT_DIR_ADDRESS
         )
         dataset_augmented_dir_address = (
-            kwargs.get("dataset_augmented")
+            dataset_augmented_dir_address
             or SETTING.AUGMENTATION_SETTING.AUGMENTED_IMAGES_DIR_ADDRESS
         )
 
@@ -337,5 +365,5 @@ if __name__ == "__main__":
     # obj.download_images(from_s3=True)
 
     print(obj.image_dict)
-    # obj.augment_data(number_of_images_tobe_gen=10)
-    # obj.train_test_split()
+    obj.augment_data(number_of_images_tobe_gen=10)
+    obj.train_test_split()

@@ -99,4 +99,4 @@ upload:
 # remove some dir folders
 .PHONY: remove
 remove:
-	@rm -rf dataset dataset_augmented dataset_train_test_val deep_model s3_dataset
+	@rm -rf dataset dataset_augmented dataset_train_test_val deep_model s3_dataset dist drillvision.egg-info

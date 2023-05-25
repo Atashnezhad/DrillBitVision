@@ -57,7 +57,7 @@ class IgnoreSetting(BaseModel):
 class PreprocessingSetting(BaseModel):
     TRAIN_TEST_VAL_SPLIT_DIR_ADDRESS: str = (
         Path(__file__).parent / ".." / "dataset_train_test_val"
-    )
+    ).resolve()
     TRAIN_TEST_SPLIT_DIR_NAMES: list = ["train", "test", "val"]
     TRAIN_FRACTION: float = 0.7
     TEST_FRACTION: float = 0.2

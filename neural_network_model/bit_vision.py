@@ -86,11 +86,11 @@ class BitVision:
         # get the list of dirs in the resource_dir
         subdir_name = os.listdir(self.train_test_val_dir)
         # check if there is .DS_Store in the subdir_name if so remove it
-        subdir_name = self.filter_out_list(list_to_be_edited=subdir_name)
+        subdir_name = self._filter_out_list(list_to_be_edited=subdir_name)
         subdir_path = self.train_test_val_dir / subdir_name[0]
         categories_name = os.listdir(subdir_path)
         # filter the list of categories if there is a case in the IGNORE_LIST
-        categories_name = self.filter_out_list(list_to_be_edited=categories_name)
+        categories_name = self._filter_out_list(list_to_be_edited=categories_name)
         return categories_name
 
     @property
@@ -99,23 +99,26 @@ class BitVision:
         This property check the dirs and make a dict and save the
         train test val data details in the dict.
         """
-        resource_dir = Path(__file__).parent / ".." / self.train_test_val_dir
+        resource_dir = (
+            self.train_test_val_dir
+            or Path(__file__).parent / ".." / self.train_test_val_dir
+        )
         # get the list of dirs in the resource_dir
         subdir_name = os.listdir(resource_dir)
         # check if there is .DS_Store in the subdir_name if so remove it
-        subdir_name = self.filter_out_list(list_to_be_edited=subdir_name)
+        subdir_name = self._filter_out_list(list_to_be_edited=subdir_name)
         data = {}
         # for each subdir in the resource_dir, get the list of files
         for subdir in subdir_name:
             data[subdir] = {}
             subdir_path = resource_dir / subdir
-            subdir_path_lisr = self.filter_out_list(
+            subdir_path_lisr = self._filter_out_list(
                 list_to_be_edited=os.listdir(subdir_path)
             )
             for category in subdir_path_lisr:
                 category_path = subdir_path / category
                 #  check if there is .DS_Store in the subdir_name if so remove it
-                # category_path = self.filter_out_list(list_to_be_edited=category_path)
+                # category_path = self._filter_out_list(list_to_be_edited=category_path)
                 # for each file in the category, find the number of files
                 num_files = len(os.listdir(category_path))
                 # logger.info(f"Number of files in {category_path.resolve()} is {num_files}")
@@ -198,7 +201,8 @@ class BitVision:
             datagen = image.ImageDataGenerator(rescale=SETTING.DATA_GEN_SETTING.RESCALE)
 
             generator = datagen.flow_from_directory(
-                directory=SETTING.PREPROCESSING_SETTING.TRAIN_TEST_VAL_SPLIT_DIR_ADDRESS
+                directory=self.train_test_val_dir / subdir
+                or SETTING.PREPROCESSING_SETTING.TRAIN_TEST_VAL_SPLIT_DIR_ADDRESS
                 / subdir,
                 target_size=SETTING.FLOW_FROM_DIRECTORY_SETTING.TARGET_SIZE,
                 color_mode=SETTING.FLOW_FROM_DIRECTORY_SETTING.COLOR_MODE,
@@ -221,8 +225,8 @@ class BitVision:
 
             logger.info(f"Rescaling {subdir} data, {generator.class_indices}:")
 
-    def check_points(self) -> ModelCheckpoint:
-        check_points = ModelCheckpoint(
+    def _check_points(self) -> ModelCheckpoint:
+        check_point = ModelCheckpoint(
             SETTING.MODEL_SETTING.MODEL_PATH,
             monitor=SETTING.MODEL_SETTING.MONITOR,
             verbose=SETTING.MODEL_SETTING.CHECK_POINT_VERBOSE,
@@ -230,9 +234,9 @@ class BitVision:
             mode=SETTING.MODEL_SETTING.MODE,
             # period=SETTING.MODEL_SETTING.PERIOD,
         )
-        return check_points
+        return check_point
 
-    def train_model(self):
+    def train_model(self, model_save_address: str = None):
         self._rescaling()
         model_history = self.model.fit_generator(
             generator=self.train_vali_gens["train"],
@@ -246,14 +250,22 @@ class BitVision:
             use_multiprocessing=SETTING.MODEL_SETTING.USE_MULTIPROCESSING,
             shuffle=SETTING.MODEL_SETTING.SHUFFLE,
             initial_epoch=SETTING.MODEL_SETTING.INITIAL_EPOCH,
-            callbacks=[self.check_points()],
+            callbacks=[self._check_points()],
         )
 
-        self.model.save(SETTING.MODEL_SETTING.MODEL_PATH)
+        self.model.save(model_save_address or SETTING.MODEL_SETTING.MODEL_PATH)
         logger.info(f"Model saved to {SETTING.MODEL_SETTING.MODEL_PATH}")
         self.model_history = model_history
 
-    def plot_history(self):
+    def plot_history(self, *args, **kwargs):
+        """
+        This function is used to plot the history of the model.
+        :param fig_folder_address: the address of the folder to save the figure
+        :return:
+        """
+        fig_folder_address = kwargs.get(
+            "fig_folder_address", SETTING.FIGURE_SETTING.FIG_PRED_OUT_DIR_ADDRESS
+        )
         logger.info(self.model_history.history.keys())
         keys_plot = ["loss", "accuracy"]
         # make two plots side by side and have train and val for loss and accuracy
@@ -269,23 +281,29 @@ class BitVision:
             axs[i].set_ylabel(key)
             axs[i].set_xlabel("epoch")
             axs[i].legend(["train", "val"], loc="upper left")
-        fig_path = (
-            SETTING.FIGURE_SETTING.FIG_PRED_OUT_DIR_ADDRESS / "history.png"
-        ).resolve()
+        fig_path = (fig_folder_address / "history.png").resolve()
         plt.savefig(fig_path)
         plt.show()
 
     @staticmethod
-    def filter_out_list(
-        filter_out_list: List[str] = SETTING.IGNORE_SETTING.IGNORE_LIST,
+    def _filter_out_list(
+        ignore_list: List[str] = SETTING.IGNORE_SETTING.IGNORE_LIST,
         list_to_be_edited: List[str] = None,
     ) -> List[str]:
-        for case in filter_out_list:
+        for case in ignore_list:
             if case in list_to_be_edited:
                 list_to_be_edited.remove(case)
         return list_to_be_edited
 
     def predict(self, *args, **kwargs):
+        """
+        This function is used to predict the test data.
+        :param args:
+        :param kwargs: fid_save_address: the address of the folder to save the figure,
+        model_path: the path of the model to be used for prediction
+        :return:
+        """
+        fid_save_address = kwargs.get("fid_save_address", SETTING.FIGURE_SETTING.FIG_PRED_OUT_DIR_ADDRESS)
         model_path = kwargs.get("model_path", SETTING.MODEL_SETTING.MODEL_PATH)
         if model_path is None:
             raise ValueError("model_path is None")
@@ -298,19 +316,22 @@ class BitVision:
             number_of_cols = SETTING.FIGURE_SETTING.NUM_COLS_IN_PRED_MODEL
             number_of_rows = SETTING.FIGURE_SETTING.NUM_ROWS_IN_PRED_MODEL
             number_of_test_to_pred = SETTING.MODEL_SETTING.NUMBER_OF_TEST_TO_PRED
-
+            train_test_val_dir = (
+                self.train_test_val_dir
+                or SETTING.PREPROCESSING_SETTING.TRAIN_TEST_VAL_SPLIT_DIR_ADDRESS
+            )
             # get the list of test images
             test_images_list = os.listdir(
-                SETTING.PREPROCESSING_SETTING.TRAIN_TEST_VAL_SPLIT_DIR_ADDRESS
+                train_test_val_dir
                 / SETTING.PREPROCESSING_SETTING.TRAIN_TEST_SPLIT_DIR_NAMES[1]
                 / category
             )
             # check if .DS_Store is in the list if so remove it
-            test_images_list = self.filter_out_list(list_to_be_edited=test_images_list)
+            test_images_list = self._filter_out_list(list_to_be_edited=test_images_list)
 
             for i, img in enumerate(test_images_list[0:number_of_test_to_pred]):
                 path_to_img = (
-                    SETTING.PREPROCESSING_SETTING.TRAIN_TEST_VAL_SPLIT_DIR_ADDRESS
+                    train_test_val_dir
                     / SETTING.PREPROCESSING_SETTING.TRAIN_TEST_SPLIT_DIR_NAMES[1]
                     / category
                     / str(img)
@@ -347,7 +368,7 @@ class BitVision:
             # save the figure in the figures folder
             fig_name = f"prediction_{category}.png"
             fig_path = (
-                SETTING.FIGURE_SETTING.FIG_PRED_OUT_DIR_ADDRESS / fig_name
+                fid_save_address / fig_name
             ).resolve()
             if not os.path.exists(fig_path.parent):
                 os.makedirs(fig_path.parent)
@@ -374,9 +395,10 @@ class BitVision:
         )
 
         model.evaluate(DoubleCheck_generator)
-
+    # TODO: check the addresses and add as kwargs if needed
     def grad_cam_viz(self, *args, **kwargs):
         model_path = kwargs.get("model_path", SETTING.MODEL_SETTING.MODEL_PATH)
+        fig_to_save_address = kwargs.get("fig_to_save_address", SETTING.GRAD_CAM_SETTING.IMAGE_NEW_NAME)
         if model_path is None:
             raise ValueError("model_path is None")
 
@@ -387,9 +409,9 @@ class BitVision:
         for idx in range(len(model.layers)):
             print(model.get_layer(index=idx).name)
 
-        model_builder = keras.applications.xception.Xception
+        # model_builder = keras.applications.xception.Xception
         preprocess_input = keras.applications.xception.preprocess_input
-        decode_predictions = keras.applications.xception.decode_predictions
+        # decode_predictions = keras.applications.xception.decode_predictions
 
         last_conv_layer_name = SETTING.GRAD_CAM_SETTING.LAST_CONV_LAYER_NAME
 
@@ -406,7 +428,7 @@ class BitVision:
         # Prepare image
         img_array = preprocess_input(
             BitVision._get_img_array(
-                img_path, size=SETTING.FLOW_FROM_DIRECTORY_SETTING.TARGET_SIZE
+                img_path, size=fig_to_save_address
             )
         )
         # Make model
@@ -509,12 +531,14 @@ class BitVision:
 
 
 if __name__ == "__main__":
-    obj = BitVision()
-    print(obj.categories)
-    # print(obj.data_details)
-    # obj.plot_image_category()
-    # obj.compile_model()
-    # obj.train_model()
-    # obj.plot_history()
-    # obj.predict()
-    # obj.grad_cam_viz()
+    obj = BitVision(
+        train_test_val_dir=Path(__file__).parent / ".." / "dataset_train_test_val"
+    )
+    # print(obj.categories)
+    print(obj.data_details)
+    obj.plot_image_category()
+    obj.compile_model()
+    obj.train_model()
+    obj.plot_history()
+    obj.predict()
+    obj.grad_cam_viz()
