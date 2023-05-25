@@ -11,7 +11,7 @@ load_dotenv()
 
 
 class DataAddressSetting(BaseModel):
-    MAIN_DATA_DIR_ADDRESS: str = Path(__file__).parent / ".." / "dataset"
+    MAIN_DATA_DIR_ADDRESS: str = (Path(__file__).parent / ".." / "dataset").resolve()
     TEST_DIR_ADDRESS: str = (
         Path(__file__).parent
         / ".."

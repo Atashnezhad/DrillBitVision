@@ -24,14 +24,12 @@ from tqdm import tqdm
 
 warnings.filterwarnings("ignore")
 
-
 # Initialize the logger
 logger = logging.getLogger()
 logger.setLevel(logging.FATAL)
 # Create console handler
 ch = logging.StreamHandler()
 ch.setLevel(logging.FATAL)
-
 
 # Create formatter and add it to the handler
 formatter = logging.Formatter("%(asctime)s - %(levelname)s - %(message)s")
@@ -48,11 +46,22 @@ class Preprocessing:
     """
 
     def __init__(self, *args, **kwargs):
+        """
+        This function is used to initialize the class.
+        :param args:
+        :param kwargs:
+        """
         self.dataset_address = kwargs.get("dataset_address", None)
         self.categories_name_folders = None
 
-    @staticmethod
-    def download_images(category_list=None, from_s3=False) -> None:
+    def download_images(self, category_list=None, from_s3=False) -> None:
+        """
+        This function is used to download the images from the internet.
+        :param category_list:
+        :param from_s3: bool
+        :param download_location_address:
+        :return:
+        """
         if from_s3:
             # download the images from the S3 bucket
             s3 = MyS3()
@@ -60,7 +69,7 @@ class Preprocessing:
             # Specify your bucket name and subfolders
             bucket_name = SETTING.S3_BUCKET_SETTING.BUCKET_NAME
             subfolders = SETTING.S3_BUCKET_SETTING.SUBFOLDER_NAME
-            download_location_address = SETTING.S3_BUCKET_SETTING.DOWNLOAD_LOCATION
+            download_location_address = self.dataset_address or SETTING.S3_BUCKET_SETTING.DOWNLOAD_LOCATION
 
             s3.download_files_from_subfolders(
                 bucket_name, subfolders, download_location_address
@@ -74,7 +83,7 @@ class Preprocessing:
             downloader.download(
                 category,
                 limit=SETTING.DOWNLOAD_IMAGE_SETTING.LIMIT,
-                output_dir=Path(__file__).parent / ".." / "dataset",
+                output_dir=self.dataset_address or SETTING.DATA_ADDRESS_SETTING.MAIN_DATA_DIR_ADDRESS,
                 adult_filter_off=True,
                 force_replace=False,
                 timeout=120,
@@ -98,7 +107,7 @@ class Preprocessing:
         # for images in each category dir, check if the image is in list_to_ignore, if yes remove from dir
         for category_folder in self.categories_name_folders:
             # read the files in the dataset folder
-            main_dataset_folder = Path(__file__).parent / ".." / "dataset"
+            main_dataset_folder = self.dataset_address or SETTING.DATA_ADDRESS_SETTING.MAIN_DATA_DIR_ADDRESS
             data_address = main_dataset_folder / category_folder
 
             for file in os.listdir(data_address):
@@ -118,7 +127,7 @@ class Preprocessing:
         image_dicts = {}
         for category_folder in self.categorie_name:
             # read the files in the dataset folder
-            main_dataset_folder = SETTING.DATA_ADDRESS_SETTING.MAIN_DATA_DIR_ADDRESS
+            main_dataset_folder = self.dataset_address or SETTING.DATA_ADDRESS_SETTING.MAIN_DATA_DIR_ADDRESS
             data_address = main_dataset_folder / category_folder
             image_dicts[category_folder] = {}
             image_dicts[category_folder]["image_list"] = list(data_address.iterdir())
@@ -129,12 +138,14 @@ class Preprocessing:
         return image_dicts
 
     def augment_data(
-        self,
-        number_of_images_tobe_gen: int = SETTING.AUGMENTATION_SETTING.NUMBER_OF_IMAGES_TOBE_GENERATED,
+            self,
+            number_of_images_tobe_gen: int = SETTING.AUGMENTATION_SETTING.NUMBER_OF_IMAGES_TOBE_GENERATED,
+            augment_data_address: str = SETTING.AUGMENTATION_SETTING.AUGMENTED_IMAGES_DIR_ADDRESS,
     ):
         """
         This function augments the images and save them into the dataset_augmented folder.
         :param number_of_images_tobe_gen: number of images to be generated
+        :param augment_data_address: address to save the augmented images
         :return: None
         """
         Augment_data_gen = image.ImageDataGenerator(
@@ -147,29 +158,31 @@ class Preprocessing:
             fill_mode=SETTING.AUGMENTATION_SETTING.FILL_MODE,
         )
 
+        main_address = augment_data_address or SETTING.AUGMENTATION_SETTING.AUGMENTED_IMAGES_DIR_ADDRESS
+
         for image_category in self.image_dict.keys():
             # check if a dir dataset_augmented exists if not create it
             if not os.path.exists(
-                SETTING.AUGMENTATION_SETTING.AUGMENTED_IMAGES_DIR_ADDRESS
-                / image_category
+                    main_address
+                    / image_category
             ):
                 os.makedirs(
-                    SETTING.AUGMENTATION_SETTING.AUGMENTED_IMAGES_DIR_ADDRESS
+                    main_address
                     / image_category
                 )
             # check if the dir is empty if not delete all the files
             else:
                 # empty the previous augmented images
                 for file in (
-                    SETTING.AUGMENTATION_SETTING.AUGMENTED_IMAGES_DIR_ADDRESS
-                    / image_category
+                        main_address
+                        / image_category
                 ).iterdir():
                     os.remove(file)
 
             number_of_images = self.image_dict[image_category]["number_of_images"]
             for _ in tqdm(
-                range(0, number_of_images_tobe_gen + 1),
-                desc=f"Augmenting {image_category} images:",
+                    range(0, number_of_images_tobe_gen),
+                    desc=f"Augmenting {image_category} images:",
             ):
                 # generate a random number integer between 0 and number_of_images
                 rand_img_num = int(random.random() * number_of_images)
@@ -193,12 +206,12 @@ class Preprocessing:
                 x = x.reshape((1,) + x.shape)
 
                 for _ in Augment_data_gen.flow(
-                    x,
-                    batch_size=SETTING.AUGMENTATION_SETTING.BATCH_SIZE,
-                    save_to_dir=SETTING.AUGMENTATION_SETTING.AUGMENTED_IMAGES_DIR_ADDRESS
-                    / image_category,
-                    save_prefix=SETTING.AUGMENTATION_SETTING.AUGMENTED_IMAGES_SAVE_PREFIX,
-                    save_format=SETTING.AUGMENTATION_SETTING.AUGMENTED_IMAGES_SAVE_FORMAT,
+                        x,
+                        batch_size=SETTING.AUGMENTATION_SETTING.BATCH_SIZE,
+                        save_to_dir=main_address or SETTING.AUGMENTATION_SETTING.AUGMENTED_IMAGES_DIR_ADDRESS
+                                    / image_category,
+                        save_prefix=SETTING.AUGMENTATION_SETTING.AUGMENTED_IMAGES_SAVE_PREFIX,
+                        save_format=SETTING.AUGMENTATION_SETTING.AUGMENTED_IMAGES_SAVE_FORMAT,
                 ):
                     break
 
@@ -208,25 +221,27 @@ class Preprocessing:
         And save them into the dataset_train_test_split folder.
         :return:
         """
+        augmented_data_address = kwargs.get("augmented_data_address") or SETTING.AUGMENTATION_SETTING.AUGMENTED_IMAGES_DIR_ADDRESS
+        train_test_val_split_dir_address = kwargs.get("train_test_val_split_dir_address") or SETTING.PREPROCESSING_SETTING.TRAIN_TEST_VAL_SPLIT_DIR_ADDRESS
         # get the list of dirs in the AUGMENTED_IMAGES_DIR_ADDRESS
         augmented_images_dir_list = os.listdir(
-            SETTING.AUGMENTATION_SETTING.AUGMENTED_IMAGES_DIR_ADDRESS
+            augmented_data_address
         )
         logger.info(f"Augmented images dir list: {augmented_images_dir_list}")
 
         # make a new dir for train and test and validation data
         if not os.path.exists(
-            SETTING.PREPROCESSING_SETTING.TRAIN_TEST_VAL_SPLIT_DIR_ADDRESS
+                train_test_val_split_dir_address
         ):
-            os.makedirs(SETTING.PREPROCESSING_SETTING.TRAIN_TEST_VAL_SPLIT_DIR_ADDRESS)
+            os.makedirs(train_test_val_split_dir_address)
         # make 3 dirs for train, test and validation under AUGMENTATION_SETTING.TRAIN_TEST_SPLIT_DIR_ADDRESS
         for dir_name in SETTING.PREPROCESSING_SETTING.TRAIN_TEST_SPLIT_DIR_NAMES:
             if not os.path.exists(
-                SETTING.PREPROCESSING_SETTING.TRAIN_TEST_VAL_SPLIT_DIR_ADDRESS
-                / dir_name
+                    train_test_val_split_dir_address
+                    / dir_name
             ):
                 os.makedirs(
-                    SETTING.PREPROCESSING_SETTING.TRAIN_TEST_VAL_SPLIT_DIR_ADDRESS
+                    train_test_val_split_dir_address
                     / dir_name
                 )
         logger.info(f"Created train, test and validation dirs")
@@ -235,12 +250,12 @@ class Preprocessing:
         for dir_name in SETTING.PREPROCESSING_SETTING.TRAIN_TEST_SPLIT_DIR_NAMES:
             for category in augmented_images_dir_list:
                 if not os.path.exists(
-                    SETTING.PREPROCESSING_SETTING.TRAIN_TEST_VAL_SPLIT_DIR_ADDRESS
-                    / dir_name
-                    / category
+                        train_test_val_split_dir_address
+                        / dir_name
+                        / category
                 ):
                     os.makedirs(
-                        SETTING.PREPROCESSING_SETTING.TRAIN_TEST_VAL_SPLIT_DIR_ADDRESS
+                        train_test_val_split_dir_address
                         / dir_name
                         / category
                     )
@@ -248,11 +263,13 @@ class Preprocessing:
 
         self.populated_augmented_images_into_train_test_val_dirs()
 
-    def populated_augmented_images_into_train_test_val_dirs(self):
+    def populated_augmented_images_into_train_test_val_dirs(self, *arges, **kwargs):
+        dataset_augmented_dir_address = kwargs.get("dataset_augmented") or SETTING.AUGMENTATION_SETTING.AUGMENTED_IMAGES_DIR_ADDRESS
+
         for category in self.categories_name_folders:
             # get the list of images in the dataset_augmented category (i.e. pdc_bit) folder
             original_list = os.listdir(
-                SETTING.AUGMENTATION_SETTING.AUGMENTED_IMAGES_DIR_ADDRESS / category
+                dataset_augmented_dir_address / category
             )
 
             # Number of items to select for each new list
@@ -269,28 +286,29 @@ class Preprocessing:
 
             # Create three new lists containing 70%, 20%, and 10% of the original list
             train_list = selected_items[:num_train]
-            test_list = selected_items[num_train : num_train + num_test]
-            val_list = selected_items[num_train + num_test :]
+            test_list = selected_items[num_train: num_train + num_test]
+            val_list = selected_items[num_train + num_test:]
             # copy the images from the dataset_augmented pdc_bit folder to the train, test and validation folders
             self.copy_images(train_list, category, "train")
             self.copy_images(test_list, category, "test")
             self.copy_images(val_list, category, "val")
 
+    # TODO: include the data address as kwargs
     @staticmethod
     def copy_images(images, categ, dest_folder):
         # check if the dir is empty, if not delete all the files
         if os.listdir(
-            SETTING.PREPROCESSING_SETTING.TRAIN_TEST_VAL_SPLIT_DIR_ADDRESS
-            / dest_folder
-            / categ
+                SETTING.PREPROCESSING_SETTING.TRAIN_TEST_VAL_SPLIT_DIR_ADDRESS
+                / dest_folder
+                / categ
         ):
             logger.info(
                 f"Deleting all the files in {SETTING.PREPROCESSING_SETTING.TRAIN_TEST_VAL_SPLIT_DIR_ADDRESS / dest_folder / categ}"
             )
             for file in os.listdir(
-                SETTING.PREPROCESSING_SETTING.TRAIN_TEST_VAL_SPLIT_DIR_ADDRESS
-                / dest_folder
-                / categ
+                    SETTING.PREPROCESSING_SETTING.TRAIN_TEST_VAL_SPLIT_DIR_ADDRESS
+                    / dest_folder
+                    / categ
             ):
                 os.remove(
                     SETTING.PREPROCESSING_SETTING.TRAIN_TEST_VAL_SPLIT_DIR_ADDRESS
@@ -315,14 +333,14 @@ class Preprocessing:
 
 
 if __name__ == "__main__":
-    # Preprocessing.download_images()
-    # obj = Preprocessing(dataset_address=Path(__file__).parent / ".." / "dataset")
+    Preprocessing.download_images(download_location_address=None)
+    obj = Preprocessing(dataset_address=Path(__file__).parent / ".." / "dataset")
 
     # or download the data from s3. this is after you have downloaded the data
     # using Process.download_images() and uploaded it to s3
     # this way the data would be consistent for all the team members
-    Preprocessing.download_images(from_s3=True)
-    obj = Preprocessing(dataset_address=Path(__file__).parent / ".." / "s3_dataset")
+    # Preprocessing.download_images(from_s3=True)
+    # obj = Preprocessing(dataset_address=Path(__file__).parent / ".." / "s3_dataset")
 
     print(obj.image_dict)
     obj.augment_data(number_of_images_tobe_gen=200)
