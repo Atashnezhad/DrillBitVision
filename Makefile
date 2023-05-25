@@ -90,3 +90,13 @@ check:
 .PHONY: upload-test
 upload-test:
 	@twine upload --repository testpypi dist/*
+
+# upload to pypi
+.PHONY: upload
+upload:
+	@twine upload dist/*
+
+# remove some dir folders
+.PHONY: remove
+remove:
+	@rm -rf dataset dataset_augmented dataset_train_test_val deep_model s3_dataset

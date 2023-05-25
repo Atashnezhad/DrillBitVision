@@ -73,7 +73,6 @@ class MyEC2:
         logger.info(f"EC2 instance {self.instance_id} is running")
 
     def set_up_security_groups(self):
-
         # Create a Boto3 client for EC2
         ec2_client = boto3.client(
             "ec2",
@@ -116,16 +115,16 @@ class MyEC2:
 
         # Create an EC2 client
         ec2_client = boto3.client(
-            'ec2',
+            "ec2",
             aws_access_key_id=self.access_key,
             aws_secret_access_key=self.secret_key,
-            region_name=self.region
+            region_name=self.region,
         )
 
         # Wait for the instance to be running
-        waiter = ec2_client.get_waiter('instance_running')
+        waiter = ec2_client.get_waiter("instance_running")
         waiter.wait(InstanceIds=[self.instance_id])
-        logger.info('EC2 instance is running')
+        logger.info("EC2 instance is running")
 
         # Get the public IP address of the instance
         response = ec2_client.describe_instances(InstanceIds=[self.instance_id])
@@ -163,10 +162,10 @@ class MyEC2:
     def terminate_instance(self):
         # Create an EC2 client
         ec2_client = boto3.client(
-            'ec2',
+            "ec2",
             aws_access_key_id=self.access_key,
             aws_secret_access_key=self.secret_key,
-            region_name=self.region
+            region_name=self.region,
         )
 
         # Terminate the EC2 instance

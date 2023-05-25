@@ -22,7 +22,7 @@ class DataAddressSetting(BaseModel):
 
 
 class DownloadImageSetting(BaseModel):
-    LIMIT: int = 50
+    LIMIT: int = 5
 
 
 class AugmentationSetting(BaseModel):

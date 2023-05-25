@@ -9,7 +9,7 @@ with open("README.md") as f:
     long_description = f.read()
 
 # Package meta-data.
-NAME = 'drillvision'
+NAME = "drillvision"
 DESCRIPTION = long_description
 URL = "https://github.com/Atashnezhad/DrillBitVision"
 EMAIL = "atashnezhad2@gmail.com"
@@ -27,7 +27,7 @@ REQUIRES_PYTHON = ">=3.6.0"
 about = {}
 ROOT_DIR = Path(__file__).resolve().parent
 REQUIREMENTS_DIR = ROOT_DIR
-PACKAGE_DIR = ROOT_DIR / 'neural_network_model'
+PACKAGE_DIR = ROOT_DIR / "neural_network_model"
 with open(PACKAGE_DIR / "VERSION") as f:
     _version = f.read().strip()
     about["__version__"] = _version
@@ -37,6 +37,7 @@ with open(PACKAGE_DIR / "VERSION") as f:
 def list_reqs(fname="requirements.txt"):
     with open(REQUIREMENTS_DIR / fname) as fd:
         return fd.read().splitlines()
+
 
 # Where the magic happens:
 setup(
