@@ -100,3 +100,7 @@ upload:
 .PHONY: remove
 remove:
 	@rm -rf dataset dataset_augmented dataset_train_test_val deep_model s3_dataset dist drillvision.egg-info
+
+.PHONY: remove2
+remove2:
+	@rm -rf dist drillvision.egg-info build

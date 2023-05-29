@@ -74,7 +74,7 @@ class BitVision:
         self.model: tensorflow.keras.models.Sequential = None
         self.assemble_deep_net_model()
         self.train_val_gens = {}
-        self.model_history = None  
+        self.model_history = None
         self.model_class_indices: Dict[str, int] = {}
 
     @property
@@ -303,7 +303,9 @@ class BitVision:
         model_path: the path of the model to be used for prediction
         :return:
         """
-        fid_save_address = kwargs.get("fid_save_address", SETTING.FIGURE_SETTING.FIG_PRED_OUT_DIR_ADDRESS)
+        fid_save_address = kwargs.get(
+            "fid_save_address", SETTING.FIGURE_SETTING.FIG_PRED_OUT_DIR_ADDRESS
+        )
         model_path = kwargs.get("model_path", SETTING.MODEL_SETTING.MODEL_PATH)
         if model_path is None:
             raise ValueError("model_path is None")
@@ -367,9 +369,7 @@ class BitVision:
 
             # save the figure in the figures folder
             fig_name = f"prediction_{category}.png"
-            fig_path = (
-                fid_save_address / fig_name
-            ).resolve()
+            fig_path = (fid_save_address / fig_name).resolve()
             if not os.path.exists(fig_path.parent):
                 os.makedirs(fig_path.parent)
             plt.savefig(fig_path)
@@ -395,11 +395,16 @@ class BitVision:
         )
 
         model.evaluate(DoubleCheck_generator)
+
     # TODO: check the addresses and add as kwargs if needed
     def grad_cam_viz(self, *args, **kwargs):
         model_path = kwargs.get("model_path", SETTING.MODEL_SETTING.MODEL_PATH)
-        fig_to_save_address = kwargs.get("fig_to_save_address", SETTING.GRAD_CAM_SETTING.IMAGE_NEW_NAME)
-        gradcam_fig_name = kwargs.get("gradcam_fig_name", SETTING.GRAD_CAM_SETTING.GRAD_CAM_FIG_NAME)
+        fig_to_save_address = kwargs.get(
+            "fig_to_save_address", SETTING.GRAD_CAM_SETTING.IMAGE_NEW_NAME
+        )
+        gradcam_fig_name = kwargs.get(
+            "gradcam_fig_name", SETTING.GRAD_CAM_SETTING.GRAD_CAM_FIG_NAME
+        )
         fig_address = fig_to_save_address / gradcam_fig_name
         if model_path is None:
             raise ValueError("model_path is None")
@@ -448,9 +453,7 @@ class BitVision:
         # Display heatmap
         plt.matshow(heatmap)
         plt.show()
-        BitVision._save_and_display_gradcam(
-            img_path, heatmap, cam_path=fig_address
-        )
+        BitVision._save_and_display_gradcam(img_path, heatmap, cam_path=fig_address)
 
     @staticmethod
     def _get_img_array(img_path, size):
