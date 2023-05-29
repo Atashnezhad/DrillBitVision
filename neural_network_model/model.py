@@ -132,8 +132,9 @@ class GradCamSetting(BaseModel):
 
     LAST_CONV_LAYER_NAME: str = "conv2d_2"
     IMAGE_NEW_NAME: str = (
-        Path(__file__).parent / ".." / "figures" / "grad_cam_pdc_Image_1.png"
-    )
+        Path(__file__).parent / ".." / "figures"
+    ).resolve()
+    GRAD_CAM_FIG_NAME: str = "grad_cam_pdc_Image_1.png"
 
     ALPHA: float = 0.7
 

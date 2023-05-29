@@ -73,8 +73,8 @@ class BitVision:
         )
         self.model: tensorflow.keras.models.Sequential = None
         self.assemble_deep_net_model()
-        self.train_vali_gens = {}
-        self.model_history = None
+        self.train_val_gens = {}
+        self.model_history = None  
         self.model_class_indices: Dict[str, int] = {}
 
     @property
@@ -218,7 +218,7 @@ class BitVision:
                 subset=None,
                 interpolation="nearest",
             )
-            self.train_vali_gens[subdir] = generator
+            self.train_val_gens[subdir] = generator
             self.model_class_indices = dict(
                 zip(generator.class_indices.values(), generator.class_indices.keys())
             )
@@ -239,10 +239,10 @@ class BitVision:
     def train_model(self, model_save_address: str = None):
         self._rescaling()
         model_history = self.model.fit_generator(
-            generator=self.train_vali_gens["train"],
+            generator=self.train_val_gens["train"],
             epochs=SETTING.MODEL_SETTING.EPOCHS,
             verbose=SETTING.MODEL_SETTING.FIT_GEN_VERBOSE,
-            validation_data=self.train_vali_gens["val"],
+            validation_data=self.train_val_gens["val"],
             validation_steps=SETTING.MODEL_SETTING.VALIDATION_STEPS,
             class_weight=SETTING.MODEL_SETTING.CLASS_WEIGHT,
             max_queue_size=SETTING.MODEL_SETTING.MAX_QUEUE_SIZE,
@@ -399,6 +399,8 @@ class BitVision:
     def grad_cam_viz(self, *args, **kwargs):
         model_path = kwargs.get("model_path", SETTING.MODEL_SETTING.MODEL_PATH)
         fig_to_save_address = kwargs.get("fig_to_save_address", SETTING.GRAD_CAM_SETTING.IMAGE_NEW_NAME)
+        gradcam_fig_name = kwargs.get("gradcam_fig_name", SETTING.GRAD_CAM_SETTING.GRAD_CAM_FIG_NAME)
+        fig_address = fig_to_save_address / gradcam_fig_name
         if model_path is None:
             raise ValueError("model_path is None")
 
@@ -428,7 +430,7 @@ class BitVision:
         # Prepare image
         img_array = preprocess_input(
             BitVision._get_img_array(
-                img_path, size=fig_to_save_address
+                img_path, size=SETTING.FLOW_FROM_DIRECTORY_SETTING.TARGET_SIZE
             )
         )
         # Make model
@@ -447,7 +449,7 @@ class BitVision:
         plt.matshow(heatmap)
         plt.show()
         BitVision._save_and_display_gradcam(
-            img_path, heatmap, cam_path=SETTING.GRAD_CAM_SETTING.IMAGE_NEW_NAME
+            img_path, heatmap, cam_path=fig_address
         )
 
     @staticmethod
@@ -534,11 +536,11 @@ if __name__ == "__main__":
     obj = BitVision(
         train_test_val_dir=Path(__file__).parent / ".." / "dataset_train_test_val"
     )
-    # print(obj.categories)
+    print(obj.categories)
     print(obj.data_details)
     obj.plot_image_category()
     obj.compile_model()
     obj.train_model()
     obj.plot_history()
     obj.predict()
-    obj.grad_cam_viz()
+    obj.grad_cam_viz(gradcam_fig_name="test.png")
