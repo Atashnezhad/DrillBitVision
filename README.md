@@ -72,3 +72,45 @@ B --> C[Assemble Model] --> D[Compile Model] --> E[Rescale Images\nTrain and Val
 
 ## Grad Cam Heatmap - PDC Bit
 ![alt text](figures/grad_cam_pdc_1.png "Logo Title Text 1")
+
+
+# How to use the Drill Bit Classifier Example
+## Installation
+```bash
+pip install drillvision
+```
+## Usage
+```python
+from pathlib import Path
+
+from neural_network_model.process_data import Preprocessing
+from neural_network_model.bit_vision import BitVision
+
+if __name__ == "__main__":
+
+    # download the images
+    obj = Preprocessing(dataset_address=Path(__file__).parent / "dataset")
+    obj.download_images()
+    print(obj.image_dict)
+    obj.augment_data(
+        number_of_images_tobe_gen=10,
+        augment_data_address=Path(__file__).parent / "augmented_dataset"
+    )
+    obj.train_test_split(
+        augmented_data_address=Path(__file__).parent / "augmented_dataset",
+        train_test_val_split_dir_address=Path(__file__).parent / "dataset_train_test_val"
+    )
+
+    obj = BitVision(train_test_val_dir=Path(__file__).parent / "dataset_train_test_val")
+    print(obj.categories)
+    print(obj.data_details)
+    obj.plot_image_category()
+    obj.compile_model()
+    model_name = "model_test_1.h5"
+    obj.train_model(model_save_address=Path(__file__).parent / "deep_model" / model_name)
+    obj.plot_history(fig_folder_address=Path(__file__).parent / "figures")
+    obj.predict(fig_save_address=Path(__file__).parent / "figures")
+    obj.grad_cam_viz(
+        fig_to_save_address=Path(__file__).parent / "figures",
+        gradcam_fig_name="gradcam.png"
+    )
