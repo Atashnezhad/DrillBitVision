@@ -309,9 +309,16 @@ class BitVision:
         fid_save_address = kwargs.get(
             "fid_save_address", SETTING.FIGURE_SETTING.FIG_PRED_OUT_DIR_ADDRESS
         )
+        # if the folder does not exist, create it
+        if not os.path.exists(fid_save_address):
+            os.makedirs(fid_save_address)
         model_path = kwargs.get("model_path", SETTING.MODEL_SETTING.MODEL_PATH)
         if model_path is None:
             raise ValueError("model_path is None")
+
+        test_folder_address = kwargs.get("test_folder_address", SETTING.PREPROCESSING_SETTING.TEST_DIR_ADDRESS)
+        if test_folder_address is None:
+            raise ValueError("test_folder_address is None")
 
         model = keras.models.load_model(model_path)
         logger.info(f"Model loaded from {model_path}")
@@ -381,7 +388,7 @@ class BitVision:
 
         datagen = image.ImageDataGenerator(SETTING.DATA_GEN_SETTING.RESCALE)
         DoubleCheck_generator = datagen.flow_from_directory(
-            directory=SETTING.DATA_ADDRESS_SETTING.TEST_DIR_ADDRESS,
+            directory=test_folder_address,
             target_size=SETTING.FLOW_FROM_DIRECTORY_SETTING.TARGET_SIZE,
             color_mode=SETTING.FLOW_FROM_DIRECTORY_SETTING.COLOR_MODE,
             classes=None,
