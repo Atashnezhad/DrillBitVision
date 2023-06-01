@@ -302,16 +302,16 @@ class BitVision:
         """
         This function is used to predict the test data.
         :param args:
-        :param kwargs: fid_save_address: the address of the folder to save the figure,
+        :param kwargs: fig_save_address: the address of the folder to save the figure,
         model_path: the path of the model to be used for prediction
         :return:
         """
-        fid_save_address = kwargs.get(
-            "fid_save_address", SETTING.FIGURE_SETTING.FIG_PRED_OUT_DIR_ADDRESS
+        fig_save_address = kwargs.get(
+            "fig_save_address", SETTING.FIGURE_SETTING.FIG_PRED_OUT_DIR_ADDRESS
         )
         # if the folder does not exist, create it
-        if not os.path.exists(fid_save_address):
-            os.makedirs(fid_save_address)
+        if not os.path.exists(fig_save_address):
+            os.makedirs(fig_save_address)
         model_path = kwargs.get("model_path", SETTING.MODEL_SETTING.MODEL_PATH)
         if model_path is None:
             raise ValueError("model_path is None")
@@ -379,7 +379,7 @@ class BitVision:
 
             # save the figure in the figures folder
             fig_name = f"prediction_{category}.png"
-            fig_path = (fid_save_address / fig_name).resolve()
+            fig_path = (fig_save_address / fig_name).resolve()
             if not os.path.exists(fig_path.parent):
                 os.makedirs(fig_path.parent)
             plt.savefig(fig_path)
