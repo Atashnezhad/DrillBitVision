@@ -236,19 +236,27 @@ class BitVision:
         )
         return check_point
 
-    def train_model(self, model_save_address: str = None):
+    def train_model(self, model_save_address: str = None, **kwargs):
+
+        epochs = kwargs.get("epochs", SETTING.MODEL_SETTING.EPOCHS)
+        verbose = kwargs.get("verbose", SETTING.MODEL_SETTING.FIT_GEN_VERBOSE)
+        class_weight = kwargs.get("class_weight", SETTING.MODEL_SETTING.CLASS_WEIGHT)
+        workers = kwargs.get("workers", SETTING.MODEL_SETTING.WORKERS)
+        use_multiprocessing = kwargs.get("use_multiprocessing", SETTING.MODEL_SETTING.USE_MULTIPROCESSING)
+        shuffle = kwargs.get("shuffle", SETTING.MODEL_SETTING.SHUFFLE)
+
         self._rescaling()
-        model_history = self.model.fit_generator(
+        self.model_history = self.model.fit_generator(
             generator=self.train_val_gens["train"],
-            epochs=SETTING.MODEL_SETTING.EPOCHS,
-            verbose=SETTING.MODEL_SETTING.FIT_GEN_VERBOSE,
+            epochs=epochs or SETTING.MODEL_SETTING.EPOCHS,
+            verbose=verbose or SETTING.MODEL_SETTING.FIT_GEN_VERBOSE,
             validation_data=self.train_val_gens["val"],
             validation_steps=SETTING.MODEL_SETTING.VALIDATION_STEPS,
-            class_weight=SETTING.MODEL_SETTING.CLASS_WEIGHT,
+            class_weight=class_weight or SETTING.MODEL_SETTING.CLASS_WEIGHT,
             max_queue_size=SETTING.MODEL_SETTING.MAX_QUEUE_SIZE,
-            workers=SETTING.MODEL_SETTING.WORKERS,
-            use_multiprocessing=SETTING.MODEL_SETTING.USE_MULTIPROCESSING,
-            shuffle=SETTING.MODEL_SETTING.SHUFFLE,
+            workers=workers or SETTING.MODEL_SETTING.WORKERS,
+            use_multiprocessing=use_multiprocessing or SETTING.MODEL_SETTING.USE_MULTIPROCESSING,
+            shuffle=shuffle or SETTING.MODEL_SETTING.SHUFFLE,
             initial_epoch=SETTING.MODEL_SETTING.INITIAL_EPOCH,
             callbacks=[self._check_points()],
         )
