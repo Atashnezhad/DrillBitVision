@@ -266,6 +266,9 @@ class BitVision:
         fig_folder_address = kwargs.get(
             "fig_folder_address", SETTING.FIGURE_SETTING.FIG_PRED_OUT_DIR_ADDRESS
         )
+        # if the folder does not exist, create it
+        if not os.path.exists(fig_folder_address):
+            os.makedirs(fig_folder_address)
         logger.info(self.model_history.history.keys())
         keys_plot = ["loss", "accuracy"]
         # make two plots side by side and have train and val for loss and accuracy
