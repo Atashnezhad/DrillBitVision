@@ -82,12 +82,10 @@ pip install drillvision
 ## Usage
 ```python
 from pathlib import Path
-
 from neural_network_model.process_data import Preprocessing
 from neural_network_model.bit_vision import BitVision
 
 if __name__ == "__main__":
-
     # download the images
     obj = Preprocessing(dataset_address=Path(__file__).parent / "dataset")
     obj.download_images()
@@ -109,8 +107,19 @@ if __name__ == "__main__":
     model_name = "model_test_1.h5"
     obj.train_model(model_save_address=Path(__file__).parent / "deep_model" / model_name)
     obj.plot_history(fig_folder_address=Path(__file__).parent / "figures")
-    obj.predict(fig_save_address=Path(__file__).parent / "figures")
+
+    obj.predict(
+        fig_save_address=Path(__file__).parent / "figures",
+        model_path=Path(__file__).parent / "deep_model" / model_name,
+        test_folder_address=Path(__file__).parent / "dataset_train_test_val" / "test"
+    )
+
+    # find list of images in the Path(__file__).parent / "dataset_train_test_val" / "test" / "pdc_bit"
+    directory_path = Path(__file__).parent / "dataset_train_test_val" / "test" / "pdc_bit"
+    list_of_images = [str(x) for x in directory_path.glob("*.jpeg")]
     obj.grad_cam_viz(
         fig_to_save_address=Path(__file__).parent / "figures",
-        gradcam_fig_name="gradcam.png"
+        img_to_be_applied_path=Path(__file__).parent / "dataset_train_test_val" / "test" / "pdc_bit" / list_of_images[0],
+        output_gradcam_fig_name="gradcam.png"
     )
+
