@@ -316,7 +316,7 @@ class BitVision:
         if model_path is None:
             raise ValueError("model_path is None")
 
-        test_folder_address = kwargs.get("test_folder_address", SETTING.PREPROCESSING_SETTING.TEST_DIR_ADDRESS)
+        test_folder_address = kwargs.get("test_folder_address", SETTING.DATA_ADDRESS_SETTING.TEST_DIR_ADDRESS)
         if test_folder_address is None:
             raise ValueError("test_folder_address is None")
 
@@ -413,8 +413,11 @@ class BitVision:
             "fig_to_save_address", SETTING.GRAD_CAM_SETTING.IMAGE_NEW_NAME
         )
         gradcam_fig_name = kwargs.get(
-            "gradcam_fig_name", SETTING.GRAD_CAM_SETTING.GRAD_CAM_FIG_NAME
+            "output_gradcam_fig_name", SETTING.GRAD_CAM_SETTING.GRAD_CAM_FIG_NAME
         )
+
+        img_to_be_applied_path = kwargs.get("img_to_be_applied_path", SETTING.GRAD_CAM_SETTING.IMG_PATH)
+
         fig_address = fig_to_save_address / gradcam_fig_name
         if model_path is None:
             raise ValueError("model_path is None")
@@ -433,7 +436,7 @@ class BitVision:
         last_conv_layer_name = SETTING.GRAD_CAM_SETTING.LAST_CONV_LAYER_NAME
 
         # The local path to our target image
-        img_path = SETTING.GRAD_CAM_SETTING.IMG_PATH
+        img_path = img_to_be_applied_path
 
         # load the image and show it
         img = load_img(
