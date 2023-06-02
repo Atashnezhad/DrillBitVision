@@ -225,14 +225,14 @@ class BitVision:
 
             logger.info(f"Rescaling {subdir} data, {generator.class_indices}:")
 
-    def _check_points(self) -> ModelCheckpoint:
+    def _check_points(self, model_save_address) -> ModelCheckpoint:
         check_point = ModelCheckpoint(
-            SETTING.MODEL_SETTING.MODEL_PATH,
+            model_save_address or SETTING.MODEL_SETTING.MODEL_PATH,
             monitor=SETTING.MODEL_SETTING.MONITOR,
             verbose=SETTING.MODEL_SETTING.CHECK_POINT_VERBOSE,
             save_best_only=SETTING.MODEL_SETTING.SAVE_BEST_ONLY,
             mode=SETTING.MODEL_SETTING.MODE,
-            # period=SETTING.MODEL_SETTING.PERIOD,
+            period=SETTING.MODEL_SETTING.PERIOD,
         )
         return check_point
 
@@ -258,12 +258,11 @@ class BitVision:
             use_multiprocessing=use_multiprocessing or SETTING.MODEL_SETTING.USE_MULTIPROCESSING,
             shuffle=shuffle or SETTING.MODEL_SETTING.SHUFFLE,
             initial_epoch=SETTING.MODEL_SETTING.INITIAL_EPOCH,
-            callbacks=[self._check_points()],
+            callbacks=[self._check_points(model_save_address)],
         )
 
         self.model.save(model_save_address or SETTING.MODEL_SETTING.MODEL_PATH)
         logger.info(f"Model saved to {SETTING.MODEL_SETTING.MODEL_PATH}")
-        self.model_history = model_history
 
     def plot_history(self, *args, **kwargs):
         """
