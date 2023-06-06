@@ -104,8 +104,12 @@ if __name__ == "__main__":
     print(obj.data_details)
     obj.plot_image_category()
     obj.compile_model()
+
     model_name = "model_test_1.h5"
-    obj.train_model(model_save_address=Path(__file__).parent / "deep_model" / model_name)
+    obj.train_model(
+        model_save_address=Path(__file__).parent / "deep_model",
+        model_name=model_name
+    )
     obj.plot_history(fig_folder_address=Path(__file__).parent / "figures")
 
     obj.predict(
@@ -118,6 +122,7 @@ if __name__ == "__main__":
     directory_path = Path(__file__).parent / "dataset_train_test_val" / "test" / "pdc_bit"
     list_of_images = [str(x) for x in directory_path.glob("*.jpeg")]
     obj.grad_cam_viz(
+        model_path=Path(__file__).parent / "deep_model" / model_name,
         fig_to_save_address=Path(__file__).parent / "figures",
         img_to_be_applied_path=Path(__file__).parent / "dataset_train_test_val" / "test" / "pdc_bit" / list_of_images[0],
         output_gradcam_fig_name="gradcam.png"
