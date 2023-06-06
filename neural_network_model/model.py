@@ -80,7 +80,7 @@ class ModelSetting(BaseModel):
     # fit generator
     EPOCHS: int = 3
     FIT_GEN_VERBOSE: int = 1
-    VALIDATION_STEPS: int = 2
+    VALIDATION_STEPS: int = 4
     CLASS_WEIGHT: dict = None
     MAX_QUEUE_SIZE: int = 10
     WORKERS: int = 1

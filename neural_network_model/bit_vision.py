@@ -238,7 +238,8 @@ class BitVision:
         )
         return check_point
 
-    def train_model(self, model_save_address: str = SETTING.MODEL_SETTING.MODEL_PATH,
+    def train_model(self,
+                    model_save_address: str = SETTING.MODEL_SETTING.MODEL_PATH,
                     **kwargs) -> None:
         """
         This function is used to train the model.
@@ -286,6 +287,7 @@ class BitVision:
         # if the folder does not exist, create it
         if not os.path.exists(fig_folder_address.resolve()):
             os.makedirs(fig_folder_address.resolve())
+
         logger.info(self.model_history.history.keys())
         keys_plot = ["loss", "accuracy"]
         # make two plots side by side and have train and val for loss and accuracy
