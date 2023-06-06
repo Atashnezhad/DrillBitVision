@@ -10,7 +10,9 @@ from keras.layers import (
     Flatten,
     MaxPooling2D,
 )
-
+import warnings
+# ignore all warnings
+warnings.filterwarnings("ignore")
 from neural_network_model.model import SETTING
 
 # set seed to get the same random numbers each time
@@ -100,8 +102,8 @@ class BitVision:
         train test val data details in the dict.
         """
         resource_dir = (
-            self.train_test_val_dir
-            or Path(__file__).parent / ".." / self.train_test_val_dir
+                self.train_test_val_dir
+                or Path(__file__).parent / ".." / self.train_test_val_dir
         )
         # get the list of dirs in the resource_dir
         subdir_name = os.listdir(resource_dir)
@@ -190,7 +192,7 @@ class BitVision:
             axs[self.categories.index(category)].set_title(category)
         plt.show()
 
-    def _rescaling(self):
+    def _rescaling(self) -> None:
         """
         This function is used to rescale the images.
         The images were augmented before in the preprocessing step.
@@ -202,8 +204,8 @@ class BitVision:
 
             generator = datagen.flow_from_directory(
                 directory=self.train_test_val_dir / subdir
-                or SETTING.PREPROCESSING_SETTING.TRAIN_TEST_VAL_SPLIT_DIR_ADDRESS
-                / subdir,
+                          or SETTING.PREPROCESSING_SETTING.TRAIN_TEST_VAL_SPLIT_DIR_ADDRESS
+                          / subdir,
                 target_size=SETTING.FLOW_FROM_DIRECTORY_SETTING.TARGET_SIZE,
                 color_mode=SETTING.FLOW_FROM_DIRECTORY_SETTING.COLOR_MODE,
                 classes=None,
@@ -225,9 +227,9 @@ class BitVision:
 
             logger.info(f"Rescaling {subdir} data, {generator.class_indices}:")
 
-    def _check_points(self, model_save_address) -> ModelCheckpoint:
+    def _check_points(self, model_save_address: str, model_name: str) -> ModelCheckpoint:
         check_point = ModelCheckpoint(
-            model_save_address or SETTING.MODEL_SETTING.MODEL_PATH,
+            model_save_address / model_name,
             monitor=SETTING.MODEL_SETTING.MONITOR,
             verbose=SETTING.MODEL_SETTING.CHECK_POINT_VERBOSE,
             save_best_only=SETTING.MODEL_SETTING.SAVE_BEST_ONLY,
@@ -236,8 +238,16 @@ class BitVision:
         )
         return check_point
 
-    def train_model(self, model_save_address: str = None, **kwargs):
+    def train_model(self, model_save_address: str = SETTING.MODEL_SETTING.MODEL_PATH,
+                    **kwargs) -> None:
+        """
+        This function is used to train the model.
+        :param model_save_address:
+        :param kwargs: model_name, epochs, verbose, class_weight, workers, use_multiprocessing, shuffle
+        :return:
+        """
 
+        model_name = kwargs.get("model_name", SETTING.MODEL_SETTING.MODEL_NAME)
         epochs = kwargs.get("epochs", SETTING.MODEL_SETTING.EPOCHS)
         verbose = kwargs.get("verbose", SETTING.MODEL_SETTING.FIT_GEN_VERBOSE)
         class_weight = kwargs.get("class_weight", SETTING.MODEL_SETTING.CLASS_WEIGHT)
@@ -258,10 +268,10 @@ class BitVision:
             use_multiprocessing=use_multiprocessing or SETTING.MODEL_SETTING.USE_MULTIPROCESSING,
             shuffle=shuffle or SETTING.MODEL_SETTING.SHUFFLE,
             initial_epoch=SETTING.MODEL_SETTING.INITIAL_EPOCH,
-            callbacks=[self._check_points(model_save_address)],
+            callbacks=[self._check_points(model_save_address, model_name)],
         )
 
-        self.model.save(model_save_address or SETTING.MODEL_SETTING.MODEL_PATH)
+        self.model.save(model_save_address / model_name or SETTING.MODEL_SETTING.MODEL_PATH / SETTING.MODEL_SETTING.MODEL_NAME)
         logger.info(f"Model saved to {SETTING.MODEL_SETTING.MODEL_PATH}")
 
     def plot_history(self, *args, **kwargs):
@@ -274,8 +284,8 @@ class BitVision:
             "fig_folder_address", SETTING.FIGURE_SETTING.FIG_PRED_OUT_DIR_ADDRESS
         )
         # if the folder does not exist, create it
-        if not os.path.exists(fig_folder_address):
-            os.makedirs(fig_folder_address)
+        if not os.path.exists(fig_folder_address.resolve()):
+            os.makedirs(fig_folder_address.resolve())
         logger.info(self.model_history.history.keys())
         keys_plot = ["loss", "accuracy"]
         # make two plots side by side and have train and val for loss and accuracy
@@ -297,8 +307,8 @@ class BitVision:
 
     @staticmethod
     def _filter_out_list(
-        ignore_list: List[str] = SETTING.IGNORE_SETTING.IGNORE_LIST,
-        list_to_be_edited: List[str] = None,
+            ignore_list: List[str] = SETTING.IGNORE_SETTING.IGNORE_LIST,
+            list_to_be_edited: List[str] = None,
     ) -> List[str]:
         for case in ignore_list:
             if case in list_to_be_edited:
@@ -317,9 +327,9 @@ class BitVision:
             "fig_save_address", SETTING.FIGURE_SETTING.FIG_PRED_OUT_DIR_ADDRESS
         )
         # if the folder does not exist, create it
-        if not os.path.exists(fig_save_address):
-            os.makedirs(fig_save_address)
-        model_path = kwargs.get("model_path", SETTING.MODEL_SETTING.MODEL_PATH)
+        if not os.path.exists(fig_save_address.resolve()):
+            os.makedirs(fig_save_address.resolve())
+        model_path = kwargs.get("model_path", SETTING.MODEL_SETTING.MODEL_PATH / SETTING.MODEL_SETTING.MODEL_NAME)
         if model_path is None:
             raise ValueError("model_path is None")
 
@@ -336,8 +346,8 @@ class BitVision:
             number_of_rows = SETTING.FIGURE_SETTING.NUM_ROWS_IN_PRED_MODEL
             number_of_test_to_pred = SETTING.MODEL_SETTING.NUMBER_OF_TEST_TO_PRED
             train_test_val_dir = (
-                self.train_test_val_dir
-                or SETTING.PREPROCESSING_SETTING.TRAIN_TEST_VAL_SPLIT_DIR_ADDRESS
+                    self.train_test_val_dir
+                    or SETTING.PREPROCESSING_SETTING.TRAIN_TEST_VAL_SPLIT_DIR_ADDRESS
             )
             # get the list of test images
             test_images_list = os.listdir(
@@ -350,10 +360,10 @@ class BitVision:
 
             for i, img in enumerate(test_images_list[0:number_of_test_to_pred]):
                 path_to_img = (
-                    train_test_val_dir
-                    / SETTING.PREPROCESSING_SETTING.TRAIN_TEST_SPLIT_DIR_NAMES[1]
-                    / category
-                    / str(img)
+                        train_test_val_dir
+                        / SETTING.PREPROCESSING_SETTING.TRAIN_TEST_SPLIT_DIR_NAMES[1]
+                        / category
+                        / str(img)
                 ).resolve()
 
                 img = load_img(
@@ -415,7 +425,7 @@ class BitVision:
 
     # TODO: check the addresses and add as kwargs if needed
     def grad_cam_viz(self, *args, **kwargs):
-        model_path = kwargs.get("model_path", SETTING.MODEL_SETTING.MODEL_PATH)
+        model_path = kwargs.get("model_path", SETTING.MODEL_SETTING.MODEL_PATH / SETTING.MODEL_SETTING.MODEL_NAME)
         fig_to_save_address = kwargs.get(
             "fig_to_save_address", SETTING.GRAD_CAM_SETTING.IMAGE_NEW_NAME
         )
@@ -523,10 +533,10 @@ class BitVision:
 
     @staticmethod
     def _save_and_display_gradcam(
-        img_path,
-        heatmap,
-        cam_path=SETTING.GRAD_CAM_SETTING.IMAGE_NEW_NAME,
-        alpha=SETTING.GRAD_CAM_SETTING.ALPHA,
+            img_path,
+            heatmap,
+            cam_path=SETTING.GRAD_CAM_SETTING.IMAGE_NEW_NAME,
+            alpha=SETTING.GRAD_CAM_SETTING.ALPHA,
     ):
         # Load the original image
         img = keras.preprocessing.image.load_img(img_path)
