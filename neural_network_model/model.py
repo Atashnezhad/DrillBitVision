@@ -69,17 +69,18 @@ class ModelSetting(BaseModel):
         Path(__file__).parent
         / ".."
         / "deep_model"
-        / "model_epoch_27_loss_0.52_acc_0.64_val_acc_0.62_.h5"
-    )
+    ).resolve()
+
+    MODEL_NAME: str = "model_.h5"
 
     # compile
     LOSS: str = "categorical_crossentropy"
     METRICS: List = ["accuracy"]
 
     # fit generator
-    EPOCHS: int = 5
+    EPOCHS: int = 3
     FIT_GEN_VERBOSE: int = 1
-    VALIDATION_STEPS: int = 2
+    VALIDATION_STEPS: int = 4
     CLASS_WEIGHT: dict = None
     MAX_QUEUE_SIZE: int = 10
     WORKERS: int = 1
@@ -102,7 +103,7 @@ class FigureSetting(BaseModel):
     FIGURE_SIZE_IN_PRED_MODEL: tuple = (20, 15)
     NUM_ROWS_IN_PRED_MODEL: int = 5
     NUM_COLS_IN_PRED_MODEL: int = 7
-    FIG_PRED_OUT_DIR_ADDRESS: str = Path(__file__) / ".." / ".." / "figures"
+    FIG_PRED_OUT_DIR_ADDRESS: str = (Path(__file__) / ".." / ".." / "figures").resolve()
 
     # in the plot_history method of BitVision class
     FIGURE_SIZE_IN_PLOT_HIST: tuple = (17, 10)
