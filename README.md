@@ -1,6 +1,7 @@
 # Drill Bit Classifier
 [![Python 3.9](https://img.shields.io/badge/python-3.9-blue.svg)](https://www.python.org/downloads/release/python-360/)
 [![PyPI version](https://badge.fury.io/py/drillvision.svg)](https://badge.fury.io/py/drillvision)
+[![Github All Releases](https://img.shields.io/github/downloads/Atashnezhad/DrillBitVision/total.svg)]()
 
 The Drill Bit Classifier is an app that uses a Convolutional Neural Network (CNN) to 
 classify images of drill bits. The app can be used by machinists and engineers to 
