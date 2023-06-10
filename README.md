@@ -1,6 +1,7 @@
 # Drill Bit Classifier
 [![Python 3.9](https://img.shields.io/badge/python-3.9-blue.svg)](https://www.python.org/downloads/release/python-360/)
 [![PyPI version](https://badge.fury.io/py/drillvision.svg)](https://badge.fury.io/py/drillvision)
+[![Github All Releases](https://img.shields.io/github/downloads/Atashnezhad/DrillBitVision/total.svg)]()
 
 The Drill Bit Classifier is an app that uses a Convolutional Neural Network (CNN) to 
 classify images of drill bits. The app can be used by machinists and engineers to 
@@ -106,11 +107,18 @@ if __name__ == "__main__":
     obj.plot_image_category()
     obj.compile_model()
 
+<<<<<<< HEAD
     model_name = "model_epoch_{epoch:02d}_loss_{loss:.2f}_acc_{accuracy:.2f}_val_acc_{val_accuracy:.2f}_.h5"
     obj.train_model(
         model_save_address=Path(__file__).parent / "deep_model",
         model_name=model_name,
         epochs=40,
+=======
+    model_name = "model_test_1.h5"
+    obj.train_model(
+        model_save_address=Path(__file__).parent / "deep_model",
+        model_name=model_name
+>>>>>>> a404cdefb85015b369c6c26679c36acb6ca622ae
     )
     obj.plot_history(fig_folder_address=Path(__file__).parent / "figures")
 
