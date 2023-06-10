@@ -14,7 +14,7 @@ import warnings
 # ignore all warnings
 warnings.filterwarnings("ignore")
 from neural_network_model.model import SETTING
-
+import math
 # set seed to get the same random numbers each time
 random.seed(1)
 
@@ -238,6 +238,11 @@ class BitVision:
         )
         return check_point
 
+    def _calculate_number_from_dict(self, my_dict: dict) -> int:
+        total = sum(my_dict.values())
+        return total
+
+
     def train_model(self,
                     model_save_address: str = SETTING.MODEL_SETTING.MODEL_PATH,
                     **kwargs) -> None:
@@ -256,13 +261,24 @@ class BitVision:
         use_multiprocessing = kwargs.get("use_multiprocessing", SETTING.MODEL_SETTING.USE_MULTIPROCESSING)
         shuffle = kwargs.get("shuffle", SETTING.MODEL_SETTING.SHUFFLE)
 
+        # calculate validation_steps
+        BATCH_SIZE = SETTING.FLOW_FROM_DIRECTORY_SETTING.BATCH_SIZE
+        TRAINING_SIZE = self._calculate_number_from_dict(self.data_details["train"])
+        VALIDATION_SIZE = self._calculate_number_from_dict(self.data_details["val"])
+        # We take the ceiling because we do not drop the remainder of the batch
+        compute_steps_per_epoch = lambda x: int(math.ceil(1. * x / BATCH_SIZE))
+        steps_per_epoch = compute_steps_per_epoch(TRAINING_SIZE)
+        val_steps = compute_steps_per_epoch(VALIDATION_SIZE)
+
+
         self._rescaling()
         self.model_history = self.model.fit_generator(
+            steps_per_epoch=steps_per_epoch,
             generator=self.train_val_gens["train"],
             epochs=epochs or SETTING.MODEL_SETTING.EPOCHS,
             verbose=verbose or SETTING.MODEL_SETTING.FIT_GEN_VERBOSE,
             validation_data=self.train_val_gens["val"],
-            validation_steps=SETTING.MODEL_SETTING.VALIDATION_STEPS,
+            validation_steps=val_steps or SETTING.MODEL_SETTING.VALIDATION_STEPS,
             class_weight=class_weight or SETTING.MODEL_SETTING.CLASS_WEIGHT,
             max_queue_size=SETTING.MODEL_SETTING.MAX_QUEUE_SIZE,
             workers=workers or SETTING.MODEL_SETTING.WORKERS,

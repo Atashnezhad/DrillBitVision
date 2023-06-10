@@ -85,13 +85,14 @@ from pathlib import Path
 from neural_network_model.process_data import Preprocessing
 from neural_network_model.bit_vision import BitVision
 
+
 if __name__ == "__main__":
     # download the images
     obj = Preprocessing(dataset_address=Path(__file__).parent / "dataset")
-    obj.download_images()
+    obj.download_images(limit=25)
     print(obj.image_dict)
     obj.augment_data(
-        number_of_images_tobe_gen=10,
+        number_of_images_tobe_gen=100,
         augment_data_address=Path(__file__).parent / "augmented_dataset"
     )
     obj.train_test_split(
@@ -104,8 +105,13 @@ if __name__ == "__main__":
     print(obj.data_details)
     obj.plot_image_category()
     obj.compile_model()
-    model_name = "model_test_1.h5"
-    obj.train_model(model_save_address=Path(__file__).parent / "deep_model" / model_name)
+
+    model_name = "model_epoch_{epoch:02d}_loss_{loss:.2f}_acc_{accuracy:.2f}_val_acc_{val_accuracy:.2f}_.h5"
+    obj.train_model(
+        model_save_address=Path(__file__).parent / "deep_model",
+        model_name=model_name,
+        epochs=40,
+    )
     obj.plot_history(fig_folder_address=Path(__file__).parent / "figures")
 
     obj.predict(
@@ -118,8 +124,10 @@ if __name__ == "__main__":
     directory_path = Path(__file__).parent / "dataset_train_test_val" / "test" / "pdc_bit"
     list_of_images = [str(x) for x in directory_path.glob("*.jpeg")]
     obj.grad_cam_viz(
+        model_path=Path(__file__).parent / "deep_model" / model_name,
         fig_to_save_address=Path(__file__).parent / "figures",
         img_to_be_applied_path=Path(__file__).parent / "dataset_train_test_val" / "test" / "pdc_bit" / list_of_images[0],
         output_gradcam_fig_name="gradcam.png"
     )
+
 
