@@ -65,11 +65,7 @@ class PreprocessingSetting(BaseModel):
 
 
 class ModelSetting(BaseModel):
-    MODEL_PATH: str = (
-        Path(__file__).parent
-        / ".."
-        / "deep_model"
-    ).resolve()
+    MODEL_PATH: str = (Path(__file__).parent / ".." / "deep_model").resolve()
 
     MODEL_NAME: str = "model_.h5"
 
