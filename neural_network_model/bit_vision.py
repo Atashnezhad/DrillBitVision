@@ -349,7 +349,7 @@ class BitVision:
             os.makedirs(fig_save_address.resolve())
         model_path = kwargs.get("model_path", SETTING.MODEL_SETTING.MODEL_PATH / SETTING.MODEL_SETTING.MODEL_NAME)
         if model_path is None:
-            raise ValueError("model_path is None")
+            logger.info(f"model_path from SETTING is was used - {model_path}")
 
         test_folder_address = kwargs.get("test_folder_address", SETTING.DATA_ADDRESS_SETTING.TEST_DIR_ADDRESS)
         if test_folder_address is None:
