@@ -601,10 +601,14 @@ class BitVision:
         superimposed_img.save(cam_path)
 
     @staticmethod
-    def return_best_model_path(
+    def return_best_model_name(
         directory: str = SETTING.MODEL_SETTING.MODEL_PATH,
     ) -> str:
-        import os
+        """
+        Return the best model name
+        :param directory:
+        :return:
+        """
 
         best_model = None
         best_val_acc = 0.0
