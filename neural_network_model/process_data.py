@@ -41,7 +41,7 @@ ch.setFormatter(formatter)
 
 # Add the handler to the logger
 logger.addHandler(ch)
-
+logging.basicConfig(level=logging.FATAL)
 
 class Preprocessing:
     """
@@ -356,7 +356,7 @@ class Preprocessing:
 
 if __name__ == "__main__":
     obj = Preprocessing(dataset_address=Path(__file__).parent / ".." / "dataset")
-    obj.download_images()
+    # obj.download_images()
 
     # or download the data from s3. this is after you have downloaded the data
     # using Process.download_images() and uploaded it to s3
