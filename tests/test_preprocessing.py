@@ -27,7 +27,7 @@ def test_download_images_1(mocker, _object):
 # test_download_images_2, the mocker is used which is from pytest
 def test_download_images_2(_object):
     with mock.patch(
-            "neural_network_model.process_data.downloader"
+        "neural_network_model.process_data.downloader"
     ) as mock_bing_downloader:
         _object.download_images()
         print(mock_bing_downloader.download.call_count)
@@ -42,7 +42,7 @@ def test_download_images_3(mocker, _object):
     _object.download_images()
     print(mock_bing_downloader_download.call_count)
     assert (
-            mock_bing_downloader_download.call_count == 2
+        mock_bing_downloader_download.call_count == 2
     )  # by default, the number of categories to download is 2
     assert mock_logger_info.call_count == 1
     # assert mock_logger_info.call_args_list[0][0][0] == "Downloaded images"
@@ -60,13 +60,21 @@ def side_effect_test_download_images_s3_2(*args, **kwargs) -> None:
 
 
 def test_download_images_s3_2(mocker, _object):
-    mock_download_files = mocker.patch("neural_network_model.process_data.MyS3.download_files_from_subfolders",
-                                       side_effect=side_effect_test_download_images_s3_2)
+    mock_download_files = mocker.patch(
+        "neural_network_model.process_data.MyS3.download_files_from_subfolders",
+        side_effect=side_effect_test_download_images_s3_2,
+    )
     _object.download_images(from_s3=True)
-    mock_download_files.assert_called_once_with('bitimages123',
-                                                ['dataset/pdc_bit', 'dataset/rollercone_bit'],
-                                                PosixPath('/Users/amin/Downloads/DrillBitVision/s3_dataset')
-                                                )
+
+    bucket_name = SETTING.S3_BUCKET_SETTING.BUCKET_NAME
+    subfolders = SETTING.S3_BUCKET_SETTING.SUBFOLDER_NAME
+    download_location_address = SETTING.S3_BUCKET_SETTING.DOWNLOAD_LOCATION
+
+    mock_download_files.assert_called_once_with(
+        bucket_name,
+        subfolders,
+        download_location_address
+    )
 
 
 def side_effect_test_property_1(*args, **kwargs) -> Union[List[str], List[PosixPath]]:
@@ -74,10 +82,11 @@ def side_effect_test_property_1(*args, **kwargs) -> Union[List[str], List[PosixP
     print(args[0], "-----")
     if args == first_os_arge:
         print("first_os_arge")
-        return ['pdc_bit', 'rollercone_bit']
+        return ["pdc_bit", "rollercone_bit"]
     else:
         print("second_os_arge")
-        return ['test_preprocessing.py', 'test_bitvision.py']
+        return ["test_preprocessing.py", "test_bitvision.py"]
+
 
 # skip this test TODO: fix this test later
 @pytest.mark.skip
@@ -90,27 +99,19 @@ def test_property_1(mocker, _object):
         "neural_network_model.process_data.os.listdir",
         side_effect=side_effect_test_property_1,
     )
-    assert _object.categorie_name == [
-        'test_preprocessing.py',
-        'test_bitvision.py'
-    ]
+    assert _object.categorie_name == ["test_preprocessing.py", "test_bitvision.py"]
 
 
-def side_effect_test_property_2(*args, **kwargs) -> \
-        Union[List[str], List[PosixPath]]:
-
+def side_effect_test_property_2(*args, **kwargs) -> Union[List[str], List[PosixPath]]:
     if args[0] == (Path(__file__).parent / ".." / "dataset").resolve():
-        return ['pdc_bit', 'rollercone_bit']
+        return ["pdc_bit", "rollercone_bit"]
 
     else:
-        return ['dummy_file1.txt', 'dummy_file2.txt']
+        return ["dummy_file1.txt", "dummy_file2.txt"]
 
 
 def test_property_2(mocker, _object):
-
-    with patch('os.listdir') as mock_os_listdir:
-        mock_os_listdir.side_effect = MagicMock(
-            side_effect=side_effect_test_property_2
-        )
+    with patch("os.listdir") as mock_os_listdir:
+        mock_os_listdir.side_effect = MagicMock(side_effect=side_effect_test_property_2)
         _object.dataset_address = (Path(__file__).parent / ".." / "dataset").resolve()
-        assert _object.categorie_name == ['pdc_bit', 'rollercone_bit']
+        assert _object.categorie_name == ["pdc_bit", "rollercone_bit"]

@@ -71,7 +71,7 @@ class Preprocessing:
             # download the images from the S3 bucket
             s3 = MyS3()
 
-            # Specify your bucket name and subfolders
+            # Specify your bucket name and folders
             bucket_name = SETTING.S3_BUCKET_SETTING.BUCKET_NAME
             subfolders = SETTING.S3_BUCKET_SETTING.SUBFOLDER_NAME
             download_location_address = (
