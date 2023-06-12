@@ -109,3 +109,10 @@ remove2:
 .PHONY: test
 test:
 	@python -m pytest -v
+
+# run tests with coverage
+.PHONY: test-coverage
+test-coverage:
+	@python -m pytest --cov=neural_network_model --cov-report=html
+	# show the coverage report in the terminal
+	@python -m pytest --cov=neural_network_model --cov-report=term-missing
