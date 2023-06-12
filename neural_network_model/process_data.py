@@ -269,10 +269,6 @@ class Preprocessing:
     def _populated_augmented_images_into_train_test_val_dirs(self, *arges, **kwargs):
         dataset_augmented_dir_address = arges[0]
         train_test_val_split_dir_address = arges[1]
-        # dataset_augmented_dir_address = (
-        #         kwargs.get("dataset_augmented")
-        #         or SETTING.AUGMENTATION_SETTING.AUGMENTED_IMAGES_DIR_ADDRESS
-        # )
 
         for category in self.categories_name_folders:
             # get the list of images in the dataset_augmented category (i.e. pdc_bit) folder
