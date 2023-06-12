@@ -108,18 +108,11 @@ if __name__ == "__main__":
     obj.plot_image_category()
     obj.compile_model()
 
-<<<<<<< HEAD
     model_name = "model_epoch_{epoch:02d}_loss_{loss:.2f}_acc_{accuracy:.2f}_val_acc_{val_accuracy:.2f}_.h5"
     obj.train_model(
         model_save_address=Path(__file__).parent / "deep_model",
         model_name=model_name,
         epochs=40,
-=======
-    model_name = "model_test_1.h5"
-    obj.train_model(
-        model_save_address=Path(__file__).parent / "deep_model",
-        model_name=model_name
->>>>>>> a404cdefb85015b369c6c26679c36acb6ca622ae
     )
     obj.plot_history(fig_folder_address=Path(__file__).parent / "figures")
 

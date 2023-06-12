@@ -104,3 +104,8 @@ remove:
 .PHONY: remove2
 remove2:
 	@rm -rf dist drillvision.egg-info build
+
+# run tests
+.PHONY: test
+test:
+	@python -m pytest -v
