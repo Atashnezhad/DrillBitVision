@@ -2,7 +2,7 @@ from pathlib import Path, PosixPath
 from typing import List, Union
 from unittest import mock
 from bing_image_downloader import downloader
-
+from unittest.mock import patch, MagicMock
 import pytest
 
 from neural_network_model.model import SETTING
@@ -96,11 +96,21 @@ def test_property_1(mocker, _object):
     ]
 
 
-def test_property_2(mocker, _object):
-    # set dataset_address
-    _object.dataset_address = Path(__file__).parent / ".." / "dataset"
+def side_effect_test_property_2(*args, **kwargs) -> \
+        Union[List[str], List[PosixPath]]:
 
-    # mock the os listdir function
-    mock_os_listdir = mocker.patch("neural_network_model.process_data.os.listdir")
-    _object.categorie_name
-    assert _object.categorie_name == mock_os_listdir.return_value
+    if args[0] == (Path(__file__).parent / ".." / "dataset").resolve():
+        return ['pdc_bit', 'rollercone_bit']
+
+    else:
+        return ['dummy_file1.txt', 'dummy_file2.txt']
+
+
+def test_property_2(mocker, _object):
+
+    with patch('os.listdir') as mock_os_listdir:
+        mock_os_listdir.side_effect = MagicMock(
+            side_effect=side_effect_test_property_2
+        )
+        _object.dataset_address = (Path(__file__).parent / ".." / "dataset").resolve()
+        assert _object.categorie_name == ['pdc_bit', 'rollercone_bit']
