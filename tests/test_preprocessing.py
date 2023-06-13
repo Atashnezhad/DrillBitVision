@@ -1,13 +1,15 @@
 from pathlib import Path, PosixPath
 from typing import List, Union
 from unittest import mock
-from bing_image_downloader import downloader
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch, MagicMock, PropertyMock
 import pytest
 
 from neural_network_model.model import SETTING
 from neural_network_model.process_data import Preprocessing
 from neural_network_model.s3 import MyS3
+import warnings
+
+warnings.filterwarnings("ignore", category=DeprecationWarning)
 
 
 @pytest.fixture
@@ -27,7 +29,7 @@ def test_download_images_1(mocker, _object):
 # test_download_images_2, the mocker is used which is from pytest
 def test_download_images_2(_object):
     with mock.patch(
-        "neural_network_model.process_data.downloader"
+            "neural_network_model.process_data.downloader"
     ) as mock_bing_downloader:
         _object.download_images()
         print(mock_bing_downloader.download.call_count)
@@ -42,7 +44,7 @@ def test_download_images_3(mocker, _object):
     _object.download_images()
     print(mock_bing_downloader_download.call_count)
     assert (
-        mock_bing_downloader_download.call_count == 2
+            mock_bing_downloader_download.call_count == 2
     )  # by default, the number of categories to download is 2
     assert mock_logger_info.call_count == 1
     # assert mock_logger_info.call_args_list[0][0][0] == "Downloaded images"
@@ -115,3 +117,28 @@ def test_property_2(mocker, _object):
         mock_os_listdir.side_effect = MagicMock(side_effect=side_effect_test_property_2)
         _object.dataset_address = (Path(__file__).parent / ".." / "dataset").resolve()
         assert _object.categorie_name == ["pdc_bit", "rollercone_bit"]
+
+
+def test_property_image_dict(mocker, _object):
+    # by defaults there is not data address set, and it would be None
+    _object.dataset_address = Path(__file__).parent / "dummy_address_dataset"
+    # set the object.categories_name
+
+    # mock the categories_name
+    # note that the PosixPath is used here from unittest while the mocker is from pytest
+    # I see if you just use PropertyMock, it will work as well.
+    # let's go with pytest mocker
+    mock_property_categories_name = mocker.PropertyMock(
+        return_value=[
+            "pdc_bit",
+            "rollercone_bit"
+        ]
+    )
+
+    # Patch the property with the mock
+    mocker.patch.object(Preprocessing, 'categorie_name', mock_property_categories_name)
+
+    mock_list = MagicMock(list)
+    mocker.patch('builtins.list', return_value=mock_list)
+
+    assert _object.image_dict == {"pdc_bit": 0, "rollercone_bit": 1}

@@ -142,6 +142,11 @@ class Preprocessing:
                 self.dataset_address
                 or SETTING.DATA_ADDRESS_SETTING.MAIN_DATA_DIR_ADDRESS
             )
+            # check if the main_datast_folder is not None if yes then raise error
+            if main_dataset_folder is None:
+                logging.error("main_dataset_folder is None")
+                raise ValueError("main_dataset_folder is None")
+
             data_address = main_dataset_folder / category_folder
             image_dicts[category_folder] = {}
             image_dicts[category_folder]["image_list"] = list(data_address.iterdir())
