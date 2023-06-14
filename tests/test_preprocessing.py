@@ -29,7 +29,7 @@ def test_download_images_1(mocker, _object):
 # test_download_images_2, the mocker is used which is from pytest
 def test_download_images_2(_object):
     with mock.patch(
-            "neural_network_model.process_data.downloader"
+        "neural_network_model.process_data.downloader"
     ) as mock_bing_downloader:
         _object.download_images()
         print(mock_bing_downloader.download.call_count)
@@ -44,7 +44,7 @@ def test_download_images_3(mocker, _object):
     _object.download_images()
     print(mock_bing_downloader_download.call_count)
     assert (
-            mock_bing_downloader_download.call_count == 2
+        mock_bing_downloader_download.call_count == 2
     )  # by default, the number of categories to download is 2
     assert mock_logger_info.call_count == 1
     # assert mock_logger_info.call_args_list[0][0][0] == "Downloaded images"
@@ -73,9 +73,7 @@ def test_download_images_s3_2(mocker, _object):
     download_location_address = SETTING.S3_BUCKET_SETTING.DOWNLOAD_LOCATION
 
     mock_download_files.assert_called_once_with(
-        bucket_name,
-        subfolders,
-        download_location_address
+        bucket_name, subfolders, download_location_address
     )
 
 
@@ -120,25 +118,19 @@ def test_property_2(mocker, _object):
 
 
 def test_property_image_dict(mocker, _object):
-    # by defaults there is not data address set, and it would be None
-    _object.dataset_address = Path(__file__).parent / "dummy_address_dataset"
-    # set the object.categories_name
+    # assign a dummy dataset address
+    _object.dataset_address = (Path(__file__).parent / "dummy_dataset").resolve()
 
-    # mock the categories_name
-    # note that the PosixPath is used here from unittest while the mocker is from pytest
-    # I see if you just use PropertyMock, it will work as well.
-    # let's go with pytest mocker
-    mock_property_categories_name = mocker.PropertyMock(
-        return_value=[
-            "pdc_bit",
-            "rollercone_bit"
-        ]
+    mocked_property_categorie_name = mocker.patch(
+        "neural_network_model.process_data.Preprocessing.categorie_name",
+        new_callable=mocker.PropertyMock,
+        return_value=["pdc_bit", "rollercone_bit"],
     )
 
-    # Patch the property with the mock
-    mocker.patch.object(Preprocessing, 'categorie_name', mock_property_categories_name)
+    mock_iterdir = MagicMock(return_value=["image1.jpg", "image2.jpg", "image3.jpg"])
+    mock_sub_catego_data_address = mocker.patch(Preprocessing, "sub_catego_data_address")
 
-    mock_list = MagicMock(list)
-    mocker.patch('builtins.list', return_value=mock_list)
+    # Patching the pathlib.Path class and its iterdir() method
+    with mock.patch("pathlib.Path.iterdir", mock_iterdir):
 
-    assert _object.image_dict == {"pdc_bit": 0, "rollercone_bit": 1}
+        assert _object.image_dict == {["pdc_bit", "rollercone_bit"]}

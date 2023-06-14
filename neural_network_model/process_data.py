@@ -43,6 +43,7 @@ ch.setFormatter(formatter)
 logger.addHandler(ch)
 logging.basicConfig(level=logging.FATAL)
 
+
 class Preprocessing:
     """
     This class is used to train the neural network model.
@@ -57,6 +58,7 @@ class Preprocessing:
         """
         self.dataset_address = kwargs.get("dataset_address", None)
         self.categories_name_folders = None
+        self.sub_catego_data_address = None
 
     def download_images(self, category_list=None, from_s3=False, limit=None) -> None:
         """
@@ -147,11 +149,13 @@ class Preprocessing:
                 logging.error("main_dataset_folder is None")
                 raise ValueError("main_dataset_folder is None")
 
-            data_address = main_dataset_folder / category_folder
+            self.sub_catego_data_address = main_dataset_folder / category_folder
             image_dicts[category_folder] = {}
-            image_dicts[category_folder]["image_list"] = list(data_address.iterdir())
+            image_dicts[category_folder]["image_list"] = list(
+                self.sub_catego_data_address.iterdir()
+            )
             image_dicts[category_folder]["number_of_images"] = len(
-                list(data_address.iterdir())
+                list(self.sub_catego_data_address.iterdir())
             )
 
         return image_dicts
