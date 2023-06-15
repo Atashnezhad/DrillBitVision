@@ -133,15 +133,6 @@ def test_property_image_dict(mocker, _object):
     print(_object.image_dict)
 
 
-class MockSubCategoDataAddress:
-    def __init__(self, *args):
-        pass
-
-    def iterdir(self):
-        # Custom implementation or return values for iterdir()
-        return [Path("file1.txt"), Path("file2.txt")]
-
-
 @mock.patch.object(
     neural_network_model.process_data.Preprocessing,
     "categorie_name",
@@ -154,9 +145,22 @@ def test_property_image_dict_2(mock_iterdir, mock_categorie_property, _object):
 
     mock_categorie_property.return_value = ["pdc_bit", "rollercone_bit"]
 
-    _object.sub_catego_data_address = (
-        MockSubCategoDataAddress()
-    )  # Use the custom MockSubCategoDataAddress object
+    assert _object.image_dict == {
+        "pdc_bit": {"image_list": [], "number_of_images": 0},
+        "rollercone_bit": {"image_list": [], "number_of_images": 0},
+    }
+
+
+@mock.patch.object(
+    neural_network_model.process_data.Preprocessing,
+    "categorie_name",
+    new_callable=mock.PropertyMock,
+)
+@mock.patch.object(Path, "iterdir")
+def test_property_image_dict_3(mock_iterdir, mock_categorie_property, _object):
+    # assign a dummy dataset address
+    _object.dataset_address = (Path(__file__).parent / "dummy_dataset").resolve()
+    mock_categorie_property.return_value = ["pdc_bit", "rollercone_bit"]
 
     assert _object.image_dict == {
         "pdc_bit": {"image_list": [], "number_of_images": 0},
