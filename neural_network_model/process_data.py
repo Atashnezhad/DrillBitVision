@@ -2,31 +2,27 @@ import logging
 import os
 import random
 import shutil
+from pathlib import Path
+from typing import Any, Dict, List
+import warnings
 
 from bing_image_downloader import downloader
 from tensorflow.keras.preprocessing import image
 from tensorflow.keras.preprocessing.image import ImageDataGenerator, img_to_array, load_img
+from tqdm import tqdm
 
 from neural_network_model.model import SETTING
 from neural_network_model.s3 import MyS3
 
-# set seed to get the same random numbers each time
+# Set seed to get the same random numbers each time
 random.seed(SETTING.RANDOM_SEED_SETTING.SEED)
-import random
-
-# import sys
-import warnings
-from pathlib import Path
-from typing import Any, Dict, List
-
-# import shutil
-from tqdm import tqdm
 
 warnings.filterwarnings("ignore")
 
 # Initialize the logger
 logger = logging.getLogger()
 logger.setLevel(logging.FATAL)
+
 # Create console handler
 ch = logging.StreamHandler()
 ch.setLevel(logging.FATAL)
@@ -37,6 +33,7 @@ ch.setFormatter(formatter)
 
 # Add the handler to the logger
 logger.addHandler(ch)
+
 logging.basicConfig(level=logging.FATAL)
 
 

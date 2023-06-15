@@ -1,10 +1,11 @@
+import logging
+import os
 from pathlib import Path
-from neural_network_model.model import SETTING
+
 import boto3
 import paramiko
-import os
-import logging
 
+from neural_network_model.model import SETTING
 
 # Initialize the logger
 logger = logging.getLogger()
