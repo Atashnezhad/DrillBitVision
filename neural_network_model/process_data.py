@@ -5,11 +5,7 @@ import shutil
 
 from bing_image_downloader import downloader
 from tensorflow.keras.preprocessing import image
-from tensorflow.keras.preprocessing.image import (
-    ImageDataGenerator,
-    img_to_array,
-    load_img,
-)
+from tensorflow.keras.preprocessing.image import ImageDataGenerator, img_to_array, load_img
 
 from neural_network_model.model import SETTING
 from neural_network_model.s3 import MyS3

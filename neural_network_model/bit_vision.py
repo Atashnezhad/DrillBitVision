@@ -1,58 +1,33 @@
 import logging
-import random
-
-from keras import Sequential
-from keras.layers import (
-    BatchNormalization,
-    Conv2D,
-    Dense,
-    Dropout,
-    Flatten,
-    MaxPooling2D,
-)
-import warnings
-
-# ignore all warnings
-warnings.filterwarnings("ignore")
-from neural_network_model.model import SETTING
 import math
-
-# set seed to get the same random numbers each time
-random.seed(1)
-
 import os
+import random
 import warnings
 from pathlib import Path
 from typing import Dict, List
 
-# from tensorflow.keras.callbacks import ModelCheckpoint
-from keras.callbacks import ModelCheckpoint
-from tensorflow.keras.applications.resnet50 import decode_predictions, preprocess_input
-
-warnings.filterwarnings("ignore")
-
 import numpy as np
 import tensorflow
-from tensorflow import keras
-
-warnings.filterwarnings("ignore")
-
 import matplotlib.cm as cm
 import matplotlib.pyplot as plt
 import tensorflow as tf
-
-# Display
 from tensorflow import keras
+from tensorflow.keras.applications.resnet50 import decode_predictions, preprocess_input
 from tensorflow.keras.preprocessing import image
-from tensorflow.keras.preprocessing.image import (
-    ImageDataGenerator,
-    img_to_array,
-    load_img,
-)
+from tensorflow.keras.preprocessing.image import ImageDataGenerator, img_to_array, load_img
+from keras import Sequential
+from keras.callbacks import ModelCheckpoint
+from keras.layers import BatchNormalization, Conv2D, Dense, Dropout, Flatten, MaxPooling2D
+
+from neural_network_model.model import SETTING
+
+# Set seed to get the same random numbers each time
+random.seed(1)
 
 # Initialize the logger
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
+
 # Create console handler
 ch = logging.StreamHandler()
 ch.setLevel(logging.INFO)
@@ -63,6 +38,9 @@ ch.setFormatter(formatter)
 
 # Add the handler to the logger
 logger.addHandler(ch)
+
+# Ignore all warnings
+warnings.filterwarnings("ignore")
 
 
 class BitVision:
@@ -582,7 +560,7 @@ class BitVision:
         heatmap = np.uint8((1 / SETTING.DATA_GEN_SETTING.RESCALE) * heatmap)
 
         # Use jet colormap to colorize heatmap
-        jet = cm.get_cmap("jet")
+        jet = cm.get_cmap("plasma")
 
         # Use RGB values of the colormap
         jet_colors = jet(np.arange(256))[:, :3]

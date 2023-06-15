@@ -1,14 +1,15 @@
+import warnings
 from pathlib import Path, PosixPath
 from typing import List, Union
 from unittest import mock
-from unittest.mock import patch, MagicMock, PropertyMock
+from unittest.mock import MagicMock, PropertyMock, patch
+
 import pytest
 
 import neural_network_model
 from neural_network_model.model import SETTING
 from neural_network_model.process_data import Preprocessing
 from neural_network_model.s3 import MyS3
-import warnings
 
 warnings.filterwarnings("ignore", category=DeprecationWarning)
 
@@ -96,7 +97,7 @@ def test_property_1(mocker, _object):
     _object.dataset_address = Path(__file__).parent / ".." / "dataset"
 
     # mock the os listdir function
-    mock_os_listdir = mocker.patch(
+    mocker.patch(
         "neural_network_model.process_data.os.listdir",
         side_effect=side_effect_test_property_1,
     )
@@ -124,7 +125,7 @@ def test_property_image_dict(mocker, _object):
     # assign a dummy dataset address
     _object.dataset_address = (Path(__file__).parent / "dummy_dataset").resolve()
 
-    mocked_property_categorie_name = mocker.patch(
+    mocker.patch(
         "neural_network_model.process_data.Preprocessing.categorie_name",
         new_callable=mocker.PropertyMock,
         return_value=["pdc_bit", "rollercone_bit"],

@@ -1,6 +1,5 @@
-from pathlib import Path
-
 import pytest
+
 from neural_network_model.bit_vision import BitVision
 
 
