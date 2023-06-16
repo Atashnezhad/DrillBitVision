@@ -10,8 +10,6 @@ workflows:
           filters:
             tags:
               only: /^v*/
-            branches:
-              ignore: false
 
 jobs:
   test:
