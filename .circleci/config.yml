@@ -11,7 +11,7 @@ workflows:
             tags:
               only: /^v*/
             branches:
-              ignore: /.*/
+              ignore: false
 
 jobs:
   test:
