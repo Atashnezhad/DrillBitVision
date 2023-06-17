@@ -4,9 +4,9 @@ workflows:
   test_deploy_package:
     jobs:
       - test
-      - package:
-          requires:
-            - test
+#      - package:
+#          requires:
+#            - test
 #          filters:
 #            tags:
 #              only: /^v*/
