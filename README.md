@@ -3,6 +3,7 @@
 [![PyPI version](https://badge.fury.io/py/drillvision.svg)](https://badge.fury.io/py/drillvision)
 [![CircleCI](https://circleci.com/gh/Atashnezhad/DrillBitVision.svg?style=svg)](https://github.com/Atashnezhad/DrillBitVision)
 [![Downloads](https://static.pepy.tech/personalized-badge/drillvision?period=total&units=international_system&left_color=grey&right_color=red&left_text=Downloads)](https://pepy.tech/project/drillvision)
+
 The Drill Bit Classifier is an app that uses a Convolutional Neural Network (CNN) to 
 classify images of drill bits. The app can be used by machinists and engineers to 
 quickly and accurately identify the type of drill bit required for a particular job.
