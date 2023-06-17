@@ -6,6 +6,7 @@ venv/*
 htmlcov
 src/__pycache__
 test/__pycache__
+tests/test_resources
 dataset/
 dataclass_prac/
 .tox/

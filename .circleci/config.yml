@@ -7,9 +7,9 @@ workflows:
       - package:
           requires:
             - test
-          filters:
-            tags:
-              only: /^v*/
+#          filters:
+#            tags:
+#              only: /^v*/
 
 jobs:
   test:
