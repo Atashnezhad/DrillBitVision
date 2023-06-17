@@ -146,7 +146,7 @@ def main():
     obj.predict(
         fig_save_address=fig_save_address,
         model_path=model_save_address / model_name,
-        test_folder_address=test_folder_address,
+        test_folder_address=train_test_val_dir / "test",
     )
 
     # find list of images in the Path(__file__).parent / "dataset_train_test_val" / "test" / "pdc_bit"

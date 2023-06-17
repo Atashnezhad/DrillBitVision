@@ -156,7 +156,7 @@ class Preprocessing:
     def augment_data(
         self,
         number_of_images_tobe_gen: int = SETTING.AUGMENTATION_SETTING.NUMBER_OF_IMAGES_TOBE_GENERATED,
-        augment_data_address: str = SETTING.AUGMENTATION_SETTING.AUGMENTED_IMAGES_DIR_ADDRESS,
+        augment_data_address: Path = SETTING.AUGMENTATION_SETTING.AUGMENTED_IMAGES_DIR_ADDRESS,
     ):
         """
         This function augments the images and save them into the dataset_augmented folder.

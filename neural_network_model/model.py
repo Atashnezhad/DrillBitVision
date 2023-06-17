@@ -37,7 +37,7 @@ class AugmentationSetting(BaseModel):
     BATCH_SIZE: int = 1
 
     # Address to save augmented images
-    AUGMENTED_IMAGES_DIR_ADDRESS: str = (
+    AUGMENTED_IMAGES_DIR_ADDRESS: Path = (
         Path(__file__).parent / ".." / "dataset_augmented"
     )
     AUGMENTED_IMAGES_SAVE_PREFIX: str = "augmented_image"
