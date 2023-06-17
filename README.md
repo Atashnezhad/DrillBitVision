@@ -3,7 +3,7 @@
 [![PyPI version](https://badge.fury.io/py/drillvision.svg)](https://badge.fury.io/py/drillvision)
 [![Github All Releases](https://img.shields.io/github/downloads/Atashnezhad/DrillBitVision/total.svg)]()
 [![CircleCI](https://circleci.com/gh/Atashnezhad/DrillBitVision.svg?style=svg)](https://github.com/Atashnezhad/DrillBitVision)
-
+[![Downloads](https://static.pepy.tech/badge/drillvision)](https://pepy.tech/project/drillvision)
 
 
 The Drill Bit Classifier is an app that uses a Convolutional Neural Network (CNN) to 
