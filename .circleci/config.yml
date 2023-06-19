@@ -28,5 +28,6 @@ jobs:
       - image: cimg/python:3.9
     steps:
       - checkout
+      - when: << pipeline.parameters.tag_pushed >>
 #      - run: make install_requirements
       - run: python --version
