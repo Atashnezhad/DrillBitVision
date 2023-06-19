@@ -1,17 +1,29 @@
 version: 2.1
 
 workflows:
-  test_deploy_package:
+  version: 2
+  build:
     jobs:
-      - test
-#      - package:
-#          requires:
-#            - test
-#          filters:
-#            tags:
-#              only: /^v*/
+      - build:
+          filters:
+            tags:
+              only: /^v.*/
+  test:
+    jobs:
+      - test:
+          filters:
+            branches:
+              ignore: /.*/
 
 jobs:
+  build:
+    docker:
+      - image: cimg/python:3.9
+    steps:
+      - checkout
+      - run: make install_requirements
+      - run: python --version
+
   test:
     docker:
       - image: cimg/python:3.9
@@ -19,14 +31,4 @@ jobs:
       - checkout
       - run: make install_requirements
       - run: python --version
-#      - run: make test
       - run: make test-coverage
-#      - run: tox -e pytest
-
-  package:
-    docker:
-      - image: cimg/python:3.9
-    steps:
-      - checkout
-      - run: make build
-      - run: make upload
