@@ -5,9 +5,9 @@ on:
     branches:
       - main
       - master
-  release:
-    types:
-      - created
+    tags:
+        - "v*.*.*"
+
 
 jobs:
   test:
