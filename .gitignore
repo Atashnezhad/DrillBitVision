@@ -22,3 +22,5 @@ build/
 .tox/
 .vscode
 /tests/test_resources/
+neural_network_model/__pycache__/
+tests/__pycache__/
