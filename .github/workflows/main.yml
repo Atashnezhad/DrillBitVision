@@ -5,14 +5,13 @@ on:
     branches:
       - main
       - master
-    create:
-      tags:
-        - 'v*.*.*'
+  release:
+    types:
+      - created
 
 jobs:
-  build-and-deploy:
+  test:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
@@ -28,8 +27,23 @@ jobs:
       - name: Run tests
         run: make test-coverage
 
+  build-and-deploy:
+    needs: test
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/')
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.9
+
+      - name: Install dependencies
+        run: make install_requirements
+
       - name: Build and deploy package
-        if: success() && startsWith(github.ref, 'refs/tags/')
         env:
           TWINE_USERNAME: ${{ secrets.TWINE_USERNAME }}
           TWINE_PASSWORD: ${{ secrets.TWINE_PASSWORD }}
