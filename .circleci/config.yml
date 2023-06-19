@@ -12,7 +12,6 @@ workflows:
             tags:
               only: /^v.*/
 
-
 jobs:
   test:
     docker:
@@ -22,12 +21,21 @@ jobs:
       - run: make install_requirements
       - run: python --version
       - run: make test-coverage
+      # The following step will only run if the tests pass
+      - run: |
+          if [[ $(make test-coverage) == "PASS" ]]; then
+            echo "Tests passed, building"
+          fi
 
   build:
     docker:
       - image: cimg/python:3.9
     steps:
       - checkout
-      - when: << pipeline.parameters.tag_pushed >>
-#      - run: make install_requirements
+      - run: make install_requirements
       - run: python --version
+      # The following step will only run if the tests pass and the tag is pushed
+      - run: |
+          if [[ $(make test-coverage) == "PASS" ]]; then
+            echo "Tests passed and tag pushed, building"
+          fi
