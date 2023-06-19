@@ -61,14 +61,6 @@ B --> C[Assemble Model] --> D[Compile Model] --> E[Rescale Images\nTrain and Val
 --> F[Fit Model] --> G[Save Model]
 ```
 
-
-[//]: # (# CNN Model Prediction on Test Data)
-
-[//]: # (![alt text]&#40;figures/prediction_pdc_bit.png "Logo Title Text 1"&#41;)
-
-[//]: # (![alt text]&#40;figures/prediction_rollercone_bit.png "Logo Title Text 1"&#41;)
-
-
 ## Grad Cam Heatmap - Rollercone Bit
 ![alt text](figures/grad_cam_rc_1.png "Logo Title Text 1")
 
