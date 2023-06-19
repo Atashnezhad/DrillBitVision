@@ -5,8 +5,9 @@ on:
     branches:
       - main
       - master
-    tags:
-      - 'v*.*.*'
+    create:
+      tags:
+        - 'v*.*.*'
 
 jobs:
   build-and-deploy:
