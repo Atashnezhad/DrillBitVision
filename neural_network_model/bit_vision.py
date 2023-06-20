@@ -257,16 +257,15 @@ class BitVision:
         self.model_history = self.model.fit_generator(
             steps_per_epoch=steps_per_epoch,
             generator=self.train_val_gens["train"],
-            epochs=epochs or SETTING.MODEL_SETTING.EPOCHS,
-            verbose=verbose or SETTING.MODEL_SETTING.FIT_GEN_VERBOSE,
+            epochs=epochs,
+            verbose=verbose,
             validation_data=self.train_val_gens["val"],
-            validation_steps=val_steps or SETTING.MODEL_SETTING.VALIDATION_STEPS,
-            class_weight=class_weight or SETTING.MODEL_SETTING.CLASS_WEIGHT,
+            validation_steps=val_steps,
+            class_weight=class_weight,
             max_queue_size=SETTING.MODEL_SETTING.MAX_QUEUE_SIZE,
-            workers=workers or SETTING.MODEL_SETTING.WORKERS,
-            use_multiprocessing=use_multiprocessing
-            or SETTING.MODEL_SETTING.USE_MULTIPROCESSING,
-            shuffle=shuffle or SETTING.MODEL_SETTING.SHUFFLE,
+            workers=workers,
+            use_multiprocessing=use_multiprocessing,
+            shuffle=shuffle,
             initial_epoch=SETTING.MODEL_SETTING.INITIAL_EPOCH,
             callbacks=[self._check_points(model_save_address, model_name)],
         )
