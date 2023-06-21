@@ -354,7 +354,7 @@ class Preprocessing:
 
 if __name__ == "__main__":
     obj = Preprocessing(dataset_address=Path(__file__).parent / ".." / "dataset")
-    # obj.download_images()
+    obj.download_images()
 
     # or download the data from s3. this is after you have downloaded the data
     # using Process.download_images() and uploaded it to s3
@@ -363,5 +363,5 @@ if __name__ == "__main__":
     # obj.download_images(from_s3=True)
 
     print(obj.image_dict)
-    obj.augment_data(number_of_images_tobe_gen=10)
+    obj.augment_data(number_of_images_tobe_gen=20)
     obj.train_test_split()

@@ -26,3 +26,7 @@ neural_network_model/__pycache__/
 tests/__pycache__/
 /.coverage
 __pycache__/
+/dataset/
+/dataset_augmented/
+/dataset_train_test_val/
+/deep_model/

@@ -16,7 +16,7 @@ class DataAddressSetting(BaseModel):
         Path(__file__).parent
         / ".."
         / "dataset_train_test_val"
-        / "test"  # check the TRAIN_TEST_SPLIT_DIR_NAMES in
+        # / "test"  # check the TRAIN_TEST_SPLIT_DIR_NAMES in
         # the PreprocessingSetting make sure test is in the list
     )
 
@@ -75,7 +75,7 @@ class ModelSetting(BaseModel):
 
     # fit generator
     EPOCHS: int = 3
-    FIT_GEN_VERBOSE: int = 1
+    FIT_GEN_VERBOSE: int = 0
     VALIDATION_STEPS: int = 4
     CLASS_WEIGHT: dict = None
     MAX_QUEUE_SIZE: int = 10
