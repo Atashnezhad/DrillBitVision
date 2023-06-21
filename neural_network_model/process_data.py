@@ -76,7 +76,7 @@ class Preprocessing:
             s3.download_files_from_subfolders(
                 bucket_name, subfolders, download_location_address
             )
-            logger.info("Downloaded images from S3 bucket")
+            logger.debug("Downloaded images from S3 bucket")
             return
 
         if category_list is None:
@@ -91,7 +91,7 @@ class Preprocessing:
                 force_replace=False,
                 timeout=120,
             )
-        logger.info("Downloaded images")
+        logger.debug("Downloaded images")
 
     @property
     def categorie_name(self) -> List[str]:
@@ -104,8 +104,8 @@ class Preprocessing:
         self.categories_name_folders = [
             x for x in self.categories_name_folders if x not in list_to_ignore
         ]
-        logger.info(self.categories_name_folders)
-        logger.info(f"Categories name: {self.categories_name_folders}")
+        logger.debug(self.categories_name_folders)
+        logger.debug(f"Categories name: {self.categories_name_folders}")
 
         # for images in each category dir, check if the image is in list_to_ignore, if yes remove from dir
         for category_folder in self.categories_name_folders:
@@ -119,7 +119,7 @@ class Preprocessing:
             for file in os.listdir(data_address):
                 if file in list_to_ignore:
                     os.remove(data_address / file)
-                    logger.info(f"Removed {file} from {category_folder}")
+                    logger.debug(f"Removed {file} from {category_folder}")
 
         return self.categories_name_folders
 
@@ -202,13 +202,13 @@ class Preprocessing:
                 ]
                 for case in SETTING.IGNORE_SETTING.IGNORE_LIST:
                     if case == img_address.name:
-                        logger.info(f"Found {case} in {image_category} folder")
+                        logger.debug(f"Found {case} in {image_category} folder")
                         continue
                 # check if the image name is in the ignore list, if so continue
                 if img_address in SETTING.IGNORE_SETTING.IGNORE_LIST:
                     continue
 
-                logger.info(f"Image address: {img_address}")
+                logger.debug(f"Image address: {img_address}")
 
                 img = load_img(img_address)
 
@@ -244,7 +244,7 @@ class Preprocessing:
         )
         # get the list of dirs in the AUGMENTED_IMAGES_DIR_ADDRESS
         augmented_images_dir_list = os.listdir(augmented_data_address)
-        logger.info(f"Augmented images dir list: {augmented_images_dir_list}")
+        logger.debug(f"Augmented images dir list: {augmented_images_dir_list}")
 
         # make a new dir for train and test and validation data
         if not os.path.exists(train_test_val_split_dir_address):
@@ -253,7 +253,7 @@ class Preprocessing:
         for dir_name in SETTING.PREPROCESSING_SETTING.TRAIN_TEST_SPLIT_DIR_NAMES:
             if not os.path.exists(train_test_val_split_dir_address / dir_name):
                 os.makedirs(train_test_val_split_dir_address / dir_name)
-        logger.info(f"Created train, test and validation dirs")
+        logger.debug(f"Created train, test and validation dirs")
 
         # under each train, test and validation dir make a dir for each category
         for dir_name in SETTING.PREPROCESSING_SETTING.TRAIN_TEST_SPLIT_DIR_NAMES:
@@ -262,7 +262,7 @@ class Preprocessing:
                     train_test_val_split_dir_address / dir_name / category
                 ):
                     os.makedirs(train_test_val_split_dir_address / dir_name / category)
-        logger.info(f"Created category dirs under train, test and validation dirs")
+        logger.debug(f"Created category dirs under train, test and validation dirs")
 
         self._populated_augmented_images_into_train_test_val_dirs(
             augmented_data_address, train_test_val_split_dir_address
@@ -334,7 +334,7 @@ class Preprocessing:
 
         # check if the dir is empty, if not delete all the files
         if os.listdir(train_test_val_split_dir_address / dest_folder / categ):
-            logger.info(
+            logger.debug(
                 f"Deleting all the files in {train_test_val_split_dir_address / dest_folder / categ}"
             )
             for file in os.listdir(
@@ -347,7 +347,7 @@ class Preprocessing:
                 dataset_augmented_dir_address / categ / image,
                 train_test_val_split_dir_address / dest_folder / categ / image,
             )
-        logger.info(
+        logger.debug(
             f"copied {len(images)} images for category {categ} to {dest_folder}"
         )
 
