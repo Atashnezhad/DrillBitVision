@@ -347,7 +347,7 @@ class Preprocessing:
                 dataset_augmented_dir_address / categ / image,
                 train_test_val_split_dir_address / dest_folder / categ / image,
             )
-        logger.info(
+        logger.debug(
             f"copied {len(images)} images for category {categ} to {dest_folder}"
         )
 
