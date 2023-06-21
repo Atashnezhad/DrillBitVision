@@ -629,5 +629,8 @@ if __name__ == "__main__":
     # obj.train_model(epochs=8)
     # obj.plot_history()
     obj.predict()
-    obj.grad_cam_viz(gradcam_fig_name="test.png",
-                     print_layer_names=True)
+    obj.grad_cam_viz(
+        gradcam_fig_name="test.png",
+        print_layer_names=True,
+        test_folder_dir=Path(__file__).parent / ".." / "dataset_train_test_val" / "test",
+    )
