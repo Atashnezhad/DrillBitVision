@@ -14,10 +14,21 @@ import tensorflow as tf
 from tensorflow import keras
 from tensorflow.keras.applications.resnet50 import decode_predictions, preprocess_input
 from tensorflow.keras.preprocessing import image
-from tensorflow.keras.preprocessing.image import ImageDataGenerator, img_to_array, load_img
+from tensorflow.keras.preprocessing.image import (
+    ImageDataGenerator,
+    img_to_array,
+    load_img,
+)
 from keras import Sequential
 from keras.callbacks import ModelCheckpoint
-from keras.layers import BatchNormalization, Conv2D, Dense, Dropout, Flatten, MaxPooling2D
+from keras.layers import (
+    BatchNormalization,
+    Conv2D,
+    Dense,
+    Dropout,
+    Flatten,
+    MaxPooling2D,
+)
 
 from neural_network_model.model import SETTING
 
@@ -356,8 +367,8 @@ class BitVision:
             number_of_test_to_pred = SETTING.MODEL_SETTING.NUMBER_OF_TEST_TO_PRED
             if test_folder_dir:
                 train_test_val_dir = (
-                        test_folder_dir
-                        or SETTING.PREPROCESSING_SETTING.TRAIN_TEST_VAL_SPLIT_DIR_ADDRESS
+                    test_folder_dir
+                    or SETTING.PREPROCESSING_SETTING.TRAIN_TEST_VAL_SPLIT_DIR_ADDRESS
                 )
             else:
                 train_test_val_dir = (
@@ -474,7 +485,9 @@ class BitVision:
         preprocess_input = keras.applications.xception.preprocess_input
         # decode_predictions = keras.applications.xception.decode_predictions
 
-        conv_layer_name_tobe_used = kwargs.get("layer_name", SETTING.GRAD_CAM_SETTING.LAST_CONV_LAYER_NAME)
+        conv_layer_name_tobe_used = kwargs.get(
+            "layer_name", SETTING.GRAD_CAM_SETTING.LAST_CONV_LAYER_NAME
+        )
 
         # The local path to our target image
         img_path = img_to_be_applied_path
@@ -632,5 +645,8 @@ if __name__ == "__main__":
     obj.grad_cam_viz(
         gradcam_fig_name="test.png",
         print_layer_names=True,
-        test_folder_dir=Path(__file__).parent / ".." / "dataset_train_test_val" / "test",
+        test_folder_dir=Path(__file__).parent
+        / ".."
+        / "dataset_train_test_val"
+        / "test",
     )
