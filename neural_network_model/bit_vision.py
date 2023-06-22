@@ -281,10 +281,10 @@ class BitVision:
             callbacks=[self._check_points(model_save_address, model_name)],
         )
 
-        self.model.save(
-            model_save_address / model_name
-            or SETTING.MODEL_SETTING.MODEL_PATH / SETTING.MODEL_SETTING.MODEL_NAME
-        )
+        # self.model.save(
+        #     model_save_address / model_name
+        #     or SETTING.MODEL_SETTING.MODEL_PATH / SETTING.MODEL_SETTING.MODEL_NAME
+        # )
         logger.info(f"Model saved to {SETTING.MODEL_SETTING.MODEL_PATH}")
 
     def plot_history(self, *args, **kwargs):
@@ -351,11 +351,11 @@ class BitVision:
         if model_path is None:
             logger.info(f"model_path from SETTING is was used - {model_path}")
 
-        test_folder_dir = kwargs.get(
-            "test_folder_dir", SETTING.DATA_ADDRESS_SETTING.TEST_DIR_ADDRESS
-        )
-        if test_folder_dir is None:
-            raise ValueError("test_folder_address is None")
+        # test_folder_dir = kwargs.get(
+        #     "test_folder_dir", SETTING.DATA_ADDRESS_SETTING.TEST_DIR_ADDRESS
+        # )
+        # if test_folder_dir is None:
+        #     raise ValueError("test_folder_address is None")
 
         model = keras.models.load_model(model_path)
         logger.info(f"Model loaded from {model_path}")
@@ -365,20 +365,20 @@ class BitVision:
             number_of_cols = SETTING.FIGURE_SETTING.NUM_COLS_IN_PRED_MODEL
             number_of_rows = SETTING.FIGURE_SETTING.NUM_ROWS_IN_PRED_MODEL
             number_of_test_to_pred = SETTING.MODEL_SETTING.NUMBER_OF_TEST_TO_PRED
-            if test_folder_dir:
-                train_test_val_dir = (
-                    test_folder_dir
-                    or SETTING.PREPROCESSING_SETTING.TRAIN_TEST_VAL_SPLIT_DIR_ADDRESS
-                )
-            else:
-                train_test_val_dir = (
-                    self.train_test_val_dir
-                    or SETTING.PREPROCESSING_SETTING.TRAIN_TEST_VAL_SPLIT_DIR_ADDRESS
-                )
+            # if test_folder_dir:
+            #     train_test_val_dir = (
+            #         test_folder_dir
+            #         or SETTING.PREPROCESSING_SETTING.TRAIN_TEST_VAL_SPLIT_DIR_ADDRESS
+            #     )
+            # else:
+            #     train_test_val_dir = (
+            #         self.train_test_val_dir
+            #         or SETTING.PREPROCESSING_SETTING.TRAIN_TEST_VAL_SPLIT_DIR_ADDRESS
+            #     )
 
             # get the list of test images
             test_images_list = os.listdir(
-                train_test_val_dir
+                self.train_test_val_dir
                 / SETTING.PREPROCESSING_SETTING.TRAIN_TEST_SPLIT_DIR_NAMES[1]
                 / category
             )
@@ -387,7 +387,7 @@ class BitVision:
 
             for i, img in enumerate(test_images_list[0:number_of_test_to_pred]):
                 path_to_img = (
-                    train_test_val_dir
+                    self.train_test_val_dir
                     / SETTING.PREPROCESSING_SETTING.TRAIN_TEST_SPLIT_DIR_NAMES[1]
                     / category
                     / str(img)
@@ -432,7 +432,7 @@ class BitVision:
 
         datagen = image.ImageDataGenerator(SETTING.DATA_GEN_SETTING.RESCALE)
         DoubleCheck_generator = datagen.flow_from_directory(
-            directory=test_folder_dir / "test",
+            directory=self.train_test_val_dir / "test",
             target_size=SETTING.FLOW_FROM_DIRECTORY_SETTING.TARGET_SIZE,
             color_mode=SETTING.FLOW_FROM_DIRECTORY_SETTING.COLOR_MODE,
             classes=None,
