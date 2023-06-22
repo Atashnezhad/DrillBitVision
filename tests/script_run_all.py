@@ -163,5 +163,5 @@ def main():
     )
 
 
-def test_run_whole():
+if __name__ == "__main__":
     main()

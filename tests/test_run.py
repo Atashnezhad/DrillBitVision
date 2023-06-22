@@ -16,9 +16,9 @@ from neural_network_model.bit_vision import BitVision
 from neural_network_model.process_data import Preprocessing
 
 
-@pytest.mark.skip
+@pytest.mark.skip(reason="no way of currently testing this")
 def test_run():
-    # check if a dir name test_resouces exists if not create one
+    # check if a dir name test_resources exists if not create one
     if not os.path.exists(Path(__file__).parent / "test_resources"):
         os.mkdir(Path(__file__).parent / "test_resources")
 
