@@ -1,7 +1,14 @@
 import argparse
 import os
 from pathlib import Path
+import sys
 
+# Get the parent directory of the current file (assuming the script is in the test folder)
+current_dir = Path(__file__).resolve().parent
+# Get the parent directory of the current directory (assuming the test folder is one level below the main folder)
+main_dir = current_dir.parent
+# Add the main directory to the Python path
+sys.path.append(str(main_dir))
 # skip this test TODO: fix this test later
 import pytest
 
@@ -9,9 +16,9 @@ from neural_network_model.bit_vision import BitVision
 from neural_network_model.process_data import Preprocessing
 
 
-@pytest.mark.skip
+@pytest.mark.skip(reason="no way of currently testing this")
 def test_run():
-    # check if a dir name test_resouces exists if not create one
+    # check if a dir name test_resources exists if not create one
     if not os.path.exists(Path(__file__).parent / "test_resources"):
         os.mkdir(Path(__file__).parent / "test_resources")
 

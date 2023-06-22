@@ -14,10 +14,21 @@ import tensorflow as tf
 from tensorflow import keras
 from tensorflow.keras.applications.resnet50 import decode_predictions, preprocess_input
 from tensorflow.keras.preprocessing import image
-from tensorflow.keras.preprocessing.image import ImageDataGenerator, img_to_array, load_img
+from tensorflow.keras.preprocessing.image import (
+    ImageDataGenerator,
+    img_to_array,
+    load_img,
+)
 from keras import Sequential
 from keras.callbacks import ModelCheckpoint
-from keras.layers import BatchNormalization, Conv2D, Dense, Dropout, Flatten, MaxPooling2D
+from keras.layers import (
+    BatchNormalization,
+    Conv2D,
+    Dense,
+    Dropout,
+    Flatten,
+    MaxPooling2D,
+)
 
 from neural_network_model.model import SETTING
 
@@ -321,7 +332,8 @@ class BitVision:
     def predict(self, *args, **kwargs):
         """
         This function is used to predict the test data.
-        :param args:
+        :param args: test_folder_dir needs to have a suborder called test and there needs to have categories folders
+        same structure as train_test_val directory
         :param kwargs: fig_save_address: the address of the folder to save the figure,
         model_path: the path of the model to be used for prediction
         :return:
@@ -339,10 +351,10 @@ class BitVision:
         if model_path is None:
             logger.info(f"model_path from SETTING is was used - {model_path}")
 
-        test_folder_address = kwargs.get(
-            "test_folder_address", SETTING.DATA_ADDRESS_SETTING.TEST_DIR_ADDRESS
+        test_folder_dir = kwargs.get(
+            "test_folder_dir", SETTING.DATA_ADDRESS_SETTING.TEST_DIR_ADDRESS
         )
-        if test_folder_address is None:
+        if test_folder_dir is None:
             raise ValueError("test_folder_address is None")
 
         model = keras.models.load_model(model_path)
@@ -353,10 +365,17 @@ class BitVision:
             number_of_cols = SETTING.FIGURE_SETTING.NUM_COLS_IN_PRED_MODEL
             number_of_rows = SETTING.FIGURE_SETTING.NUM_ROWS_IN_PRED_MODEL
             number_of_test_to_pred = SETTING.MODEL_SETTING.NUMBER_OF_TEST_TO_PRED
-            train_test_val_dir = (
-                self.train_test_val_dir
-                or SETTING.PREPROCESSING_SETTING.TRAIN_TEST_VAL_SPLIT_DIR_ADDRESS
-            )
+            if test_folder_dir:
+                train_test_val_dir = (
+                    test_folder_dir
+                    or SETTING.PREPROCESSING_SETTING.TRAIN_TEST_VAL_SPLIT_DIR_ADDRESS
+                )
+            else:
+                train_test_val_dir = (
+                    self.train_test_val_dir
+                    or SETTING.PREPROCESSING_SETTING.TRAIN_TEST_VAL_SPLIT_DIR_ADDRESS
+                )
+
             # get the list of test images
             test_images_list = os.listdir(
                 train_test_val_dir
@@ -413,7 +432,7 @@ class BitVision:
 
         datagen = image.ImageDataGenerator(SETTING.DATA_GEN_SETTING.RESCALE)
         DoubleCheck_generator = datagen.flow_from_directory(
-            directory=test_folder_address,
+            directory=test_folder_dir / "test",
             target_size=SETTING.FLOW_FROM_DIRECTORY_SETTING.TARGET_SIZE,
             color_mode=SETTING.FLOW_FROM_DIRECTORY_SETTING.COLOR_MODE,
             classes=None,
@@ -448,6 +467,8 @@ class BitVision:
             "img_to_be_applied_path", SETTING.GRAD_CAM_SETTING.IMG_PATH
         )
 
+        print_layer_names = kwargs.get("print_layer_names", False)
+
         fig_address = fig_to_save_address / gradcam_fig_name
         if model_path is None:
             raise ValueError("model_path is None")
@@ -455,15 +476,18 @@ class BitVision:
         model = keras.models.load_model(model_path)
         logger.info(f"Model loaded from {model_path}")
 
-        # print the model layers
-        for idx in range(len(model.layers)):
-            print(model.get_layer(index=idx).name)
+        if print_layer_names:
+            # print the model layers
+            for idx in range(len(model.layers)):
+                print(model.get_layer(index=idx).name)
 
         # model_builder = keras.applications.xception.Xception
         preprocess_input = keras.applications.xception.preprocess_input
         # decode_predictions = keras.applications.xception.decode_predictions
 
-        last_conv_layer_name = SETTING.GRAD_CAM_SETTING.LAST_CONV_LAYER_NAME
+        conv_layer_name_tobe_used = kwargs.get(
+            "layer_name", SETTING.GRAD_CAM_SETTING.LAST_CONV_LAYER_NAME
+        )
 
         # The local path to our target image
         img_path = img_to_be_applied_path
@@ -490,7 +514,7 @@ class BitVision:
         # print("Predicted:", decode_predictions(preds, top=1)[0])
         # Generate class activation heatmap
         heatmap = BitVision._make_gradcam_heatmap(
-            img_array, model, last_conv_layer_name
+            img_array, model, conv_layer_name_tobe_used
         )
 
         # Display heatmap
@@ -611,11 +635,18 @@ if __name__ == "__main__":
     obj = BitVision(
         train_test_val_dir=Path(__file__).parent / ".." / "dataset_train_test_val"
     )
-    print(obj.categories)
-    print(obj.data_details)
-    obj.plot_image_category()
-    obj.compile_model()
-    obj.train_model()
-    obj.plot_history()
+    # print(obj.categories)
+    # print(obj.data_details)
+    # obj.plot_image_category()
+    # obj.compile_model()
+    # obj.train_model(epochs=8)
+    # obj.plot_history()
     obj.predict()
-    obj.grad_cam_viz(gradcam_fig_name="test.png")
+    obj.grad_cam_viz(
+        gradcam_fig_name="test.png",
+        print_layer_names=True,
+        test_folder_dir=Path(__file__).parent
+        / ".."
+        / "dataset_train_test_val"
+        / "test",
+    )

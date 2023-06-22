@@ -5,8 +5,16 @@ on:
     branches:
       - main
       - master
+      - '*'
+      - 'feature/*'
     tags:
         - "v*.*.*"
+  pull_request:
+    types:
+      - closed
+    branches:
+      - master
+      - main
 
 
 jobs:
