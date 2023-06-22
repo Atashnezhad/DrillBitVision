@@ -1,4 +1,4 @@
-name: Python Package Deploy
+name: Python Package CI/CD
 
 on:
   push:
