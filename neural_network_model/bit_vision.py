@@ -236,7 +236,7 @@ class BitVision:
         return total
 
     def train_model(
-        self, model_save_address: str = SETTING.MODEL_SETTING.MODEL_PATH, **kwargs
+        self, model_save_address: Path = SETTING.MODEL_SETTING.MODEL_PATH, **kwargs
     ) -> None:
         """
         This function is used to train the model.
@@ -603,7 +603,7 @@ class BitVision:
 
     @staticmethod
     def return_best_model_name(
-        directory: str = SETTING.MODEL_SETTING.MODEL_PATH,
+        directory: Path = SETTING.MODEL_SETTING.MODEL_PATH,
     ) -> str:
         """
         Return the best model name
