@@ -30,3 +30,5 @@ __pycache__/
 /dataset_augmented/
 /dataset_train_test_val/
 /deep_model/
+/tests/augmented_dataset/
+/tests/dataset/
