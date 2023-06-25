@@ -65,6 +65,7 @@ class BitVision:
             SETTING.PREPROCESSING_SETTING.TRAIN_TEST_VAL_SPLIT_DIR_ADDRESS,
         )
         self.model: tensorflow.keras.models.Sequential = None
+        # by default the following model is assembled
         self.assemble_deep_net_model()
         self.train_val_gens = {}
         self.model_history = None
@@ -122,11 +123,13 @@ class BitVision:
         """
         This function is used to assemble the deep net model.
         """
+        image_size = SETTING.FLOW_FROM_DIRECTORY_SETTING.IMAGE_SIZE
+
         model = Sequential()
         activ = "relu"
 
         model.add(
-            Conv2D(32, kernel_size=(3, 3), activation=activ, input_shape=(224, 224, 3))
+            Conv2D(32, kernel_size=(3, 3), activation=activ, input_shape=(image_size, image_size, 3))
         )
         model.add(BatchNormalization())
 
@@ -146,6 +149,48 @@ class BitVision:
         model.add(Dense(len(self.categories), activation="softmax"))
         self.model = model
         return self.model
+
+    def assemble_deep_net_model_2(self) -> tensorflow.keras.models.Sequential:
+        """
+        This function is used to assemble the deep net model.
+        """
+
+        image_size = SETTING.FLOW_FROM_DIRECTORY_SETTING.IMAGE_SIZE
+
+        kernel_size = (3, 3)
+        pool_size = (2, 2)
+        first_filters = 32
+        second_filters = 64
+        third_filters = 128
+
+        dropout_conv = 0.3
+        dropout_dense = 0.3
+
+        model = Sequential()
+        model.add(Conv2D(first_filters, kernel_size, activation='relu',
+                         input_shape=(image_size, image_size, 3)))
+        model.add(Conv2D(first_filters, kernel_size, activation='relu'))
+        model.add((MaxPooling2D(pool_size=pool_size)))
+        model.add(Dropout(dropout_conv))
+
+        model.add(Conv2D(second_filters, kernel_size, activation='relu'))
+        model.add(Conv2D(second_filters, kernel_size, activation='relu'))
+        model.add((MaxPooling2D(pool_size=pool_size)))
+        model.add(Dropout(dropout_conv))
+
+        model.add(Conv2D(third_filters, kernel_size, activation='relu'))
+        model.add(Conv2D(third_filters, kernel_size, activation='relu'))
+        model.add((MaxPooling2D(pool_size=pool_size)))
+        model.add(Dropout(dropout_conv))
+
+        model.add(Flatten())
+        model.add(Dense(256, activation="relu"))
+        model.add(Dropout(dropout_dense))
+        model.add(Dense(len(self.categories), activation="softmax"))
+
+        self.model = model
+        return self.model
+
 
     def compile_model(self, *args, **kwargs) -> None:
         """
@@ -580,7 +625,7 @@ class BitVision:
         heatmap = np.uint8((1 / SETTING.DATA_GEN_SETTING.RESCALE) * heatmap)
 
         # Use jet colormap to colorize heatmap
-        jet = cm.get_cmap("plasma")
+        jet = cm.get_cmap("hot")
 
         # Use RGB values of the colormap
         jet_colors = jet(np.arange(256))[:, :3]
@@ -632,18 +677,20 @@ if __name__ == "__main__":
     obj = BitVision(
         train_test_val_dir=Path(__file__).parent / ".." / "dataset_train_test_val"
     )
-    print(obj.categories)
-    print(obj.data_details)
-    obj.plot_image_category(nrows=3, ncols=3)
+    # print(obj.categories)
+    # print(obj.data_details)
+    # obj.plot_image_category(nrows=3, ncols=3)
+    # obj.assemble_deep_net_model_2()
     # obj.compile_model()
-    # obj.train_model(epochs=8)
+    # obj.train_model(epochs=5)
     # obj.plot_history()
     # obj.predict(num_rows=2, num_cols=2, figsize=(4, 10))
-    # obj.grad_cam_viz(
-    #     gradcam_fig_name="test.png",
-    #     print_layer_names=True,
-    #     test_folder_dir=Path(__file__).parent
-    #     / ".."
-    #     / "dataset_train_test_val"
-    #     / "test",
-    # )
+    obj.grad_cam_viz(
+        gradcam_fig_name="test.png",
+        print_layer_names=True,
+        test_folder_dir=Path(__file__).parent
+        / ".."
+        / "dataset_train_test_val"
+        / "test",
+        layer_name="conv2d_5",
+    )

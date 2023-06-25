@@ -112,6 +112,7 @@ class RandomSeedSetting(BaseModel):
 
 
 class FlowFromDirectorySetting(BaseModel):
+    IMAGE_SIZE: int = 224
     TARGET_SIZE: tuple = (224, 224)
     COLOR_MODE: str = "rgb"
     CLASS_MODE: str = "categorical"
