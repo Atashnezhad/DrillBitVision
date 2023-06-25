@@ -8,7 +8,11 @@ from typing import Any, Dict, List
 
 from bing_image_downloader import downloader
 from tensorflow.keras.preprocessing import image
-from tensorflow.keras.preprocessing.image import ImageDataGenerator, img_to_array, load_img
+from tensorflow.keras.preprocessing.image import (
+    ImageDataGenerator,
+    img_to_array,
+    load_img,
+)
 from tqdm import tqdm
 
 from neural_network_model.model import SETTING
@@ -289,8 +293,8 @@ class Preprocessing:
 
             # Create three new lists containing 70%, 20%, and 10% of the original list
             train_list = selected_items[:num_train]
-            test_list = selected_items[num_train: num_train + num_test]
-            val_list = selected_items[num_train + num_test:]
+            test_list = selected_items[num_train : num_train + num_test]  # noqa: E203
+            val_list = selected_items[num_train + num_test :]  # noqa: E203
             # copy the images from the dataset_augmented pdc_bit folder to the train, test and validation folders
             self._copy_images(
                 train_list,

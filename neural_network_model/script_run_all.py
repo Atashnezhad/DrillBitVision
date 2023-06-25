@@ -5,7 +5,6 @@ from neural_network_model.process_data import Preprocessing
 
 
 def main():
-
     parent_dir = Path(__file__).resolve().parent.parent
     # download the images
     obj = Preprocessing(dataset_address=parent_dir / "dataset")
@@ -17,7 +16,7 @@ def main():
     )
     obj.train_test_split(
         augmented_data_address=parent_dir / "dataset_augmented",
-        train_test_val_split_dir_address=parent_dir / "dataset_train_test_val"
+        train_test_val_split_dir_address=parent_dir / "dataset_train_test_val",
     )
 
     obj = BitVision(train_test_val_dir=parent_dir / "dataset_train_test_val")
@@ -28,9 +27,7 @@ def main():
     #
     model_name = "model_epoch_{epoch:02d}_loss_{loss:.2f}_acc_{accuracy:.2f}_val_acc_{val_accuracy:.2f}_.h5"
     obj.train_model(
-        epochs=8,
-        model_save_address=parent_dir / "deep_model",
-        model_name=model_name
+        epochs=8, model_save_address=parent_dir / "deep_model", model_name=model_name
     )
     obj.plot_history(fig_folder_address=parent_dir / "figures")
 
@@ -39,7 +36,7 @@ def main():
     obj.predict(
         fig_save_address=parent_dir / "figures",
         model_path=parent_dir / "deep_model" / best_model,
-        test_folder_address=parent_dir / "dataset_train_test_val" / "test"
+        test_folder_address=parent_dir / "dataset_train_test_val" / "test",
     )
 
     # find list of images in the parent_dir / "dataset_train_test_val" / "test" / "pdc_bit"
@@ -49,9 +46,12 @@ def main():
     obj.grad_cam_viz(
         model_path=parent_dir / "deep_model" / best_model,
         fig_to_save_address=parent_dir / "figures",
-        img_to_be_applied_path=parent_dir / "dataset_train_test_val" / "test" / "pdc_bit" / list_of_images[
-            0],
-        output_gradcam_fig_name="test.png"
+        img_to_be_applied_path=parent_dir
+        / "dataset_train_test_val"
+        / "test"
+        / "pdc_bit"
+        / list_of_images[0],
+        output_gradcam_fig_name="test.png",
     )
 
 

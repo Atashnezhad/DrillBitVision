@@ -11,6 +11,8 @@ sys.path.append(str(main_dir))
 
 
 def test_run_all():
-    script_path = Path(__file__).parent / ".." / "neural_network_model" / "script_run_all.py"
-    os.system(f'python {script_path}')
+    script_path = (
+        Path(__file__).parent / ".." / "neural_network_model" / "script_run_all.py"
+    )
+    os.system(f"python {script_path}")
     assert True
