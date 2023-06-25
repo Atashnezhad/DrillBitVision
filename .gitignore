@@ -32,3 +32,4 @@ __pycache__/
 /deep_model/
 /tests/augmented_dataset/
 /tests/dataset/
+/s3_dataset/
