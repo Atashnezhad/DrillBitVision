@@ -354,6 +354,10 @@ class Preprocessing:
             f"copied {len(images)} images for category {categ} to {dest_folder}"
         )
 
+    @staticmethod
+    def print_deepnet_project_metadata():
+        SETTING.load_settings_from_json()
+
 
 if __name__ == "__main__":
     obj = Preprocessing(dataset_address=Path(__file__).parent / ".." / "dataset")
@@ -366,5 +370,6 @@ if __name__ == "__main__":
     # obj.download_images(from_s3=True)
 
     print(obj.image_dict)
-    obj.augment_data(number_of_images_tobe_gen=20)
+    obj.augment_data(number_of_images_tobe_gen=10)
     obj.train_test_split()
+    obj.print_deepnet_project_metadata()

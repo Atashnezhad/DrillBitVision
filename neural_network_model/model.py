@@ -1,10 +1,13 @@
+import json
 import os
 from pathlib import Path
+from pprint import pprint
 from typing import List
 
 from dotenv import load_dotenv
 from pydantic import BaseModel
 from tensorflow import keras
+from dotenv import load_dotenv
 
 # Load environment variables from .env file
 load_dotenv()
@@ -136,7 +139,7 @@ class GradCamSetting(BaseModel):
 
 
 class S3BucketSetting(BaseModel):
-    BUCKET_NAME: str = "bitimages123"
+    BUCKET_NAME: str = os.getenv("BUCKET_NAME")
     PARENT_FOLDER_NAME: str = "dataset"
     SUBFOLDER_NAME: list = ["dataset/pdc_bit", "dataset/rollercone_bit"]
     DOWNLOAD_LOCATION: str = (Path(__file__).parent / ".." / "s3_dataset").resolve()
@@ -192,9 +195,32 @@ class Setting(BaseModel):
     EC2_SETTING: Ec2Setting = Ec2Setting()
     GITHUB_SETTING: GitHubSetting = GitHubSetting()
 
+    @staticmethod
+    def save_settings_to_json(filename: str = "settings.json"):
+        def convert_paths(obj):
+            if isinstance(obj, (Path, tuple)):
+                return str(obj)
+            return obj
+
+        with open(filename, "w") as f:
+            json.dump(SETTING.dict(), f, indent=4, default=convert_paths)
+
+    @staticmethod
+    def load_settings_from_json(filename: str = "settings.json") -> json:
+        with open(filename, "r") as f:
+            data = json.load(f)
+        pprint(Setting(**data))
+        return Setting(**data)
+
 
 SETTING = Setting()
 
 
 if __name__ == "__main__":
-    print(SETTING.EC2_SETTING.SECURITY_GROUP_ID)
+    # print(SETTING.EC2_SETTING.SECURITY_GROUP_ID)
+    # Save the settings to a JSON file
+    # SETTING.save_settings_to_json("settings.json")
+    SETTING.load_settings_from_json("settings.json")
+
+    # Load the settings from a JSON file
+    # loaded_settings = load_settings_from_json("settings.json")

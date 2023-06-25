@@ -129,7 +129,12 @@ class BitVision:
         activ = "relu"
 
         model.add(
-            Conv2D(32, kernel_size=(3, 3), activation=activ, input_shape=(image_size, image_size, 3))
+            Conv2D(
+                32,
+                kernel_size=(3, 3),
+                activation=activ,
+                input_shape=(image_size, image_size, 3),
+            )
         )
         model.add(BatchNormalization())
 
@@ -167,19 +172,25 @@ class BitVision:
         dropout_dense = 0.3
 
         model = Sequential()
-        model.add(Conv2D(first_filters, kernel_size, activation='relu',
-                         input_shape=(image_size, image_size, 3)))
-        model.add(Conv2D(first_filters, kernel_size, activation='relu'))
+        model.add(
+            Conv2D(
+                first_filters,
+                kernel_size,
+                activation="relu",
+                input_shape=(image_size, image_size, 3),
+            )
+        )
+        model.add(Conv2D(first_filters, kernel_size, activation="relu"))
         model.add((MaxPooling2D(pool_size=pool_size)))
         model.add(Dropout(dropout_conv))
 
-        model.add(Conv2D(second_filters, kernel_size, activation='relu'))
-        model.add(Conv2D(second_filters, kernel_size, activation='relu'))
+        model.add(Conv2D(second_filters, kernel_size, activation="relu"))
+        model.add(Conv2D(second_filters, kernel_size, activation="relu"))
         model.add((MaxPooling2D(pool_size=pool_size)))
         model.add(Dropout(dropout_conv))
 
-        model.add(Conv2D(third_filters, kernel_size, activation='relu'))
-        model.add(Conv2D(third_filters, kernel_size, activation='relu'))
+        model.add(Conv2D(third_filters, kernel_size, activation="relu"))
+        model.add(Conv2D(third_filters, kernel_size, activation="relu"))
         model.add((MaxPooling2D(pool_size=pool_size)))
         model.add(Dropout(dropout_conv))
 
@@ -190,7 +201,6 @@ class BitVision:
 
         self.model = model
         return self.model
-
 
     def compile_model(self, *args, **kwargs) -> None:
         """
@@ -216,7 +226,9 @@ class BitVision:
         fig, axs = plt.subplots(nrows, ncols, figsize=fig_size)
 
         if nrows == 1 and ncols > 1:
-            axs = axs.reshape((ncols,))  # Reshape axs to handle 1 row and multiple columns
+            axs = axs.reshape(
+                (ncols,)
+            )  # Reshape axs to handle 1 row and multiple columns
 
         for i, category in enumerate(self.categories):
             category_path = self.train_test_val_dir / subdir / category
@@ -409,9 +421,9 @@ class BitVision:
         default_figsize = SETTING.FIGURE_SETTING.FIGURE_SIZE_IN_PRED_MODEL
 
         # Extract details from kwargs or use default settings
-        num_rows = kwargs.get('num_rows', default_num_rows)
-        num_cols = kwargs.get('num_cols', default_num_cols)
-        figure_size = kwargs.get('figure_size', default_figsize)
+        num_rows = kwargs.get("num_rows", default_num_rows)
+        num_cols = kwargs.get("num_cols", default_num_cols)
+        figure_size = kwargs.get("figure_size", default_figsize)
 
         for category in self.categories:
             plt.figure(figsize=figure_size)
@@ -671,6 +683,10 @@ class BitVision:
                     best_model = filename
 
         return best_model
+
+    @staticmethod
+    def print_deepnet_project_metadata():
+        SETTING.load_settings_from_json()
 
 
 if __name__ == "__main__":
