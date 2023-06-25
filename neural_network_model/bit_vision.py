@@ -49,6 +49,7 @@ class BitVision:
     """
 
     def __init__(self, *args, **kwargs):
+        self.layer_names: Dict[str, List] = {}
         self.train_test_val_dir: str = kwargs.get(
             "train_test_val_dir",
             SETTING.PREPROCESSING_SETTING.TRAIN_TEST_VAL_SPLIT_DIR_ADDRESS,
@@ -204,6 +205,24 @@ class BitVision:
 
         self.model.summary()
 
+        # Initialize the dictionary
+        layer_names = {
+            'conv_layer': [],
+            'other_layer': []
+        }
+
+        # Iterate over the model layers and store the names
+        for idx in range(len(self.model.layers)):
+            layer_name = self.model.get_layer(index=idx).name
+
+            # Check if the layer name contains 'conv' substring
+            if 'conv' in layer_name.lower():
+                layer_names['conv_layer'].append(layer_name)
+            else:
+                layer_names['other_layer'].append(layer_name)
+
+        self.layer_names = layer_names
+
     def plot_image_category(self, *args, **kwargs) -> None:
         nrows = kwargs.get("nrows", 1)
         number_of_categories = len(self.categories)
@@ -278,6 +297,7 @@ class BitVision:
             save_best_only=SETTING.MODEL_SETTING.SAVE_BEST_ONLY,
             mode=SETTING.MODEL_SETTING.MODE,
             period=SETTING.MODEL_SETTING.PERIOD,
+            metrics=SETTING.MODEL_SETTING.METRICS,
         )
         return check_point
 
@@ -331,10 +351,6 @@ class BitVision:
             callbacks=[self._check_points(model_save_address, model_name)],
         )
 
-        # self.model.save(
-        #     model_save_address / model_name
-        #     or SETTING.MODEL_SETTING.MODEL_PATH / SETTING.MODEL_SETTING.MODEL_NAME
-        # )
         logger.info(f"Model saved to {SETTING.MODEL_SETTING.MODEL_PATH}")
 
     def plot_history(self, *args, **kwargs):
@@ -562,6 +578,8 @@ class BitVision:
 
         # Display heatmap
         plt.matshow(heatmap)
+        # add the title layer name
+        plt.title(conv_layer_name_tobe_used)
         plt.show()
         BitVision._save_and_display_gradcam(img_path, heatmap, cam_path=fig_address)
 
@@ -682,20 +700,23 @@ if __name__ == "__main__":
     obj = BitVision(
         train_test_val_dir=Path(__file__).parent / ".." / "dataset_train_test_val"
     )
-    # print(obj.categories)
-    # print(obj.data_details)
-    # obj.plot_image_category(nrows=3, ncols=3)
-    # obj.assemble_deep_net_model_2()
-    # obj.compile_model()
-    # obj.train_model(epochs=5)
-    # obj.plot_history()
-    # obj.predict(num_rows=2, num_cols=2, figsize=(4, 10))
-    obj.grad_cam_viz(
-        gradcam_fig_name="test.png",
-        print_layer_names=True,
-        test_folder_dir=Path(__file__).parent
-        / ".."
-        / "dataset_train_test_val"
-        / "test",
-        layer_name="conv2d_5",
-    )
+    print(obj.categories)
+    print(obj.data_details)
+    obj.plot_image_category(nrows=3, ncols=3)
+    obj.assemble_deep_net_model_2()
+    obj.compile_model()
+    obj.train_model(epochs=5)
+    obj.plot_history()
+    obj.predict(num_rows=2, num_cols=2, figsize=(4, 10))
+    print(obj.layer_names)
+
+    for conv_layer in obj.layer_names["conv_layer"]:
+        obj.grad_cam_viz(
+            gradcam_fig_name="test.png",
+            print_layer_names=False,
+            test_folder_dir=Path(__file__).parent
+            / ".."
+            / "dataset_train_test_val"
+            / "test",
+            layer_name=conv_layer,
+        )

@@ -4,6 +4,7 @@ import random
 import shutil
 import warnings
 from pathlib import Path
+from pprint import pprint
 from typing import Any, Dict, List
 
 from bing_image_downloader import downloader
@@ -352,7 +353,7 @@ class Preprocessing:
 
     @staticmethod
     def print_deepnet_project_metadata():
-        SETTING.load_settings_from_json()
+        return SETTING.load_settings_from_json()
 
 
 if __name__ == "__main__":
