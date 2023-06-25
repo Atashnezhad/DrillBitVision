@@ -365,16 +365,6 @@ class BitVision:
             number_of_cols = SETTING.FIGURE_SETTING.NUM_COLS_IN_PRED_MODEL
             number_of_rows = SETTING.FIGURE_SETTING.NUM_ROWS_IN_PRED_MODEL
             number_of_test_to_pred = SETTING.MODEL_SETTING.NUMBER_OF_TEST_TO_PRED
-            # if test_folder_dir:
-            #     train_test_val_dir = (
-            #         test_folder_dir
-            #         or SETTING.PREPROCESSING_SETTING.TRAIN_TEST_VAL_SPLIT_DIR_ADDRESS
-            #     )
-            # else:
-            #     train_test_val_dir = (
-            #         self.train_test_val_dir
-            #         or SETTING.PREPROCESSING_SETTING.TRAIN_TEST_VAL_SPLIT_DIR_ADDRESS
-            #     )
 
             # get the list of test images
             test_images_list = os.listdir(
