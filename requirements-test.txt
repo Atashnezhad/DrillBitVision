@@ -8,3 +8,5 @@ pytest_mock
 pytest-cov
 pytest
 twine
+mypy==1.4.0
+
