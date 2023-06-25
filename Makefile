@@ -59,6 +59,14 @@ run-flake8:
 	flake8 neural_network_model/*.py
 	#flake8 tests/*.py
 
+# lint
+.PHONY: lint_flake8
+lint:
+	@echo "flake8..."
+	@flake8 neural_network_model/*.py
+	@flake8 tests/*.py
+
+
 # run black on all python files in the src folder
 .PHONY: run-black
 run-black:

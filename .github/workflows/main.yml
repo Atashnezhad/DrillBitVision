@@ -5,7 +5,6 @@ on:
     branches:
       - main
       - master
-      - '*'
       - 'feature/*'
     tags:
         - "v*.*.*"
@@ -31,6 +30,9 @@ jobs:
 
       - name: Install dependencies
         run: make install_requirements
+
+      - name: lint
+        run: make lint_flake8
 
       - name: Run tests
         run: make test-coverage
