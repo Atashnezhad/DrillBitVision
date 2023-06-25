@@ -2,17 +2,13 @@ import logging
 import os
 import random
 import shutil
+import warnings
 from pathlib import Path
 from typing import Any, Dict, List
-import warnings
 
 from bing_image_downloader import downloader
 from tensorflow.keras.preprocessing import image
-from tensorflow.keras.preprocessing.image import (
-    ImageDataGenerator,
-    img_to_array,
-    load_img,
-)
+from tensorflow.keras.preprocessing.image import ImageDataGenerator, img_to_array, load_img
 from tqdm import tqdm
 
 from neural_network_model.model import SETTING
@@ -257,7 +253,7 @@ class Preprocessing:
         for dir_name in SETTING.PREPROCESSING_SETTING.TRAIN_TEST_SPLIT_DIR_NAMES:
             if not os.path.exists(train_test_val_split_dir_address / dir_name):
                 os.makedirs(train_test_val_split_dir_address / dir_name)
-        logger.debug(f"Created train, test and validation dirs")
+        logger.debug("Created train, test and validation dirs")
 
         # under each train, test and validation dir make a dir for each category
         for dir_name in SETTING.PREPROCESSING_SETTING.TRAIN_TEST_SPLIT_DIR_NAMES:
@@ -266,7 +262,7 @@ class Preprocessing:
                     train_test_val_split_dir_address / dir_name / category
                 ):
                     os.makedirs(train_test_val_split_dir_address / dir_name / category)
-        logger.debug(f"Created category dirs under train, test and validation dirs")
+        logger.debug("Created category dirs under train, test and validation dirs")
 
         self._populated_augmented_images_into_train_test_val_dirs(
             augmented_data_address, train_test_val_split_dir_address
@@ -287,15 +283,14 @@ class Preprocessing:
             num_test = int(
                 len(original_list) * SETTING.PREPROCESSING_SETTING.TEST_FRACTION
             )
-            num_val = len(original_list) - num_train - num_test
 
             # Randomly select items from the original list without replacement
             selected_items = random.sample(original_list, len(original_list))
 
             # Create three new lists containing 70%, 20%, and 10% of the original list
             train_list = selected_items[:num_train]
-            test_list = selected_items[num_train : num_train + num_test]
-            val_list = selected_items[num_train + num_test :]
+            test_list = selected_items[num_train: num_train + num_test]
+            val_list = selected_items[num_train + num_test:]
             # copy the images from the dataset_augmented pdc_bit folder to the train, test and validation folders
             self._copy_images(
                 train_list,
@@ -346,10 +341,10 @@ class Preprocessing:
             ):
                 os.remove(train_test_val_split_dir_address / dest_folder / categ / file)
 
-        for image in images:
+        for _image in images:
             shutil.copy(
-                dataset_augmented_dir_address / categ / image,
-                train_test_val_split_dir_address / dest_folder / categ / image,
+                dataset_augmented_dir_address / categ / _image,
+                train_test_val_split_dir_address / dest_folder / categ / _image,
             )
         logger.debug(
             f"copied {len(images)} images for category {categ} to {dest_folder}"

@@ -1,6 +1,7 @@
+from pathlib import Path
+
 from neural_network_model.bit_vision import BitVision
 from neural_network_model.process_data import Preprocessing
-from pathlib import Path
 
 
 def main():

@@ -1,9 +1,10 @@
+import sys
 import warnings
 from pathlib import Path, PosixPath
 from typing import List, Union
 from unittest import mock
 from unittest.mock import MagicMock, PropertyMock, patch
-import sys
+import pytest
 
 # Get the parent directory of the current file (assuming the script is in the test folder)
 current_dir = Path(__file__).resolve().parent
@@ -11,12 +12,12 @@ current_dir = Path(__file__).resolve().parent
 main_dir = current_dir.parent
 # Add the main directory to the Python path
 sys.path.append(str(main_dir))
-import pytest
 
-import neural_network_model
-from neural_network_model.model import SETTING
-from neural_network_model.process_data import Preprocessing
-from neural_network_model.s3 import MyS3
+
+import neural_network_model  # noqa: E402
+from neural_network_model.model import SETTING  # noqa: E402
+from neural_network_model.process_data import Preprocessing  # noqa: E402
+from neural_network_model.s3 import MyS3  # noqa: E402
 
 warnings.filterwarnings("ignore", category=DeprecationWarning)
 

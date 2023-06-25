@@ -10,10 +10,8 @@ main_dir = current_dir.parent
 # Add the main directory to the Python path
 sys.path.append(str(main_dir))
 
-from pathlib import Path
-
-from neural_network_model.bit_vision import BitVision
-from neural_network_model.process_data import Preprocessing
+from neural_network_model.bit_vision import BitVision  # noqa: E402
+from neural_network_model.process_data import Preprocessing  # noqa: E402
 
 
 def get_parser():
@@ -78,15 +76,15 @@ def main():
         Path(args.model_save_address) if args.model_save_address else None
     )
     model_name = args.model_name
-    epochs = args.epochs
+    # epochs = args.epochs
     fig_save_address = Path(args.fig_save_address) if args.fig_save_address else None
-    model_path = Path(args.model_path) if args.model_path else None
+    # model_path = Path(args.model_path) if args.model_path else None
     test_folder_address = (
         Path(args.test_folder_address) if args.test_folder_address else None
     )
-    img_to_be_applied_path = (
-        Path(args.img_to_be_applied_path) if args.img_to_be_applied_path else None
-    )
+    # img_to_be_applied_path = (
+    #     Path(args.img_to_be_applied_path) if args.img_to_be_applied_path else None
+    # )
     output_gradcam_fig_name = args.output_gradcam_fig_name
 
     # Perform actions based on the arguments

@@ -6,29 +6,18 @@ import warnings
 from pathlib import Path
 from typing import Dict, List
 
-import numpy as np
-import tensorflow
 import matplotlib.cm as cm
 import matplotlib.pyplot as plt
+import numpy as np
+import tensorflow
 import tensorflow as tf
+from keras import Sequential
+from keras.callbacks import ModelCheckpoint
+from keras.layers import BatchNormalization, Conv2D, Dense, Dropout, Flatten, MaxPooling2D
 from tensorflow import keras
 from tensorflow.keras.applications.resnet50 import decode_predictions, preprocess_input
 from tensorflow.keras.preprocessing import image
-from tensorflow.keras.preprocessing.image import (
-    ImageDataGenerator,
-    img_to_array,
-    load_img,
-)
-from keras import Sequential
-from keras.callbacks import ModelCheckpoint
-from keras.layers import (
-    BatchNormalization,
-    Conv2D,
-    Dense,
-    Dropout,
-    Flatten,
-    MaxPooling2D,
-)
+from tensorflow.keras.preprocessing.image import ImageDataGenerator, img_to_array, load_img
 
 from neural_network_model.model import SETTING
 
@@ -510,7 +499,6 @@ class BitVision:
         # Remove last layer's softmax
         model.layers[-1].activation = None
         # Print what the top predicted class is
-        preds = model.predict(img_array)
         # print("Predicted:", decode_predictions(preds, top=1)[0])
         # Generate class activation heatmap
         heatmap = BitVision._make_gradcam_heatmap(
@@ -618,7 +606,7 @@ class BitVision:
             if (
                 filename.endswith(".h5")
                 and "val_acc" in filename
-                and not "val_accuracy" in filename
+                and "val_accuracy" not in filename
             ):
                 # Extract the validation accuracy from the filename
                 print(filename.split("_val_acc_")[1].split("_.h5")[0])

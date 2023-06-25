@@ -1,8 +1,7 @@
-import pytest
-
-
 import sys
 from pathlib import Path
+
+import pytest
 
 # Get the parent directory of the current file (assuming the script is in the test folder)
 current_dir = Path(__file__).resolve().parent
@@ -11,7 +10,7 @@ main_dir = current_dir.parent
 # Add the main directory to the Python path
 sys.path.append(str(main_dir))
 
-from neural_network_model.bit_vision import BitVision
+from neural_network_model.bit_vision import BitVision  # noqa: E402
 
 
 @pytest.fixture

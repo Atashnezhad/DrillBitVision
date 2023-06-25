@@ -55,9 +55,9 @@ commit:
 .PHONY: run-flake8
 run-flake8:
 	isort neural_network_model/*.py
-	#isort test/*.py
+	#isort tests/*.py
 	flake8 neural_network_model/*.py
-	#flake8 test/*.py
+	#flake8 tests/*.py
 
 # run black on all python files in the src folder
 .PHONY: run-black
