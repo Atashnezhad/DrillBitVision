@@ -60,7 +60,7 @@ run-flake8:
 	#flake8 tests/*.py
 
 # lint
-.PHONY: lint_flake8
+.PHONY: run_flake8
 lint:
 	@echo "flake8..."
 	@flake8 neural_network_model/*.py

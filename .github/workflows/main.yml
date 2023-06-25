@@ -31,8 +31,8 @@ jobs:
       - name: Install dependencies
         run: make install_requirements
 
-      - name: lint
-        run: make lint_flake8
+      - name: flake8
+        run: make run_flake8
 
       - name: Run tests
         run: make test-coverage
