@@ -84,8 +84,8 @@ class BitVision:
         train test val data details in the dict.
         """
         resource_dir = (
-            self.train_test_val_dir
-            or Path(__file__).parent / ".." / self.train_test_val_dir
+                self.train_test_val_dir
+                or Path(__file__).parent / ".." / self.train_test_val_dir
         )
         # get the list of dirs in the resource_dir
         subdir_name = os.listdir(resource_dir)
@@ -264,8 +264,8 @@ class BitVision:
 
             generator = datagen.flow_from_directory(
                 directory=self.train_test_val_dir / subdir
-                or SETTING.PREPROCESSING_SETTING.TRAIN_TEST_VAL_SPLIT_DIR_ADDRESS
-                / subdir,
+                          or SETTING.PREPROCESSING_SETTING.TRAIN_TEST_VAL_SPLIT_DIR_ADDRESS
+                          / subdir,
                 target_size=SETTING.FLOW_FROM_DIRECTORY_SETTING.TARGET_SIZE,
                 color_mode=SETTING.FLOW_FROM_DIRECTORY_SETTING.COLOR_MODE,
                 classes=None,
@@ -288,7 +288,7 @@ class BitVision:
             logger.info(f"Rescaling {subdir} data, {generator.class_indices}:")
 
     def _check_points(
-        self, model_save_address: str, model_name: str
+            self, model_save_address: str, model_name: str
     ) -> ModelCheckpoint:
         check_point = ModelCheckpoint(
             model_save_address / model_name,
@@ -305,8 +305,24 @@ class BitVision:
         total = sum(my_dict.values())
         return total
 
+    def _calculate_class_weight(self, class_counts: dict) -> dict:
+        class_labels = list(class_counts.keys())
+        class_indices = {label: index for index, label in enumerate(class_labels)}
+
+        total_samples = sum(class_counts.values())
+        class_weight = {}
+        for class_label, count in class_counts.items():
+            class_index = class_indices[class_label]
+            class_weight[class_index] = total_samples / (len(class_counts) * count)
+
+        # Normalize the class weights
+        class_weight_sum = sum(class_weight.values())
+        for class_index in class_weight:
+            class_weight[class_index] /= class_weight_sum
+        return class_weight
+
     def train_model(
-        self, model_save_address: Path = SETTING.MODEL_SETTING.MODEL_PATH, **kwargs
+            self, model_save_address: Path = SETTING.MODEL_SETTING.MODEL_PATH, **kwargs
     ) -> None:
         """
         This function is used to train the model.
@@ -329,6 +345,10 @@ class BitVision:
         BATCH_SIZE = SETTING.FLOW_FROM_DIRECTORY_SETTING.BATCH_SIZE
         TRAINING_SIZE = self._calculate_number_from_dict(self.data_details["train"])
         VALIDATION_SIZE = self._calculate_number_from_dict(self.data_details["val"])
+
+        if not class_weight:
+            class_weight = self._calculate_class_weight(self.data_details["train"])
+
         # We take the ceiling because we do not drop the remainder of the batch
         compute_steps_per_epoch = lambda x: int(math.ceil(1.0 * x / BATCH_SIZE))
         steps_per_epoch = compute_steps_per_epoch(TRAINING_SIZE)
@@ -387,8 +407,8 @@ class BitVision:
 
     @staticmethod
     def _filter_out_list(
-        ignore_list: List[str] = SETTING.IGNORE_SETTING.IGNORE_LIST,
-        list_to_be_edited: List[str] = None,
+            ignore_list: List[str] = SETTING.IGNORE_SETTING.IGNORE_LIST,
+            list_to_be_edited: List[str] = None,
     ) -> List[str]:
         for case in ignore_list:
             if case in list_to_be_edited:
@@ -447,10 +467,10 @@ class BitVision:
 
             for i, img in enumerate(test_images_list[0:number_of_test_to_pred]):
                 path_to_img = (
-                    self.train_test_val_dir
-                    / SETTING.PREPROCESSING_SETTING.TRAIN_TEST_SPLIT_DIR_NAMES[1]
-                    / category
-                    / str(img)
+                        self.train_test_val_dir
+                        / SETTING.PREPROCESSING_SETTING.TRAIN_TEST_SPLIT_DIR_NAMES[1]
+                        / category
+                        / str(img)
                 ).resolve()
 
                 img = load_img(
@@ -631,10 +651,10 @@ class BitVision:
 
     @staticmethod
     def _save_and_display_gradcam(
-        img_path,
-        heatmap,
-        cam_path=SETTING.GRAD_CAM_SETTING.IMAGE_NEW_NAME,
-        alpha=SETTING.GRAD_CAM_SETTING.ALPHA,
+            img_path,
+            heatmap,
+            cam_path=SETTING.GRAD_CAM_SETTING.IMAGE_NEW_NAME,
+            alpha=SETTING.GRAD_CAM_SETTING.ALPHA,
     ):
         # Load the original image
         img = keras.preprocessing.image.load_img(img_path)
@@ -664,7 +684,7 @@ class BitVision:
 
     @staticmethod
     def return_best_model_name(
-        directory: Path = SETTING.MODEL_SETTING.MODEL_PATH,
+            directory: Path = SETTING.MODEL_SETTING.MODEL_PATH,
     ) -> str:
         """
         Return the best model name
@@ -677,9 +697,9 @@ class BitVision:
 
         for filename in os.listdir(directory):
             if (
-                filename.endswith(".h5")
-                and "val_acc" in filename
-                and "val_accuracy" not in filename
+                    filename.endswith(".h5")
+                    and "val_acc" in filename
+                    and "val_accuracy" not in filename
             ):
                 # Extract the validation accuracy from the filename
                 print(filename.split("_val_acc_")[1].split("_.h5")[0])
@@ -709,14 +729,13 @@ if __name__ == "__main__":
     obj.plot_history()
     obj.predict(num_rows=2, num_cols=2, figsize=(4, 10))
     print(obj.layer_names)
-
     for conv_layer in obj.layer_names["conv_layer"]:
         obj.grad_cam_viz(
             gradcam_fig_name="test.png",
             print_layer_names=False,
             test_folder_dir=Path(__file__).parent
-            / ".."
-            / "dataset_train_test_val"
-            / "test",
+                            / ".."
+                            / "dataset_train_test_val"
+                            / "test",
             layer_name=conv_layer,
         )
