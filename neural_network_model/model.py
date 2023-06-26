@@ -15,9 +15,9 @@ load_dotenv()
 class DataAddressSetting(BaseModel):
     MAIN_DATA_DIR_ADDRESS: str = (Path(__file__).parent / ".." / "dataset").resolve()
     TEST_DIR_ADDRESS: str = (
-            Path(__file__).parent
-            / ".."
-            / "dataset_train_test_val"
+        Path(__file__).parent
+        / ".."
+        / "dataset_train_test_val"
         # / "test"  # check the TRAIN_TEST_SPLIT_DIR_NAMES in
         # the PreprocessingSetting make sure test is in the list
     )
@@ -40,7 +40,7 @@ class AugmentationSetting(BaseModel):
 
     # Address to save augmented images
     AUGMENTED_IMAGES_DIR_ADDRESS: Path = (
-            Path(__file__).parent / ".." / "dataset_augmented"
+        Path(__file__).parent / ".." / "dataset_augmented"
     )
     AUGMENTED_IMAGES_SAVE_PREFIX: str = "augmented_image"
     AUGMENTED_IMAGES_SAVE_FORMAT: str = "jpeg"
@@ -58,7 +58,7 @@ class IgnoreSetting(BaseModel):
 
 class PreprocessingSetting(BaseModel):
     TRAIN_TEST_VAL_SPLIT_DIR_ADDRESS: str = (
-            Path(__file__).parent / ".." / "dataset_train_test_val"
+        Path(__file__).parent / ".." / "dataset_train_test_val"
     ).resolve()
     TRAIN_TEST_SPLIT_DIR_NAMES: list = ["train", "test", "val"]
     TRAIN_FRACTION: float = 0.7
@@ -163,7 +163,7 @@ class Ec2Setting(BaseModel):
 
     KEY_NAME: str = "bitvision_ec2"
     PEM_FILE_ADDRESS: str = (
-            Path(__file__).parent / "ec2_key" / "bitvision_ec2.pem"
+        Path(__file__).parent / "ec2_key" / "bitvision_ec2.pem"
     ).resolve()
 
     SSH_USER: str = "ec2-user"
