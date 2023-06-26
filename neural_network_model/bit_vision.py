@@ -84,8 +84,8 @@ class BitVision:
         train test val data details in the dict.
         """
         resource_dir = (
-                self.train_test_val_dir
-                or Path(__file__).parent / ".." / self.train_test_val_dir
+            self.train_test_val_dir
+            or Path(__file__).parent / ".." / self.train_test_val_dir
         )
         # get the list of dirs in the resource_dir
         subdir_name = os.listdir(resource_dir)
@@ -264,8 +264,8 @@ class BitVision:
 
             generator = datagen.flow_from_directory(
                 directory=self.train_test_val_dir / subdir
-                          or SETTING.PREPROCESSING_SETTING.TRAIN_TEST_VAL_SPLIT_DIR_ADDRESS
-                          / subdir,
+                or SETTING.PREPROCESSING_SETTING.TRAIN_TEST_VAL_SPLIT_DIR_ADDRESS
+                / subdir,
                 target_size=SETTING.FLOW_FROM_DIRECTORY_SETTING.TARGET_SIZE,
                 color_mode=SETTING.FLOW_FROM_DIRECTORY_SETTING.COLOR_MODE,
                 classes=None,
@@ -467,10 +467,10 @@ class BitVision:
 
             for i, img in enumerate(test_images_list[0:number_of_test_to_pred]):
                 path_to_img = (
-                        self.train_test_val_dir
-                        / SETTING.PREPROCESSING_SETTING.TRAIN_TEST_SPLIT_DIR_NAMES[1]
-                        / category
-                        / str(img)
+                    self.train_test_val_dir
+                    / SETTING.PREPROCESSING_SETTING.TRAIN_TEST_SPLIT_DIR_NAMES[1]
+                    / category
+                    / str(img)
                 ).resolve()
 
                 img = load_img(
@@ -734,8 +734,8 @@ if __name__ == "__main__":
             gradcam_fig_name="test.png",
             print_layer_names=False,
             test_folder_dir=Path(__file__).parent
-                            / ".."
-                            / "dataset_train_test_val"
-                            / "test",
+            / ".."
+            / "dataset_train_test_val"
+            / "test",
             layer_name=conv_layer,
         )
