@@ -201,7 +201,7 @@ class TransferModel(Preprocessing, BitVision):
             test_images,
         )
 
-    def train_model(self):
+    def train_model(self, num_categories=2, epochs=10, batch_size=32):
         (
             pretrained_model,
             train_generator,
@@ -215,7 +215,7 @@ class TransferModel(Preprocessing, BitVision):
         x = tf.keras.layers.Dense(128, activation="relu")(pretrained_model.output)
         x = tf.keras.layers.Dense(128, activation="relu")(x)
 
-        outputs = tf.keras.layers.Dense(2, activation="softmax")(x)
+        outputs = tf.keras.layers.Dense(num_categories, activation="softmax")(x)
 
         model = tf.keras.Model(inputs=inputs, outputs=outputs)
 
@@ -226,8 +226,8 @@ class TransferModel(Preprocessing, BitVision):
         history = model.fit(
             train_images,
             validation_data=val_images,
-            batch_size=32,
-            epochs=10,
+            batch_size=batch_size,
+            epochs=epochs,
             callbacks=[
                 tf.keras.callbacks.EarlyStopping(
                     monitor="val_loss", patience=2, restore_best_weights=True
