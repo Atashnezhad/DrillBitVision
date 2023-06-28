@@ -13,11 +13,22 @@ import tensorflow
 import tensorflow as tf
 from keras import Sequential
 from keras.callbacks import ModelCheckpoint
-from keras.layers import BatchNormalization, Conv2D, Dense, Dropout, Flatten, MaxPooling2D
+from keras.layers import (
+    BatchNormalization,
+    Conv2D,
+    Dense,
+    Dropout,
+    Flatten,
+    MaxPooling2D,
+)
 from tensorflow import keras
 from tensorflow.keras.applications.resnet50 import decode_predictions, preprocess_input
 from tensorflow.keras.preprocessing import image
-from tensorflow.keras.preprocessing.image import ImageDataGenerator, img_to_array, load_img
+from tensorflow.keras.preprocessing.image import (
+    ImageDataGenerator,
+    img_to_array,
+    load_img,
+)
 
 from neural_network_model.model import SETTING
 
@@ -206,20 +217,17 @@ class BitVision:
         self.model.summary()
 
         # Initialize the dictionary
-        layer_names = {
-            'conv_layer': [],
-            'other_layer': []
-        }
+        layer_names = {"conv_layer": [], "other_layer": []}
 
         # Iterate over the model layers and store the names
         for idx in range(len(self.model.layers)):
             layer_name = self.model.get_layer(index=idx).name
 
             # Check if the layer name contains 'conv' substring
-            if 'conv' in layer_name.lower():
-                layer_names['conv_layer'].append(layer_name)
+            if "conv" in layer_name.lower():
+                layer_names["conv_layer"].append(layer_name)
             else:
-                layer_names['other_layer'].append(layer_name)
+                layer_names["other_layer"].append(layer_name)
 
         self.layer_names = layer_names
 
@@ -288,7 +296,7 @@ class BitVision:
             logger.info(f"Rescaling {subdir} data, {generator.class_indices}:")
 
     def _check_points(
-            self, model_save_address: str, model_name: str
+        self, model_save_address: str, model_name: str
     ) -> ModelCheckpoint:
         check_point = ModelCheckpoint(
             model_save_address / model_name,
@@ -322,7 +330,7 @@ class BitVision:
         return class_weight
 
     def train_model(
-            self, model_save_address: Path = SETTING.MODEL_SETTING.MODEL_PATH, **kwargs
+        self, model_save_address: Path = SETTING.MODEL_SETTING.MODEL_PATH, **kwargs
     ) -> None:
         """
         This function is used to train the model.
@@ -407,8 +415,8 @@ class BitVision:
 
     @staticmethod
     def _filter_out_list(
-            ignore_list: List[str] = SETTING.IGNORE_SETTING.IGNORE_LIST,
-            list_to_be_edited: List[str] = None,
+        ignore_list: List[str] = SETTING.IGNORE_SETTING.IGNORE_LIST,
+        list_to_be_edited: List[str] = None,
     ) -> List[str]:
         for case in ignore_list:
             if case in list_to_be_edited:
@@ -651,10 +659,10 @@ class BitVision:
 
     @staticmethod
     def _save_and_display_gradcam(
-            img_path,
-            heatmap,
-            cam_path=SETTING.GRAD_CAM_SETTING.IMAGE_NEW_NAME,
-            alpha=SETTING.GRAD_CAM_SETTING.ALPHA,
+        img_path,
+        heatmap,
+        cam_path=SETTING.GRAD_CAM_SETTING.IMAGE_NEW_NAME,
+        alpha=SETTING.GRAD_CAM_SETTING.ALPHA,
     ):
         # Load the original image
         img = keras.preprocessing.image.load_img(img_path)
@@ -684,7 +692,7 @@ class BitVision:
 
     @staticmethod
     def return_best_model_name(
-            directory: Path = SETTING.MODEL_SETTING.MODEL_PATH,
+        directory: Path = SETTING.MODEL_SETTING.MODEL_PATH,
     ) -> str:
         """
         Return the best model name
@@ -697,9 +705,9 @@ class BitVision:
 
         for filename in os.listdir(directory):
             if (
-                    filename.endswith(".h5")
-                    and "val_acc" in filename
-                    and "val_accuracy" not in filename
+                filename.endswith(".h5")
+                and "val_acc" in filename
+                and "val_accuracy" not in filename
             ):
                 # Extract the validation accuracy from the filename
                 print(filename.split("_val_acc_")[1].split("_.h5")[0])

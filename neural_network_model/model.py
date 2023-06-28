@@ -74,7 +74,7 @@ class ModelSetting(BaseModel):
     # compile
     LOSS: str = "categorical_crossentropy"
     METRICS: List = [
-        'accuracy',
+        "accuracy",
         # 'precision',
         # 'recall',
         # 'f1_score'
