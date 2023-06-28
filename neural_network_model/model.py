@@ -28,11 +28,11 @@ class DownloadImageSetting(BaseModel):
 
 
 class AugmentationSetting(BaseModel):
-    ROTATION_RANGE: int = 25
-    WIDTH_SHIFT_RANGE: float = 0.0
-    HEIGHT_SHIFT_RANGE: float = 0.0
-    SHEAR_RANGE: float = 0.2
-    ZOOM_RANGE: float = 0.5
+    ROTATION_RANGE: int = 30
+    WIDTH_SHIFT_RANGE: float = 0.2
+    HEIGHT_SHIFT_RANGE: float = 0.2
+    SHEAR_RANGE: float = 0.15
+    ZOOM_RANGE: float = 0.15
     HORIZONTAL_FLIP: bool = True
     FILL_MODE: str = "nearest"
 
