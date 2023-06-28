@@ -61,11 +61,15 @@ class TransferModel(Preprocessing, BitVision):
 
     import math
 
-    def plot_data_images(self):
-        num_images = len(self.image_df)
-        max_plots = 3 * 5  # Maximum number of plots in a 3x5 grid
-        num_rows = math.ceil(num_images / 5)
-        num_cols = min(num_images, 5)
+    def plot_data_images(self, num_rows=None, num_cols=None):
+
+        if not num_rows and not num_cols:
+            num_images = len(self.image_df)
+            max_plots = 3 * 5  # Maximum number of plots in a 3x5 grid
+            num_rows = math.ceil(num_images / 5)
+            num_cols = min(num_images, 5)
+        else:
+            num_images = num_rows * num_cols
 
         fig, axes = plt.subplots(
             nrows=num_rows,
@@ -410,6 +414,9 @@ class TransferModel(Preprocessing, BitVision):
         preprocess_input = tf.keras.applications.mobilenet_v2.preprocess_input
         decode_predictions = tf.keras.applications.mobilenet_v2.decode_predictions
 
+        num_rows = kwargs.get("num_rows", None)
+        num_cols = kwargs.get("num_cols", None)
+
         last_conv_layer_name = "Conv_1"
         img_size = (224, 224)
 
@@ -419,10 +426,13 @@ class TransferModel(Preprocessing, BitVision):
         # Display the part of the pictures used by the neural network to classify the pictures
         _, test_df = self.train_test_split()
 
-        # Get the number of rows and columns for subplots
-        num_images = len(test_df)
-        num_cols = 2
-        num_rows = (num_images + num_cols - 1) // num_cols
+        if not num_rows and not num_cols:
+            # Get the number of rows and columns for subplots
+            num_images = len(test_df)
+            num_cols = 2
+            num_rows = (num_images + num_cols - 1) // num_cols
+        else:
+            num_images = num_rows * num_cols
 
         fig, axes = plt.subplots(nrows=num_rows, ncols=num_cols, figsize=(12, 6))
 
@@ -458,9 +468,9 @@ if __name__ == "__main__":
     transfer_model = TransferModel(
         dataset_address=Path(__file__).parent / ".." / "dataset"
     )
-    transfer_model.plot_data_images()
+    transfer_model.plot_data_images(num_rows=3, num_cols=3)
     transfer_model.train_model()
     transfer_model.plot_metrics_results()
     transfer_model.results()
     transfer_model.predcit_test()
-    transfer_model.grad_cam_viz()
+    transfer_model.grad_cam_viz(num_rows=3, num_cols=2)
