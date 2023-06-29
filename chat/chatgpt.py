@@ -8,7 +8,7 @@ from dotenv import load_dotenv
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
-import openai
+# import openai
 
 # Load the API key from the .env file
 load_dotenv()
@@ -31,7 +31,7 @@ def chat_with_gpt(messages):
     try:
         if data["choices"][0]["message"]["content"]:
             return data["choices"][0]["message"]["content"]
-    except:
+    except KeyError:
         logging.info(f"{data}")
 
 
