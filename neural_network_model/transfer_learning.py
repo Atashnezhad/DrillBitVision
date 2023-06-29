@@ -13,17 +13,24 @@ import numpy as np
 import pandas as pd
 import seaborn as sns
 import tensorflow as tf
+from imageio.v2 import imread
 from IPython.display import Image, Markdown, display
 from matplotlib import pyplot as plt
+from sklearn.cluster import KMeans
 from sklearn.metrics import classification_report, confusion_matrix
 from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
 
 from neural_network_model.bit_vision import BitVision
 from neural_network_model.model import TRANSFER_LEARNING_SETTING
 from neural_network_model.process_data import Preprocessing
 
+# Initialize the logger
+logger = logging.getLogger()
+logger.setLevel(logging.INFO)
 
-class TransferModel(Preprocessing):
+
+class TransferModel(Preprocessing, BitVision):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
@@ -70,6 +77,147 @@ class TransferModel(Preprocessing):
             print(self.image_df.head(3))
         # log the data was prepared
         logging.info("Data was prepared")
+
+    def plot_classes_number(
+        self, figsize=(10, 5), x_rotation=0, palette="Greens_r"
+    ) -> None:
+        """
+        Plot the number of images per species
+        :param figsize: size of the figure
+        :param x_rotation: rotation of the x-axis
+        :param palette: color palette
+        :return: None
+        """
+
+        base_path = self.dataset_address
+        subfolders = os.listdir(base_path)
+        names = []
+        counts = []
+
+        filtered_subfolders = self._filter_out_list(list_to_be_edited=subfolders)
+
+        for folder in filtered_subfolders:
+            images = os.listdir(base_path / folder)
+            names.append(folder)
+            counts.append(len(images))
+
+        counts = np.array(counts)
+        names = np.array(names)
+
+        idx = np.argsort(counts)[::-1]
+
+        plt.figure(figsize=figsize)
+        sns.barplot(x=names[idx], y=counts[idx], palette=palette)
+        plt.xticks(rotation=x_rotation)
+        plt.title("How many images per classes are given in the data?")
+        plt.tight_layout()
+        plt.show()
+
+    def analyze_image_names(
+        self, figsize=(20, 22), figsize_2=(10, 7), cmap_2="YlGnBu", size=15, label_size=25, num_cluster=5
+    ) -> None:
+        """
+        Analyze the image names if there is any pattern in the names
+        :param figsize: size of the figure
+        :param figsize_2: size of the second figure
+        :param cmap_2: color map of the second figure
+        :param size: size of the scatter points
+        :param label_size: size of the labels
+        :param num_cluster: number of clusters - unsupervised learning on width of images
+        """
+        base_path = self.dataset_address
+        subfolders = os.listdir(base_path)
+        filtered_subfolders = self._filter_out_list(list_to_be_edited=subfolders)
+
+        total_images = 0
+        for folder in filtered_subfolders:
+            total_images += len(os.listdir(base_path / folder))
+
+        image_df = pd.DataFrame(
+            index=np.arange(0, total_images), columns=["width", "height", "classes"]
+        )
+
+        k = 0
+        all_images = []
+        for m in range(len(subfolders)):
+            folder = subfolders[m]
+
+            images = os.listdir(base_path / folder)
+            all_images.extend(images)
+            n_images = len(images)
+
+            for n in range(0, n_images):
+                image = imread(base_path / folder / images[n])
+                image_df.loc[k, "width"] = image.shape[0]
+                image_df.loc[k, "height"] = image.shape[1]
+                image_df.loc[k, "classes"] = folder
+                image_df.loc[k, "image_name"] = images[n]
+                k += 1
+
+        image_df.width = image_df.width.astype(np.int)
+        image_df.height = image_df.height.astype(np.int)
+        print(image_df.head())
+
+        fig, ax = plt.subplots(3, 1, figsize=figsize)
+        ax[0].scatter(image_df.width.values, image_df.height.values, s=size)
+        ax[0].set_xlabel("Image width")
+        ax[0].set_ylabel("Image height")
+        ax[0].set_title("Is image width always equal to image height?")
+        for single in image_df.classes.unique():
+            sns.kdeplot(
+                image_df[image_df.classes == single].width, ax=ax[1], label=single
+            )
+        ax[1].legend()
+        ax[1].set_title("KDE-Plot of image width given classes")
+        ax[1].set_xlabel("Image width")
+        ax[1].set_ylabel("Density")
+        sns.distplot(image_df.width, ax=ax[2])
+        ax[2].set_xlabel("Image width")
+        ax[2].set_ylabel("Density")
+        ax[2].set_title("Overall image width distribution")
+
+        # set x and y axis font size
+        ax[0].tick_params(axis="both", which="major", labelsize=label_size)
+        ax[1].tick_params(axis="both", which="major", labelsize=label_size)
+        ax[2].tick_params(axis="both", which="major", labelsize=label_size)
+
+        # x and y axis label font size
+        for i in range(3):
+            ax[i].xaxis.label.set_size(label_size)
+            ax[i].yaxis.label.set_size(label_size)
+            # tite font size
+            ax[i].title.set_size(label_size)
+
+        # show the plot
+        plt.tight_layout()
+        plt.show()
+
+        # check if there is sort of cluster with respect to the image width
+        scaler = StandardScaler()
+
+        X = np.log(image_df.width.values).reshape(-1, 1)
+        X = scaler.fit_transform(X)
+
+        km = KMeans(n_clusters=num_cluster)
+        image_df["cluster_number"] = km.fit_predict(X)
+
+        mean_states = image_df.groupby("cluster_number").width.mean().values
+        cluster_number_order = np.argsort(mean_states)
+        logger.info("Cluster number order: {}".format(cluster_number_order))
+
+        target_leakage = (
+            image_df.groupby(["cluster_number", "classes"]).size().unstack().fillna(0)
+        )
+        target_leakage = target_leakage / image_df.classes.value_counts() * 100
+        target_leakage = target_leakage.apply(np.round).astype(np.int)
+
+        plt.figure(figsize=figsize_2)
+        sns.heatmap(target_leakage, cmap=cmap_2, annot=True)
+        plt.title(
+            "The cluster_number is related to the classes!\nThis is based on the images width and defined "
+            "number of clusters"
+        )
+        plt.show()
 
     def plot_data_images(self, num_rows=None, num_cols=None, figsize=(15, 10)):
         """
@@ -167,8 +315,12 @@ class TransferModel(Preprocessing):
 
         rotation_range = TRANSFER_LEARNING_SETTING.AUGMENTATION_SETTING.ROTATION_RANGE
         zoom_range = TRANSFER_LEARNING_SETTING.AUGMENTATION_SETTING.ZOOM_RANGE
-        width_shift_range = TRANSFER_LEARNING_SETTING.AUGMENTATION_SETTING.WIDTH_SHIFT_RANGE
-        height_shift_range = TRANSFER_LEARNING_SETTING.AUGMENTATION_SETTING.HEIGHT_SHIFT_RANGE
+        width_shift_range = (
+            TRANSFER_LEARNING_SETTING.AUGMENTATION_SETTING.WIDTH_SHIFT_RANGE
+        )
+        height_shift_range = (
+            TRANSFER_LEARNING_SETTING.AUGMENTATION_SETTING.HEIGHT_SHIFT_RANGE
+        )
         shear_range = TRANSFER_LEARNING_SETTING.AUGMENTATION_SETTING.SHEAR_RANGE
         horizontal_flip = TRANSFER_LEARNING_SETTING.AUGMENTATION_SETTING.HORIZONTAL_FLIP
         fill_mode = TRANSFER_LEARNING_SETTING.AUGMENTATION_SETTING.FILL_MODE
@@ -561,9 +713,12 @@ if __name__ == "__main__":
     transfer_model = TransferModel(
         dataset_address=Path(__file__).parent / ".." / "dataset"
     )
-    transfer_model.plot_data_images(num_rows=3, num_cols=3)
-    transfer_model.train_model()
-    transfer_model.plot_metrics_results()
-    transfer_model.results()
-    transfer_model.predcit_test()
-    transfer_model.grad_cam_viz(num_rows=3, num_cols=2)
+
+    # transfer_model.plot_classes_number()
+    transfer_model.analyze_image_names()
+    # transfer_model.plot_data_images(num_rows=3, num_cols=3)
+    # transfer_model.train_model()
+    # transfer_model.plot_metrics_results()
+    # transfer_model.results()
+    # transfer_model.predcit_test()
+    # transfer_model.grad_cam_viz(num_rows=3, num_cols=2)
