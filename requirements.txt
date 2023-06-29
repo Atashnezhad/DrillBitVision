@@ -15,4 +15,7 @@ pathlib
 boto3~=1.26.137
 python-dotenv~=1.0.0
 seaborn~=0.11.2
+scikit-learn==1.2.2
+
+
 
