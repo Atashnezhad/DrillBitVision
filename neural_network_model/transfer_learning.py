@@ -4,22 +4,22 @@
 # Location: Dresden, Saxony, Germany
 
 import logging
+import math
 import os
 from pathlib import Path
-import matplotlib.cm as cm
 
+import matplotlib.cm as cm
 import numpy as np
-import tensorflow as tf
-import math
-from IPython.display import Image, display, Markdown
-from sklearn.metrics import classification_report
-from sklearn.metrics import confusion_matrix
-import seaborn as sns
 import pandas as pd
+import seaborn as sns
+import tensorflow as tf
+from IPython.display import Image, Markdown, display
 from matplotlib import pyplot as plt
+from sklearn.metrics import classification_report, confusion_matrix
 from sklearn.model_selection import train_test_split
 
 from neural_network_model.bit_vision import BitVision
+from neural_network_model.model import TRANSFER_LEARNING_SETTING
 from neural_network_model.process_data import Preprocessing
 
 
@@ -36,7 +36,19 @@ class TransferModel(Preprocessing, BitVision):
 
         self.pred: np.ndarray = None
 
-    def _prepare_data(self):
+    def _prepare_data(
+        self,
+        print_data_head=False,
+        x_col=TRANSFER_LEARNING_SETTING.DF_X_COL_NAME,
+        y_col=TRANSFER_LEARNING_SETTING.DF_Y_COL_NAME,
+    ):
+        """
+        Prepare the data for the model
+        :param print_data_head: print the head of the data
+        :param x_col: column name for the filepaths
+        :param y_col: column name for the labels
+        :return: None
+        """
         image_dir = self.dataset_address
         # Get filepaths and labels
         filepaths = list(image_dir.glob(r"**/*.png"))
@@ -44,8 +56,8 @@ class TransferModel(Preprocessing, BitVision):
         filepaths.extend(list(image_dir.glob(r"**/*.jpg")))
         labels = list(map(lambda x: os.path.split(os.path.split(x)[0])[1], filepaths))
 
-        filepaths = pd.Series(filepaths, name="Filepath").astype(str)
-        labels = pd.Series(labels, name="Label")
+        filepaths = pd.Series(filepaths, name=x_col).astype(str)
+        labels = pd.Series(labels, name=y_col)
 
         # Concatenate filepaths and labels
         image_df = pd.concat([filepaths, labels], axis=1)
@@ -54,18 +66,23 @@ class TransferModel(Preprocessing, BitVision):
         image_df = image_df.sample(frac=1).reset_index(drop=True)
 
         self.image_df = image_df
-        # Show the result
-        print(self.image_df.head(3))
+        if print_data_head:
+            print(self.image_df.head(3))
         # log the data was prepared
-        logging.info(f"Data was prepared")
+        logging.info("Data was prepared")
 
-    import math
-
-    def plot_data_images(self, num_rows=None, num_cols=None):
+    def plot_data_images(self, num_rows=None, num_cols=None, figsize=(15, 10)):
+        """
+        Plot the images in a grid
+        :param num_rows: number of rows in the grid
+        :param num_cols: number of columns in the grid
+        :param figsize: size of the figure
+        :return: None
+        """
 
         if not num_rows and not num_cols:
             num_images = len(self.image_df)
-            max_plots = 3 * 5  # Maximum number of plots in a 3x5 grid
+            # max_plots = 3 * 5  # Maximum number of plots in a 3x5 grid
             num_rows = math.ceil(num_images / 5)
             num_cols = min(num_images, 5)
         else:
@@ -74,7 +91,7 @@ class TransferModel(Preprocessing, BitVision):
         fig, axes = plt.subplots(
             nrows=num_rows,
             ncols=num_cols,
-            figsize=(15, 10),
+            figsize=figsize,
             subplot_kw={"xticks": [], "yticks": []},
         )
 
@@ -101,84 +118,128 @@ class TransferModel(Preprocessing, BitVision):
         plt.show()
 
     def train_test_split(self, *args, **kwargs):
+        """
+        Split the data into train and test data
+        :param args: arguments for the train_test_split function
+        train_size: float, int (default is 0.9)
+        shuffle: bool (default is True)
+        random_state: int (default is 1)
+        :return: train_df, test_df
+        """
+        train_size = kwargs.get("train_size", TRANSFER_LEARNING_SETTING.TRAIN_SIZE)
+        shuffle = kwargs.get("shuffle", TRANSFER_LEARNING_SETTING.SHUFFLE)
+        random_state = kwargs.get(
+            "random_state", TRANSFER_LEARNING_SETTING.RANDOM_STATE
+        )
         # Separate in train and test data
         train_df, test_df = train_test_split(
-            self.image_df, train_size=0.9, shuffle=True, random_state=1
+            self.image_df,
+            train_size=train_size,
+            shuffle=shuffle,
+            random_state=random_state,
         )
         return train_df, test_df
 
     def _create_gen(self):
+        """
+        Create the generator for the model
+        :return: train_images, val_images, test_images
+        """
         train_df, test_df = self.train_test_split()
         # Load the Images with a generator and Data Augmentation
         train_generator = tf.keras.preprocessing.image.ImageDataGenerator(
             preprocessing_function=tf.keras.applications.mobilenet_v2.preprocess_input,
-            validation_split=0.1,
+            validation_split=TRANSFER_LEARNING_SETTING.VALIDATION_SPLIT,
         )
 
         test_generator = tf.keras.preprocessing.image.ImageDataGenerator(
             preprocessing_function=tf.keras.applications.mobilenet_v2.preprocess_input
         )
 
+        xcol = TRANSFER_LEARNING_SETTING.DF_X_COL_NAME
+        ycol = TRANSFER_LEARNING_SETTING.DF_Y_COL_NAME
+        traget_size = TRANSFER_LEARNING_SETTING.TARGET_SIZE
+        color_mode = TRANSFER_LEARNING_SETTING.COLOR_MODE
+        class_mode = TRANSFER_LEARNING_SETTING.CLASS_MODE
+        batch_size = TRANSFER_LEARNING_SETTING.BATCH_SIZE
+        shuffle = TRANSFER_LEARNING_SETTING.SHUFFLE
+        seed = TRANSFER_LEARNING_SETTING.SEED
+
+        rotation_range = TRANSFER_LEARNING_SETTING.ROTATION_RANGE
+        zoom_range = TRANSFER_LEARNING_SETTING.ZOOM_RANGE
+        width_shift_range = TRANSFER_LEARNING_SETTING.WIDTH_SHIFT_RANGE
+        height_shift_range = TRANSFER_LEARNING_SETTING.HEIGHT_SHIFT_RANGE
+        shear_range = TRANSFER_LEARNING_SETTING.SHEAR_RANGE
+        horizontal_flip = TRANSFER_LEARNING_SETTING.HORIZONTAL_FLIP
+        fill_mode = TRANSFER_LEARNING_SETTING.FILL_MODE
+
         train_images = train_generator.flow_from_dataframe(
             dataframe=train_df,
-            x_col="Filepath",
-            y_col="Label",
-            target_size=(224, 224),
-            color_mode="rgb",
-            class_mode="categorical",
-            batch_size=32,
-            shuffle=True,
-            seed=0,
+            x_col=xcol,
+            y_col=ycol,
+            target_size=traget_size,
+            color_mode=color_mode,
+            class_mode=class_mode,
+            batch_size=batch_size,
+            shuffle=shuffle,
+            seed=seed,
             subset="training",
-            rotation_range=30,  # Uncomment to use data augmentation
-            zoom_range=0.15,
-            width_shift_range=0.2,
-            height_shift_range=0.2,
-            shear_range=0.15,
-            horizontal_flip=True,
-            fill_mode="nearest",
+            rotation_range=rotation_range,  # Uncomment to use data augmentation
+            zoom_range=zoom_range,
+            width_shift_range=width_shift_range,
+            height_shift_range=height_shift_range,
+            shear_range=shear_range,
+            horizontal_flip=horizontal_flip,
+            fill_mode=fill_mode,
         )
 
         val_images = train_generator.flow_from_dataframe(
             dataframe=train_df,
-            x_col="Filepath",
-            y_col="Label",
-            target_size=(224, 224),
-            color_mode="rgb",
-            class_mode="categorical",
-            batch_size=32,
-            shuffle=True,
-            seed=0,
+            x_col=xcol,
+            y_col=ycol,
+            target_size=traget_size,
+            color_mode=color_mode,
+            class_mode=class_mode,
+            batch_size=batch_size,
+            shuffle=shuffle,
+            seed=seed,
             subset="validation",
-            rotation_range=30,  # Uncomment to use data augmentation
-            zoom_range=0.15,
-            width_shift_range=0.2,
-            height_shift_range=0.2,
-            shear_range=0.15,
-            horizontal_flip=True,
-            fill_mode="nearest",
+            rotation_range=rotation_range,  # Uncomment to use data augmentation
+            zoom_range=zoom_range,
+            width_shift_range=width_shift_range,
+            height_shift_range=height_shift_range,
+            shear_range=shear_range,
+            horizontal_flip=horizontal_flip,
+            fill_mode=fill_mode,
         )
 
         test_images = test_generator.flow_from_dataframe(
             dataframe=test_df,
-            x_col="Filepath",
-            y_col="Label",
-            target_size=(224, 224),
-            color_mode="rgb",
-            class_mode="categorical",
-            batch_size=32,
+            x_col=xcol,
+            y_col=ycol,
+            target_size=traget_size,
+            color_mode=color_mode,
+            class_mode=class_mode,
+            batch_size=batch_size,
             shuffle=False,
         )
 
         return train_generator, test_generator, train_images, val_images, test_images
 
     def _create_model(self):
+        """
+        The model is a pretrained MobileNetV2 model without the top layer
+        :return: pretrained_model, train_generator, test_generator, train_images, val_images, test_images
+        """
+        x_input = TRANSFER_LEARNING_SETTING.FLOW_FROM_DIRECTORY_SETTING.IMAGE_SIZE
+        y_input = TRANSFER_LEARNING_SETTING.FLOW_FROM_DIRECTORY_SETTING.IMAGE_SIZE
+
         # Load the pretrained model
         pretrained_model = tf.keras.applications.MobileNetV2(
-            input_shape=(224, 224, 3),
-            include_top=False,
-            weights="imagenet",
-            pooling="avg",
+            input_shape=(x_input, y_input, 3),
+            include_top=TRANSFER_LEARNING_SETTING.INCLUDE_TOP,
+            weights=TRANSFER_LEARNING_SETTING.WEIGHTS,
+            pooling=TRANSFER_LEARNING_SETTING.POOLING,
         )
 
         pretrained_model.trainable = False
@@ -202,6 +263,21 @@ class TransferModel(Preprocessing, BitVision):
         )
 
     def train_model(self, num_categories=2, epochs=10, batch_size=32):
+        """
+        Train the model
+        :param num_categories: number of categories in the dataset
+        :param epochs: number of epochs
+        :param batch_size: batch size
+        """
+
+        if not num_categories:
+            # check number of subfolders in the self.image_df
+            folder_path = self.dataset_address  # Replace with the path to your folder
+            # Create a Path object for the specified folder
+            folder = Path(folder_path)
+            # Count the number of subfolders
+            num_categories = sum(item.is_dir() for item in folder.iterdir())
+
         (
             pretrained_model,
             train_generator,
@@ -212,16 +288,32 @@ class TransferModel(Preprocessing, BitVision):
         ) = self._create_model()
         inputs = pretrained_model.input
 
-        x = tf.keras.layers.Dense(128, activation="relu")(pretrained_model.output)
-        x = tf.keras.layers.Dense(128, activation="relu")(x)
+        number_of_units_layer_1 = TRANSFER_LEARNING_SETTING.NUMBER_OF_UNITS_LAYER_1
+        number_of_units_layer_2 = TRANSFER_LEARNING_SETTING.NUMBER_OF_UNITS_LAYER_2
+        activation = TRANSFER_LEARNING_SETTING.DENSE_LAYER_ACTIVATION
 
-        outputs = tf.keras.layers.Dense(num_categories, activation="softmax")(x)
+        x = tf.keras.layers.Dense(number_of_units_layer_1, activation=activation)(
+            pretrained_model.output
+        )
+        x = tf.keras.layers.Dense(number_of_units_layer_2, activation=activation)(x)
+
+        last_layer_activation = TRANSFER_LEARNING_SETTING.LAST_LAYER_ACTIVATION
+
+        outputs = tf.keras.layers.Dense(
+            num_categories, activation=last_layer_activation
+        )(x)
 
         model = tf.keras.Model(inputs=inputs, outputs=outputs)
 
-        model.compile(
-            optimizer="adam", loss="categorical_crossentropy", metrics=["accuracy"]
-        )
+        optimizer = TRANSFER_LEARNING_SETTING.OPTIMIZER
+        loss = TRANSFER_LEARNING_SETTING.LOSS
+        metrics = TRANSFER_LEARNING_SETTING.METRICS
+
+        model.compile(optimizer=optimizer, loss=loss, metrics=metrics)
+
+        monitor = TRANSFER_LEARNING_SETTING.MONITOR
+        patience = TRANSFER_LEARNING_SETTING.PATIENCE
+        restore_best_weights = TRANSFER_LEARNING_SETTING.RESTORE_BEST_WEIGHTS
 
         history = model.fit(
             train_images,
@@ -230,7 +322,9 @@ class TransferModel(Preprocessing, BitVision):
             epochs=epochs,
             callbacks=[
                 tf.keras.callbacks.EarlyStopping(
-                    monitor="val_loss", patience=2, restore_best_weights=True
+                    monitor=monitor,
+                    patience=patience,
+                    restore_best_weights=restore_best_weights,
                 )
             ],
         )
@@ -412,7 +506,7 @@ class TransferModel(Preprocessing, BitVision):
 
     def grad_cam_viz(self, *args, **kwargs):
         preprocess_input = tf.keras.applications.mobilenet_v2.preprocess_input
-        decode_predictions = tf.keras.applications.mobilenet_v2.decode_predictions
+        # decode_predictions = tf.keras.applications.mobilenet_v2.decode_predictions
 
         num_rows = kwargs.get("num_rows", None)
         num_cols = kwargs.get("num_cols", None)
