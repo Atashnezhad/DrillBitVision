@@ -714,11 +714,11 @@ if __name__ == "__main__":
         dataset_address=Path(__file__).parent / ".." / "dataset"
     )
 
-    # transfer_model.plot_classes_number()
+    transfer_model.plot_classes_number()
     transfer_model.analyze_image_names()
-    # transfer_model.plot_data_images(num_rows=3, num_cols=3)
-    # transfer_model.train_model()
-    # transfer_model.plot_metrics_results()
-    # transfer_model.results()
-    # transfer_model.predcit_test()
-    # transfer_model.grad_cam_viz(num_rows=3, num_cols=2)
+    transfer_model.plot_data_images(num_rows=3, num_cols=3)
+    transfer_model.train_model()
+    transfer_model.plot_metrics_results()
+    transfer_model.results()
+    transfer_model.predcit_test()
+    transfer_model.grad_cam_viz(num_rows=3, num_cols=2)
