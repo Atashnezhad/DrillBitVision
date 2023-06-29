@@ -27,39 +27,56 @@ category using the ImageDataGenerator class from keras.preprocessing.image modul
 The augmented images are saved to the dataset_augmented directory.
 
 ### Bit Vision Module
-The BitVision class is designed to train a neural network model for bit vision. It provides various methods for assembling and training the model, as well as performing predictions and visualizations.
-The class has an initialization method that sets the train_test_val_dir attribute, which represents the directory where the training, testing, and validation data is stored. It also initializes other attributes such as model, train_vali_gens, and model_class_indices.
-The categories property returns a list of categories based on the subdirectories in the train_test_val_dir. It filters out any unwanted categories specified in the IGNORE_LIST.
-The data_details property returns a dictionary containing the details of the training, testing, and validation data. It counts the number of files in each category and stores the information in the dictionary.
-The assemble_deep_net_model method creates a sequential model for the neural network. It adds convolutional, batch normalization, max pooling, dropout, and dense layers to the model based on predefined settings.
-The compile_model method compiles the model by specifying the optimizer, loss function, and metrics to be used during training.
-The plot_image_category method plots images from the training data for each category. It accepts parameters such as the number of rows and columns in the plot, the subdirectory (e.g., "train"), and the figure size.
-The _rescaling method is responsible for rescaling the images before training. It uses the ImageDataGenerator class from Keras to rescale the images based on the specified settings.
-The check_points method returns a ModelCheckpoint object, which is used to save the best model during training based on a specified monitor metric.
-The train_model method trains the model using the training and validation data. It uses the fit_generator function to perform the training, specifying various parameters such as the number of epochs, validation data, class weights, and callbacks (including the checkpoint).
-The plot_history method plots the training and validation loss and accuracy over epochs. It generates separate plots for each metric and saves the figure as "history.png".
-The filter_out_list method filters out unwanted elements from a given list based on a predefined ignore list.
-The predict method performs predictions on test images using the trained model. It loads the model, iterates over each category, selects test images, and predicts their labels. It plots the images with their predicted labels and saves the figures in a specified directory.
-The grad_cam_viz method visualizes the class activation heatmap using Grad-CAM. It loads the model, prepares the input image, generates the heatmap using the last convolutional layer, and displays the heatmap along with the original image. The resulting heatmap is saved as an image file.
-Overall, the BitVision class provides functionality for training, evaluating, and visualizing a neural network model for bit vision tasks. It encapsulates the necessary preprocessing steps, model assembly, training process, and prediction visualization, making it convenient to use for bit vision applications.
-
-### Process Module
-```mermaid
-flowchart LR
-
-A[Download Data\n Bing module] --> B[1-find category names\n 2-make an image dictionary]
-B --> C[Augment data] --> D
-D[Train Test  Val Split] --> E[Populate images into the\ntrain test val folders] --> F[Train the model]
-```
 
 
-### Bit Vision Module
-```mermaid
-flowchart LR
-A[Categories\nproperty] --> B[Data Details\nproperty]
-B --> C[Assemble Model] --> D[Compile Model] --> E[Rescale Images\nTrain and Val] 
---> F[Fit Model] --> G[Save Model]
-```
+BitVision is a versatile library initially designed for training, evaluating, and visualizing neural network models specifically tailored to subject with focus on drilling engineering classification tasks. However, it has since evolved to support general classification problems beyond drilling bits. With BitVision, you can effortlessly assemble and train models, make predictions, and generate visualizations for various classification applications, including but not limited to drilling bits.
+- **Model Assembly**: BitVision provides methods to assemble deep neural network models for bit vision tasks. You can add convolutional layers, batch normalization, max pooling, dropout, and dense layers based on predefined settings.
+
+- **Data Preparation**: The library handles data preprocessing tasks such as rescaling images using the ImageDataGenerator class from Keras. It also allows you to obtain details about the training, testing, and validation data, including the number of files in each category.
+
+- **Training and Evaluation**: BitVision simplifies the model training process with the fit_generator function. You can specify the number of epochs, validation data, class weights, and utilize ModelCheckpoint to save the best model based on a chosen metric. Additionally, the library provides methods to plot training and validation loss and accuracy over epochs.
+
+- **Prediction Visualization**: With BitVision, you can easily perform predictions on test images using the trained model. The library facilitates plotting images with their predicted labels and saving the figures for analysis and presentation.
+
+- **Grad-CAM Visualization**: BitVision offers functionality to visualize class activation heatmaps using Grad-CAM. You can overlay the heatmaps on the original images and save the resulting visualizations.
+
+### Transfer Learning Module
+
+The code imports necessary libraries and modules, including TensorFlow, NumPy, pandas, seaborn, and matplotlib.
+The code defines a class called TransferModel that inherits from two other classes: Preprocessing and BitVision. These classes seem to provide additional functionality for data preprocessing and working with images.
+The TransferModel class has several methods for preparing the data, plotting class distributions, analyzing image names, plotting images, performing train-test split, creating data generators, and creating the model.
+The TransferModel class uses the MobileNetV2 architecture for transfer learning. It includes methods for creating data generators using ImageDataGenerator from TensorFlow and training the model.
+
+
+[//]: # (### Process Module)
+
+[//]: # (```mermaid)
+
+[//]: # (flowchart LR)
+
+[//]: # ()
+[//]: # (A[Download Data\n Bing module] --> B[1-find category names\n 2-make an image dictionary])
+
+[//]: # (B --> C[Augment data] --> D)
+
+[//]: # (D[Train Test  Val Split] --> E[Populate images into the\ntrain test val folders] --> F[Train the model])
+
+[//]: # (```)
+
+
+[//]: # (### Bit Vision Module)
+
+[//]: # (```mermaid)
+
+[//]: # (flowchart LR)
+
+[//]: # (A[Categories\nproperty] --> B[Data Details\nproperty])
+
+[//]: # (B --> C[Assemble Model] --> D[Compile Model] --> E[Rescale Images\nTrain and Val] )
+
+[//]: # (--> F[Fit Model] --> G[Save Model])
+
+[//]: # (```)
 
 ## Grad Cam Heatmap - Rollercone Bit
 ![alt text](figures/grad_cam_rc_1.png "Logo Title Text 1")
@@ -126,6 +143,36 @@ if __name__ == "__main__":
         img_to_be_applied_path=Path(__file__).parent / "dataset_train_test_val" / "test" / "pdc_bit" / list_of_images[0],
         output_gradcam_fig_name="gradcam.png"
     )
+```
+
+## Using TransferLearning Module
+```python
+from neural_network_model.transfer_learning import TransferModel
+from pathlib import Path
 
 
+transfer_model = TransferModel(
+        dataset_address=Path(__file__).parent / "dataset"
+    )
 
+transfer_model.plot_classes_number()
+transfer_model.analyze_image_names()
+transfer_model.plot_data_images(num_rows=3, num_cols=3)
+transfer_model.train_model()
+transfer_model.plot_metrics_results()
+transfer_model.results()
+transfer_model.predcit_test()
+transfer_model.grad_cam_viz(num_rows=3, num_cols=2)
+```
+
+Note that the dataset structure should be as follows:
+```
+├── dataset
+│   ├── class 1
+│   └── class 2
+│   └── class 3
+│   └── class .
+│   └── class .
+│   └── class .
+│   └── class N      
+```

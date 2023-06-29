@@ -74,7 +74,7 @@ class ModelSetting(BaseModel):
     # compile
     LOSS: str = "categorical_crossentropy"
     METRICS: List = [
-        'accuracy',
+        "accuracy",
         # 'precision',
         # 'recall',
         # 'f1_score'
@@ -217,7 +217,41 @@ class Setting(BaseModel):
         return Setting(**data)
 
 
+class TransferLearnignSetting(Setting):
+    # prepare data frame in pandas
+    DF_X_COL_NAME: str = "Filepath"
+    DF_Y_COL_NAME: str = "Label"
+
+    TRAIN_SIZE: float = 0.9
+    SHUFFLE: bool = True
+    RANDOM_STATE: int = 1
+
+    # training
+    VALIDATION_SPLIT: float = 0.1
+
+    # MobileNetV2 network details
+    WEIGHTS: str = "imagenet"
+    POOLING: str = "avg"
+    INCLUDE_TOP: bool = False
+
+    DENSE_LAYER_ACTIVATION: str = "relu"
+
+    DENSE_LAYER_1_UNITS: int = 128
+    DENSE_LAYER_2_UNITS: int = 128
+
+    LAST_LAYER_ACTIVATION: str = "softmax"
+
+    OPTIMIZER: str = "adam"
+    LOSS: str = "categorical_crossentropy"
+    METRICS: list = ["accuracy"]
+
+    MONITOR: str = "val_loss"
+    PATIENCE: int = 5
+    RESTORE_BEST_WEIGHTS: bool = True
+
+
 SETTING = Setting()
+TRANSFER_LEARNING_SETTING = TransferLearnignSetting()
 
 if __name__ == "__main__":
     # print(SETTING.EC2_SETTING.SECURITY_GROUP_ID)
