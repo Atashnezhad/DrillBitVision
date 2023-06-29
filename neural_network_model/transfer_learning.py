@@ -114,7 +114,13 @@ class TransferModel(Preprocessing, BitVision):
         plt.show()
 
     def analyze_image_names(
-        self, figsize=(20, 22), figsize_2=(10, 7), cmap_2="YlGnBu", size=15, label_size=25, num_cluster=5
+        self,
+        figsize=(20, 22),
+        figsize_2=(10, 7),
+        cmap_2="YlGnBu",
+        size=15,
+        label_size=25,
+        num_cluster=5,
     ) -> None:
         """
         Analyze the image names if there is any pattern in the names
@@ -626,7 +632,12 @@ class TransferModel(Preprocessing, BitVision):
         return heatmap.numpy()
 
     def _save_and_display_gradcam(
-        self, img_path, heatmap, cam_name="transf_cam.jpg", cam_path=Path(__file__).parent / ".." / "figures", alpha=0.4
+        self,
+        img_path,
+        heatmap,
+        cam_name="transf_cam.jpg",
+        cam_path=Path(__file__).parent / ".." / "figures",
+        alpha=0.4,
     ):
         # Load the original image
         img = tf.keras.preprocessing.image.load_img(img_path)
