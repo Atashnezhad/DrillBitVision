@@ -18,9 +18,7 @@ def test_run_all():
     assert True
 
     script_path = (
-            Path(__file__).parent / ".." / "neural_network_model" / "transfer_learning.py"
+        Path(__file__).parent / ".." / "neural_network_model" / "transfer_learning.py"
     )
     os.system(f"python {script_path}")
     assert True
-
-
