@@ -23,7 +23,7 @@ from neural_network_model.model import TRANSFER_LEARNING_SETTING
 from neural_network_model.process_data import Preprocessing
 
 
-class TransferModel(Preprocessing, BitVision):
+class TransferModel(Preprocessing):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
@@ -158,20 +158,20 @@ class TransferModel(Preprocessing, BitVision):
 
         xcol = TRANSFER_LEARNING_SETTING.DF_X_COL_NAME
         ycol = TRANSFER_LEARNING_SETTING.DF_Y_COL_NAME
-        traget_size = TRANSFER_LEARNING_SETTING.TARGET_SIZE
-        color_mode = TRANSFER_LEARNING_SETTING.COLOR_MODE
-        class_mode = TRANSFER_LEARNING_SETTING.CLASS_MODE
-        batch_size = TRANSFER_LEARNING_SETTING.BATCH_SIZE
-        shuffle = TRANSFER_LEARNING_SETTING.SHUFFLE
-        seed = TRANSFER_LEARNING_SETTING.SEED
+        traget_size = TRANSFER_LEARNING_SETTING.FLOW_FROM_DIRECTORY_SETTING.TARGET_SIZE
+        color_mode = TRANSFER_LEARNING_SETTING.FLOW_FROM_DIRECTORY_SETTING.COLOR_MODE
+        class_mode = TRANSFER_LEARNING_SETTING.FLOW_FROM_DIRECTORY_SETTING.CLASS_MODE
+        batch_size = TRANSFER_LEARNING_SETTING.FLOW_FROM_DIRECTORY_SETTING.BATCH_SIZE
+        shuffle = TRANSFER_LEARNING_SETTING.FLOW_FROM_DIRECTORY_SETTING.SHUFFLE
+        seed = TRANSFER_LEARNING_SETTING.FLOW_FROM_DIRECTORY_SETTING.SEED
 
-        rotation_range = TRANSFER_LEARNING_SETTING.ROTATION_RANGE
-        zoom_range = TRANSFER_LEARNING_SETTING.ZOOM_RANGE
-        width_shift_range = TRANSFER_LEARNING_SETTING.WIDTH_SHIFT_RANGE
-        height_shift_range = TRANSFER_LEARNING_SETTING.HEIGHT_SHIFT_RANGE
-        shear_range = TRANSFER_LEARNING_SETTING.SHEAR_RANGE
-        horizontal_flip = TRANSFER_LEARNING_SETTING.HORIZONTAL_FLIP
-        fill_mode = TRANSFER_LEARNING_SETTING.FILL_MODE
+        rotation_range = TRANSFER_LEARNING_SETTING.AUGMENTATION_SETTING.ROTATION_RANGE
+        zoom_range = TRANSFER_LEARNING_SETTING.AUGMENTATION_SETTING.ZOOM_RANGE
+        width_shift_range = TRANSFER_LEARNING_SETTING.AUGMENTATION_SETTING.WIDTH_SHIFT_RANGE
+        height_shift_range = TRANSFER_LEARNING_SETTING.AUGMENTATION_SETTING.HEIGHT_SHIFT_RANGE
+        shear_range = TRANSFER_LEARNING_SETTING.AUGMENTATION_SETTING.SHEAR_RANGE
+        horizontal_flip = TRANSFER_LEARNING_SETTING.AUGMENTATION_SETTING.HORIZONTAL_FLIP
+        fill_mode = TRANSFER_LEARNING_SETTING.AUGMENTATION_SETTING.FILL_MODE
 
         train_images = train_generator.flow_from_dataframe(
             dataframe=train_df,
@@ -262,7 +262,7 @@ class TransferModel(Preprocessing, BitVision):
             test_images,
         )
 
-    def train_model(self, num_categories=2, epochs=10, batch_size=32):
+    def train_model(self, epochs=10, batch_size=32):
         """
         Train the model
         :param num_categories: number of categories in the dataset
@@ -270,13 +270,12 @@ class TransferModel(Preprocessing, BitVision):
         :param batch_size: batch size
         """
 
-        if not num_categories:
-            # check number of subfolders in the self.image_df
-            folder_path = self.dataset_address  # Replace with the path to your folder
-            # Create a Path object for the specified folder
-            folder = Path(folder_path)
-            # Count the number of subfolders
-            num_categories = sum(item.is_dir() for item in folder.iterdir())
+        # check number of subfolders in the self.image_df
+        folder_path = self.dataset_address  # Replace with the path to your folder
+        # Create a Path object for the specified folder
+        folder = Path(folder_path)
+        # Count the number of subfolders
+        num_categories = sum(item.is_dir() for item in folder.iterdir())
 
         (
             pretrained_model,
@@ -288,8 +287,8 @@ class TransferModel(Preprocessing, BitVision):
         ) = self._create_model()
         inputs = pretrained_model.input
 
-        number_of_units_layer_1 = TRANSFER_LEARNING_SETTING.NUMBER_OF_UNITS_LAYER_1
-        number_of_units_layer_2 = TRANSFER_LEARNING_SETTING.NUMBER_OF_UNITS_LAYER_2
+        number_of_units_layer_1 = TRANSFER_LEARNING_SETTING.DENSE_LAYER_1_UNITS
+        number_of_units_layer_2 = TRANSFER_LEARNING_SETTING.DENSE_LAYER_2_UNITS
         activation = TRANSFER_LEARNING_SETTING.DENSE_LAYER_ACTIVATION
 
         x = tf.keras.layers.Dense(number_of_units_layer_1, activation=activation)(

@@ -217,7 +217,7 @@ class Setting(BaseModel):
         return Setting(**data)
 
 
-class TransferLearnignSetting(BaseModel, Setting):
+class TransferLearnignSetting(Setting):
     # prepare data frame in pandas
     DF_X_COL_NAME: str = "Filepath"
     DF_Y_COL_NAME: str = "Label"
@@ -246,7 +246,7 @@ class TransferLearnignSetting(BaseModel, Setting):
     METRICS: list = ["accuracy"]
 
     MONITOR: str = "val_loss"
-    PATIENCE: int = 2
+    PATIENCE: int = 5
     RESTORE_BEST_WEIGHTS: bool = True
 
 
