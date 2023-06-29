@@ -55,9 +55,12 @@ commit:
 .PHONY: run-flake8
 run-flake8:
 	isort neural_network_model/*.py
-	#isort tests/*.py
+	isort tests/*.py
+	isort chat/*.py
+
 	flake8 neural_network_model/*.py
-	#flake8 tests/*.py
+	flake8 tests/*.py
+	flake8 chat/*.py
 
 # lint
 .PHONY: run_flake8
