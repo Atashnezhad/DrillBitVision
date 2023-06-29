@@ -8,6 +8,7 @@ import math
 import os
 from pathlib import Path
 
+import matplotlib.pyplot as plt
 import matplotlib.cm as cm
 import numpy as np
 import pandas as pd
@@ -163,15 +164,19 @@ class TransferModel(Preprocessing, BitVision):
         ax[0].set_xlabel("Image width")
         ax[0].set_ylabel("Image height")
         ax[0].set_title("Is image width always equal to image height?")
+
         for single in image_df.classes.unique():
-            sns.kdeplot(
-                image_df[image_df.classes == single].width, ax=ax[1], label=single
-            )
+            # sns.kdeplot(
+            #     image_df[image_df.classes == single].width, ax=ax[1], label=single
+            # )
+            # Filter the data based on the 'classes' column
+            filtered_data = image_df[image_df.classes == single].width
+            plt.hist(filtered_data, density=True, alpha=0.5, label=single)
         ax[1].legend()
         ax[1].set_title("KDE-Plot of image width given classes")
         ax[1].set_xlabel("Image width")
         ax[1].set_ylabel("Density")
-        sns.distplot(image_df.width, ax=ax[2])
+        # sns.distplot(image_df.width, ax=ax[2])
         ax[2].set_xlabel("Image width")
         ax[2].set_ylabel("Density")
         ax[2].set_title("Overall image width distribution")
@@ -622,7 +627,7 @@ class TransferModel(Preprocessing, BitVision):
         return heatmap.numpy()
 
     def _save_and_display_gradcam(
-        self, img_path, heatmap, cam_path="cam.jpg", alpha=0.4
+        self, img_path, heatmap, cam_name="transf_cam.jpg", cam_path=Path(__file__).parent / ".." / "figures", alpha=0.4
     ):
         # Load the original image
         img = tf.keras.preprocessing.image.load_img(img_path)
@@ -648,7 +653,7 @@ class TransferModel(Preprocessing, BitVision):
         superimposed_img = tf.keras.preprocessing.image.array_to_img(superimposed_img)
 
         # Save the superimposed image
-        superimposed_img.save(cam_path)
+        superimposed_img.save(cam_path / cam_name)
 
         # Display Grad CAM
         #     display(Image(cam_path))
@@ -691,7 +696,7 @@ class TransferModel(Preprocessing, BitVision):
                     img_array, self.model, last_conv_layer_name
                 )
                 cam_path = self._save_and_display_gradcam(img_path, heatmap)
-                ax.imshow(plt.imread(cam_path))
+                ax.imshow(plt.imread(cam_path / "transf_cam.jpg"))
                 ax.set_title(
                     f"True: {test_df.Label.iloc[i]}\nPredicted: {self.pred[i]}"
                 )
@@ -717,7 +722,7 @@ if __name__ == "__main__":
     transfer_model.plot_classes_number()
     transfer_model.analyze_image_names()
     transfer_model.plot_data_images(num_rows=3, num_cols=3)
-    transfer_model.train_model()
+    transfer_model.train_model(epochs=3)
     transfer_model.plot_metrics_results()
     transfer_model.results()
     transfer_model.predcit_test()
