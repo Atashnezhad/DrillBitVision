@@ -155,7 +155,7 @@ transfer_model = TransferModel(
         dataset_address=Path(__file__).parent / "dataset"
     )
 
-transfer_model.plot_classes_number()
+transfer_model.plot_classes_number(figure_folder_path=Path(__file__).parent / "figures")
 transfer_model.analyze_image_names()
 transfer_model.plot_data_images(num_rows=3, num_cols=3)
 transfer_model.train_model()
