@@ -79,7 +79,11 @@ class TransferModel(Preprocessing, BitVision):
         logging.info("Data was prepared")
 
     def plot_classes_number(
-        self, figsize=(10, 5), x_rotation=0, palette="Greens_r", **kwargs,
+        self,
+        figsize=(10, 5),
+        x_rotation=0,
+        palette="Greens_r",
+        **kwargs,
     ) -> None:
         """
         Plot the number of images per species
@@ -89,8 +93,9 @@ class TransferModel(Preprocessing, BitVision):
         :param kwargs: figure_folder_path
         :return: None
         """
-        figure_folder_path = kwargs.get("figure_folder_path",
-                                        Path(__file__).parent / ".." / "figures")
+        figure_folder_path = kwargs.get(
+            "figure_folder_path", Path(__file__).parent / ".." / "figures"
+        )
         # check if the folder exists if not create it
         if not figure_folder_path.exists():
             os.makedirs(figure_folder_path)
@@ -141,8 +146,9 @@ class TransferModel(Preprocessing, BitVision):
         :param num_cluster: number of clusters - unsupervised learning on width of images
         """
 
-        figure_folder_path = kwargs.get("figure_folder_path",
-                                        Path(__file__).parent / ".." / "figures")
+        figure_folder_path = kwargs.get(
+            "figure_folder_path", Path(__file__).parent / ".." / "figures"
+        )
         # check if the folder exists if not create it
         if not figure_folder_path.exists():
             os.makedirs(figure_folder_path)
@@ -252,7 +258,9 @@ class TransferModel(Preprocessing, BitVision):
         plt.savefig(figure_folder_path / "cluster_number_per_class.png")
         plt.show()
 
-    def plot_data_images(self, num_rows=None, num_cols=None, figsize=(15, 10), **kwargs):
+    def plot_data_images(
+        self, num_rows=None, num_cols=None, figsize=(15, 10), **kwargs
+    ):
         """
         Plot the images in a grid
         :param num_rows: number of rows in the grid
@@ -262,8 +270,9 @@ class TransferModel(Preprocessing, BitVision):
         :return: None
         """
 
-        figure_folder_path = kwargs.get("figure_folder_path",
-                                        Path(__file__).parent / ".." / "figures")
+        figure_folder_path = kwargs.get(
+            "figure_folder_path", Path(__file__).parent / ".." / "figures"
+        )
         # check if the folder exists if not create it
         if not figure_folder_path.exists():
             os.makedirs(figure_folder_path)
@@ -527,9 +536,9 @@ class TransferModel(Preprocessing, BitVision):
         self.model.save(self.model_address)
 
     def plot_metrics_results(self, **kwargs):
-
-        figure_folder_path = kwargs.get("figure_folder_path",
-                                        Path(__file__).parent / ".." / "figures")
+        figure_folder_path = kwargs.get(
+            "figure_folder_path", Path(__file__).parent / ".." / "figures"
+        )
         # check if the folder exists if not create it
         if not figure_folder_path.exists():
             os.makedirs(figure_folder_path)
@@ -589,8 +598,9 @@ class TransferModel(Preprocessing, BitVision):
             test_images,
         ) = self._create_gen()
 
-        figure_folder_path = kwargs.get("figure_folder_path",
-                                        Path(__file__).parent / ".." / "figures")
+        figure_folder_path = kwargs.get(
+            "figure_folder_path", Path(__file__).parent / ".." / "figures"
+        )
         # check if the folder exists if not create it
         if not figure_folder_path.exists():
             os.makedirs(figure_folder_path)
@@ -687,7 +697,9 @@ class TransferModel(Preprocessing, BitVision):
             figure_folder_path: the path to the folder where we want to save the cam (default: figures)
         """
 
-        cam_path = kwargs.get("figure_folder_path", Path(__file__).parent / ".." / "figures")
+        cam_path = kwargs.get(
+            "figure_folder_path", Path(__file__).parent / ".." / "figures"
+        )
         # check if the cam_path exists if not create it
         if not os.path.exists(cam_path):
             os.makedirs(cam_path)
