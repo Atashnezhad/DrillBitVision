@@ -79,15 +79,26 @@ class TransferModel(Preprocessing, BitVision):
         logging.info("Data was prepared")
 
     def plot_classes_number(
-        self, figsize=(10, 5), x_rotation=0, palette="Greens_r"
+        self,
+        figsize=(10, 5),
+        x_rotation=0,
+        palette="Greens_r",
+        **kwargs,
     ) -> None:
         """
         Plot the number of images per species
         :param figsize: size of the figure
         :param x_rotation: rotation of the x-axis
         :param palette: color palette
+        :param kwargs: figure_folder_path
         :return: None
         """
+        figure_folder_path = kwargs.get(
+            "figure_folder_path", Path(__file__).parent / ".." / "figures"
+        )
+        # check if the folder exists if not create it
+        if not figure_folder_path.exists():
+            os.makedirs(figure_folder_path)
 
         base_path = self.dataset_address
         subfolders = os.listdir(base_path)
@@ -111,6 +122,8 @@ class TransferModel(Preprocessing, BitVision):
         plt.xticks(rotation=x_rotation)
         plt.title("How many images per classes are given in the data?")
         plt.tight_layout()
+        # save the plot in the figures folder
+        plt.savefig(figure_folder_path / "classes_number.png")
         plt.show()
 
     def analyze_image_names(
@@ -121,6 +134,7 @@ class TransferModel(Preprocessing, BitVision):
         size=15,
         label_size=25,
         num_cluster=5,
+        **kwargs,
     ) -> None:
         """
         Analyze the image names if there is any pattern in the names
@@ -131,6 +145,14 @@ class TransferModel(Preprocessing, BitVision):
         :param label_size: size of the labels
         :param num_cluster: number of clusters - unsupervised learning on width of images
         """
+
+        figure_folder_path = kwargs.get(
+            "figure_folder_path", Path(__file__).parent / ".." / "figures"
+        )
+        # check if the folder exists if not create it
+        if not figure_folder_path.exists():
+            os.makedirs(figure_folder_path)
+
         base_path = self.dataset_address
         subfolders = os.listdir(base_path)
         filtered_subfolders = self._filter_out_list(list_to_be_edited=subfolders)
@@ -177,6 +199,8 @@ class TransferModel(Preprocessing, BitVision):
             # Filter the data based on the 'classes' column
             filtered_data = image_df[image_df.classes == single].width
             plt.hist(filtered_data, density=True, alpha=0.5, label=single)
+            # show the legend
+            plt.legend()
         ax[1].legend()
         ax[1].set_title("KDE-Plot of image width given classes")
         ax[1].set_xlabel("Image width")
@@ -200,6 +224,8 @@ class TransferModel(Preprocessing, BitVision):
 
         # show the plot
         plt.tight_layout()
+        # save the plot in the figures folder
+        plt.savefig(figure_folder_path / "image_width_height.png")
         plt.show()
 
         # check if there is sort of cluster with respect to the image width
@@ -227,16 +253,29 @@ class TransferModel(Preprocessing, BitVision):
             "The cluster_number is related to the classes!\nThis is based on the images width and defined "
             "number of clusters"
         )
+        plt.tight_layout()
+        # save the plot in the figures folder
+        plt.savefig(figure_folder_path / "cluster_number_per_class.png")
         plt.show()
 
-    def plot_data_images(self, num_rows=None, num_cols=None, figsize=(15, 10)):
+    def plot_data_images(
+        self, num_rows=None, num_cols=None, figsize=(15, 10), **kwargs
+    ):
         """
         Plot the images in a grid
         :param num_rows: number of rows in the grid
         :param num_cols: number of columns in the grid
         :param figsize: size of the figure
+        :param kwargs: figure_folder_path
         :return: None
         """
+
+        figure_folder_path = kwargs.get(
+            "figure_folder_path", Path(__file__).parent / ".." / "figures"
+        )
+        # check if the folder exists if not create it
+        if not figure_folder_path.exists():
+            os.makedirs(figure_folder_path)
 
         if not num_rows and not num_cols:
             num_images = len(self.image_df)
@@ -273,6 +312,8 @@ class TransferModel(Preprocessing, BitVision):
                 ax.axis("off")  # Turn off the empty subplot
 
         plt.tight_layout()
+        # save the plot in the figures folder
+        plt.savefig(figure_folder_path / "images.png")
         plt.show()
 
     def train_test_split(self, *args, **kwargs):
@@ -491,8 +532,17 @@ class TransferModel(Preprocessing, BitVision):
         )
         self.model = model
         self.model_history = history
+        # save the model
+        self.model.save(self.model_address)
 
-    def plot_metrics_results(self):
+    def plot_metrics_results(self, **kwargs):
+        figure_folder_path = kwargs.get(
+            "figure_folder_path", Path(__file__).parent / ".." / "figures"
+        )
+        # check if the folder exists if not create it
+        if not figure_folder_path.exists():
+            os.makedirs(figure_folder_path)
+
         # Create subplots with 1 row and 2 columns
         fig, axes = plt.subplots(nrows=1, ncols=2, figsize=(12, 6))
 
@@ -513,6 +563,7 @@ class TransferModel(Preprocessing, BitVision):
         axes[1].legend(["Train", "Validation"])
 
         plt.tight_layout()
+        plt.savefig(figure_folder_path / "metrics.png")
         plt.show()
 
     @staticmethod
@@ -538,7 +589,7 @@ class TransferModel(Preprocessing, BitVision):
         print(" ## Test Loss: {:.5f}".format(results[0]))
         print("## Accuracy on the test set: {:.2f}%".format(results[1] * 100))
 
-    def predcit_test(self):
+    def predcit_test(self, **kwargs):
         (
             train_generator,
             test_generator,
@@ -546,6 +597,13 @@ class TransferModel(Preprocessing, BitVision):
             val_images,
             test_images,
         ) = self._create_gen()
+
+        figure_folder_path = kwargs.get(
+            "figure_folder_path", Path(__file__).parent / ".." / "figures"
+        )
+        # check if the folder exists if not create it
+        if not figure_folder_path.exists():
+            os.makedirs(figure_folder_path)
 
         # Predict the label of the test_images
         pred = self.model.predict(test_images)
@@ -572,20 +630,10 @@ class TransferModel(Preprocessing, BitVision):
             yticklabels=sorted(set(y_test)),
         )
         plt.title("Normalized Confusion Matrix")
+        plt.savefig(figure_folder_path / "confusion_matrix.png")
         plt.show()
 
         self.pred = pred
-
-        # # Display some pictures of the dataset with their labels and the predictions
-        # fig, axes = plt.subplots(
-        #     nrows=3, ncols=3, figsize=(15, 15), subplot_kw={"xticks": [], "yticks": []}
-        # )
-        #
-        # for i, ax in enumerate(axes.flat):
-        #     ax.imshow(plt.imread(test_df.Filepath.iloc[i]))
-        #     ax.set_title(f"True: {test_df.Label.iloc[i]}\nPredicted: {pred[i]}")
-        # plt.tight_layout()
-        # plt.show()
 
     def _get_img_array(self, img_path, size):
         img = tf.keras.preprocessing.image.load_img(img_path, target_size=size)
@@ -636,9 +684,26 @@ class TransferModel(Preprocessing, BitVision):
         img_path,
         heatmap,
         cam_name="transf_cam.jpg",
-        cam_path=Path(__file__).parent / ".." / "figures",
         alpha=0.4,
+        **kwargs,
     ):
+        """
+        Args:
+            img_path: path to our image
+            heatmap: the heatmap of our image
+        Keyword Args:
+            cam_name: name of the cam (default: transf_cam.jpg)
+            alpha: the alpha of the cam (default: 0.4)
+            figure_folder_path: the path to the folder where we want to save the cam (default: figures)
+        """
+
+        cam_path = kwargs.get(
+            "figure_folder_path", Path(__file__).parent / ".." / "figures"
+        )
+        # check if the cam_path exists if not create it
+        if not os.path.exists(cam_path):
+            os.makedirs(cam_path)
+
         # Load the original image
         img = tf.keras.preprocessing.image.load_img(img_path)
         img = tf.keras.preprocessing.image.img_to_array(img)
@@ -671,14 +736,25 @@ class TransferModel(Preprocessing, BitVision):
         return cam_path
 
     def grad_cam_viz(self, *args, **kwargs):
+        """
+        Visualize the Grad-CAM heatmap
+        Keyword Arguments:
+            num_rows {int} -- Number of rows of the subplot grid (default: {None})
+            num_cols {int} -- Number of columns of the subplot grid (default: {None})
+            last_conv_layer_name {str} -- Name of the last convolutional layer (default: {"Conv_1"})
+            img_size {tuple} -- Size of the image (default: {(224, 224)})
+            gard_cam_image_name {str} -- Name of the Grad-CAM image (default: {"transf_cam.jpg"})
+            figsize {tuple} -- Size of the figure (default: {(12, 6)})
+        """
         preprocess_input = tf.keras.applications.mobilenet_v2.preprocess_input
         # decode_predictions = tf.keras.applications.mobilenet_v2.decode_predictions
 
         num_rows = kwargs.get("num_rows", None)
         num_cols = kwargs.get("num_cols", None)
-
-        last_conv_layer_name = "Conv_1"
-        img_size = (224, 224)
+        last_conv_layer_name = kwargs.get("last_conv_layer_name", "Conv_1")
+        img_size = kwargs.get("img_size", (224, 224))
+        gard_cam_image_name = kwargs.get("gard_cam_image_name", "transf_cam.jpg")
+        figsize = kwargs.get("figsize", (8, 6))
 
         # Remove last layer's softmax
         self.model.layers[-1].activation = None
@@ -694,7 +770,7 @@ class TransferModel(Preprocessing, BitVision):
         else:
             num_images = num_rows * num_cols
 
-        fig, axes = plt.subplots(nrows=num_rows, ncols=num_cols, figsize=(12, 6))
+        fig, axes = plt.subplots(nrows=num_rows, ncols=num_cols, figsize=figsize)
 
         for i, ax in enumerate(axes.flat):
             if i < num_images:
@@ -706,7 +782,7 @@ class TransferModel(Preprocessing, BitVision):
                     img_array, self.model, last_conv_layer_name
                 )
                 cam_path = self._save_and_display_gradcam(img_path, heatmap)
-                ax.imshow(plt.imread(cam_path / "transf_cam.jpg"))
+                ax.imshow(plt.imread(cam_path / f"{gard_cam_image_name}"))
                 ax.set_title(
                     f"True: {test_df.Label.iloc[i]}\nPredicted: {self.pred[i]}"
                 )
