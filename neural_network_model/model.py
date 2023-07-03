@@ -229,6 +229,9 @@ class TransferLearnignSetting(Setting):
     # training
     VALIDATION_SPLIT: float = 0.1
 
+    # model save location
+    MODEL_SAVE_LOCATION: str = (Path(__file__).parent / ".." / "deep_model").resolve()
+
     # MobileNetV2 network details
     WEIGHTS: str = "imagenet"
     POOLING: str = "avg"
