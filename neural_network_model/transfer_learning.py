@@ -475,6 +475,9 @@ class TransferModel(Preprocessing, BitVision):
             model_save_location: location to save the model default is self.model_save_location
         """
         if kwargs.get("model_save_location"):
+            # check if the path exists if not create it
+            if not os.path.exists(kwargs.get("model_save_location")):
+                os.makedirs(kwargs.get("model_save_location"))
             self.model_save_path = kwargs.get("model_save_path")
         model_name = kwargs.get("model_name", "tf_model.h5")
 
