@@ -474,10 +474,10 @@ class TransferModel(Preprocessing, BitVision):
         kwargs:
             model_save_location: location to save the model default is self.model_save_location
         """
-        if kwargs.get("model_save_location"):
+        if kwargs.get("model_save_path"):
             # check if the path exists if not create it
-            if not os.path.exists(kwargs.get("model_save_location")):
-                os.makedirs(kwargs.get("model_save_location"))
+            if not os.path.exists(kwargs.get("model_save_path")):
+                os.makedirs(kwargs.get("model_save_path"))
             self.model_save_path = kwargs.get("model_save_path")
         model_name = kwargs.get("model_name", "tf_model.h5")
 
@@ -824,7 +824,9 @@ if __name__ == "__main__":
     transfer_model.plot_classes_number()
     transfer_model.analyze_image_names()
     transfer_model.plot_data_images(num_rows=3, num_cols=3)
-    transfer_model.train_model(epochs=3)
+    transfer_model.train_model(epochs=3,
+                               model_save_path=(Path(__file__).parent / ".." / "deep_model").resolve(),
+                               model_name="tf_model_2.h5")
     transfer_model.plot_metrics_results()
     transfer_model.results()
     transfer_model.predcit_test()
