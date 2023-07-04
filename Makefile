@@ -132,3 +132,8 @@ test-coverage:
 .PHONY: git-rm-cache
 git-rm-cache:
 	@git rm -r --cached .
+
+# find files with a specific name
+.PHONY: find
+find:
+	@find . -name "dataset" -type d
