@@ -34,6 +34,7 @@ class TransferModel(Preprocessing, BitVision):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
+        self.model_save_path: str = TRANSFER_LEARNING_SETTING.MODEL_SAVE_LOCATION
         self.image_df: pd.DataFrame = None
 
         self._prepare_data()
@@ -44,10 +45,10 @@ class TransferModel(Preprocessing, BitVision):
         self.pred: np.ndarray = None
 
     def _prepare_data(
-        self,
-        print_data_head=False,
-        x_col=TRANSFER_LEARNING_SETTING.DF_X_COL_NAME,
-        y_col=TRANSFER_LEARNING_SETTING.DF_Y_COL_NAME,
+            self,
+            print_data_head=False,
+            x_col=TRANSFER_LEARNING_SETTING.DF_X_COL_NAME,
+            y_col=TRANSFER_LEARNING_SETTING.DF_Y_COL_NAME,
     ):
         """
         Prepare the data for the model
@@ -79,11 +80,11 @@ class TransferModel(Preprocessing, BitVision):
         logging.info("Data was prepared")
 
     def plot_classes_number(
-        self,
-        figsize=(10, 5),
-        x_rotation=0,
-        palette="Greens_r",
-        **kwargs,
+            self,
+            figsize=(10, 5),
+            x_rotation=0,
+            palette="Greens_r",
+            **kwargs,
     ) -> None:
         """
         Plot the number of images per species
@@ -127,14 +128,14 @@ class TransferModel(Preprocessing, BitVision):
         plt.show()
 
     def analyze_image_names(
-        self,
-        figsize=(20, 22),
-        figsize_2=(10, 7),
-        cmap_2="YlGnBu",
-        size=15,
-        label_size=25,
-        num_cluster=5,
-        **kwargs,
+            self,
+            figsize=(20, 22),
+            figsize_2=(10, 7),
+            cmap_2="YlGnBu",
+            size=15,
+            label_size=25,
+            num_cluster=5,
+            **kwargs,
     ) -> None:
         """
         Analyze the image names if there is any pattern in the names
@@ -259,7 +260,7 @@ class TransferModel(Preprocessing, BitVision):
         plt.show()
 
     def plot_data_images(
-        self, num_rows=None, num_cols=None, figsize=(15, 10), **kwargs
+            self, num_rows=None, num_cols=None, figsize=(15, 10), **kwargs
     ):
         """
         Plot the images in a grid
@@ -465,13 +466,17 @@ class TransferModel(Preprocessing, BitVision):
             test_images,
         )
 
-    def train_model(self, epochs=10, batch_size=32):
+    def train_model(self, epochs=10, batch_size=32, **kwargs):
         """
         Train the model
-        :param num_categories: number of categories in the dataset
         :param epochs: number of epochs
         :param batch_size: batch size
+        kwargs:
+            model_save_location: location to save the model default is self.model_save_location
         """
+        if kwargs.get("model_save_location"):
+            self.model_save_path = kwargs.get("model_save_path")
+        model_name = kwargs.get("model_name", "tf_model.h5")
 
         # check number of subfolders in the self.image_df
         folder_path = self.dataset_address  # Replace with the path to your folder
@@ -533,7 +538,8 @@ class TransferModel(Preprocessing, BitVision):
         self.model = model
         self.model_history = history
         # save the model
-        self.model.save(self.model_address)
+        self.model_save_path = os.path.join(self.model_save_path, model_name)
+        self.model.save(self.model_save_path)
 
     def plot_metrics_results(self, **kwargs):
         figure_folder_path = kwargs.get(
@@ -589,7 +595,7 @@ class TransferModel(Preprocessing, BitVision):
         print(" ## Test Loss: {:.5f}".format(results[0]))
         print("## Accuracy on the test set: {:.2f}%".format(results[1] * 100))
 
-    def predcit_test(self, **kwargs):
+    def predcit_test(self, model_path: str = None, **kwargs):
         (
             train_generator,
             test_generator,
@@ -601,6 +607,13 @@ class TransferModel(Preprocessing, BitVision):
         figure_folder_path = kwargs.get(
             "figure_folder_path", Path(__file__).parent / ".." / "figures"
         )
+
+        # Load the model
+        # here we check if the model_path path is provided and load it otherwise we use the self.model
+        # which is the model trained in the train method in the memory
+        if model_path is not None:
+            self.model = tf.keras.models.load_model(model_path)
+
         # check if the folder exists if not create it
         if not figure_folder_path.exists():
             os.makedirs(figure_folder_path)
@@ -644,7 +657,7 @@ class TransferModel(Preprocessing, BitVision):
         return array
 
     def _make_gradcam_heatmap(
-        self, img_array, model, last_conv_layer_name, pred_index=None
+            self, img_array, model, last_conv_layer_name, pred_index=None
     ):
         # First, we create a model that maps the input image to the activations
         # of the last conv layer as well as the output predictions
@@ -680,12 +693,12 @@ class TransferModel(Preprocessing, BitVision):
         return heatmap.numpy()
 
     def _save_and_display_gradcam(
-        self,
-        img_path,
-        heatmap,
-        cam_name="transf_cam.jpg",
-        alpha=0.4,
-        **kwargs,
+            self,
+            img_path,
+            heatmap,
+            cam_name="transf_cam.jpg",
+            alpha=0.4,
+            **kwargs,
     ):
         """
         Args:
