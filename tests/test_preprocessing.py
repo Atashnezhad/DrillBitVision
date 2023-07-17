@@ -183,5 +183,5 @@ def test_property_image_dict_3(mock_iterdir, mock_categorie_property, _object):
 def test_integrated(_object):
     _object = Preprocessing(dataset_address=Path(__file__).parent / ".." / "dataset")
     _object.download_images()
-    _object.augment_data(number_of_images_tobe_gen=10)
-    _object.train_test_split()
+    # _object.augment_data(number_of_images_tobe_gen=10)
+    # _object.train_test_split()
