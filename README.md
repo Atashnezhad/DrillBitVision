@@ -155,12 +155,15 @@ transfer_model = TransferModel(
         dataset_address=Path(__file__).parent / "dataset"
     )
 
-transfer_model.plot_classes_number(figure_folder_path=Path(__file__).parent / "figures")
+transfer_model.plot_classes_number()
 transfer_model.analyze_image_names()
 transfer_model.plot_data_images(num_rows=3, num_cols=3)
-transfer_model.train_model()
+transfer_model.train_model(epochs=3,
+                           model_save_path=(Path(__file__).parent / ".." / "deep_model").resolve(),
+                           model_name="tf_model_2.h5")
 transfer_model.plot_metrics_results()
 transfer_model.results()
+# one can pass the model address to the predict_test method
 transfer_model.predcit_test()
 transfer_model.grad_cam_viz(num_rows=3, num_cols=2)
 ```

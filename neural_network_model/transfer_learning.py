@@ -829,5 +829,6 @@ if __name__ == "__main__":
                                model_name="tf_model_2.h5")
     transfer_model.plot_metrics_results()
     transfer_model.results()
+    # one can pass the model address to the predict_test method
     transfer_model.predcit_test()
     transfer_model.grad_cam_viz(num_rows=3, num_cols=2)
