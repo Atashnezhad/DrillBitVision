@@ -5,6 +5,7 @@ from typing import List, Union
 from unittest import mock
 from unittest.mock import MagicMock, PropertyMock, patch
 
+import numpy as np
 import pytest
 
 # Get the parent directory of the current file (assuming the script is in the test folder)
@@ -185,3 +186,67 @@ def test_integrated(_object):
     _object.download_images()
     # _object.augment_data(number_of_images_tobe_gen=10)
     # _object.train_test_split()
+
+
+class XObjClass:
+    def shape(self):
+        return None
+
+    def reshape(self, *args, **kwargs):
+        print(args, kwargs)
+        return self
+
+
+def img_to_array_func(*args, **kwargs):
+    print(args, kwargs)
+    return XObjClass
+
+
+def load_image_func(*args, **kwargs):
+    print(args, kwargs)
+    return None
+
+
+class ImageAddressObject:
+    @property
+    def name(self):
+        return "test_image.jpg"
+
+
+def image_dict_object(*args, **kwargs):
+    print(args, kwargs)
+    return {
+        "pdc_bit": {"image_list": [ImageAddressObject], "number_of_images": 0},
+        "rollercone_bit": {"image_list": [ImageAddressObject], "number_of_images": 0},
+    }
+
+
+def test_augment_data(mocker, _object):
+
+    # mocker patch the property categories_name
+    mocker.patch(
+        "neural_network_model.process_data.Preprocessing.categorie_name",
+        new_callable=mocker.PropertyMock,
+        return_value=["pdc_bit", "rollercone_bit"],
+    )
+
+    # mocker patch the image dict object
+    mocker.patch(
+        "neural_network_model.process_data.Preprocessing.image_dict",
+        new_callable=mocker.PropertyMock,
+        side_effect=image_dict_object,
+    )
+
+    # mocker patch load_image function
+    mocker.patch(
+        "neural_network_model.process_data.load_img",
+        side_effect=load_image_func,
+    )
+
+    # mocker patch the img_to_array function
+    mocker.patch(
+        "neural_network_model.process_data.img_to_array",
+        side_effect=img_to_array_func,
+    )
+
+    _object.augment_data(number_of_images_tobe_gen=5)
