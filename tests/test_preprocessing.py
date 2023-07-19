@@ -190,7 +190,7 @@ def test_integrated(_object):
 
 class XObjClass:
     def shape(self):
-        return None
+        return ()
 
     def reshape(self, *args, **kwargs):
         print(args, kwargs)
