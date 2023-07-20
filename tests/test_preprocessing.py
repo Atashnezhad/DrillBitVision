@@ -188,22 +188,34 @@ def test_integrated(_object):
     # _object.train_test_split()
 
 
+class ImageObject:
+
+    def ImageDataGenerator(self, *args, **kwargs):
+        # print(args, kwargs)
+        return self
+
+    def flow(self, *args, **kwargs):
+        # print(args, kwargs)
+        return []
+
+
 class XObjClass:
-    def shape(self):
-        return None
+    @staticmethod
+    def shape():
+        return (1, 2, 3)
 
     def reshape(self, *args, **kwargs):
-        print(args, kwargs)
+        # print(args, kwargs)
         return self
 
 
 def img_to_array_func(*args, **kwargs):
-    print(args, kwargs)
+    # print(args, kwargs)
     return XObjClass
 
 
 def load_image_func(*args, **kwargs):
-    print(args, kwargs)
+    # print(args, kwargs)
     return None
 
 
@@ -214,7 +226,7 @@ class ImageAddressObject:
 
 
 def image_dict_object(*args, **kwargs):
-    print(args, kwargs)
+    # print(args, kwargs)
     return {
         "pdc_bit": {"image_list": [ImageAddressObject], "number_of_images": 0},
         "rollercone_bit": {"image_list": [ImageAddressObject], "number_of_images": 0},
@@ -247,6 +259,12 @@ def test_augment_data(mocker, _object):
     mocker.patch(
         "neural_network_model.process_data.img_to_array",
         side_effect=img_to_array_func,
+    )
+
+    # mocker patch the image module
+    mocker.patch(
+        "neural_network_model.process_data.image",
+        side_effect=ImageObject,
     )
 
     _object.augment_data(number_of_images_tobe_gen=5)
