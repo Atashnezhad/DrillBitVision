@@ -189,7 +189,6 @@ def test_integrated(_object):
 
 
 class ImageObject:
-
     def ImageDataGenerator(self, *args, **kwargs):
         # print(args, kwargs)
         return self
@@ -234,7 +233,6 @@ def image_dict_object(*args, **kwargs):
 
 
 def test_augment_data(mocker, _object):
-
     # mocker patch the property categories_name
     mocker.patch(
         "neural_network_model.process_data.Preprocessing.categorie_name",
