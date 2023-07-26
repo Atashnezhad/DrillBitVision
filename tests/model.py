@@ -22,3 +22,7 @@ class ImageAddressObject:
     @property
     def name(self):
         return "test_image.jpg"
+
+
+class TestAugmentData2Mock:
+    ...
