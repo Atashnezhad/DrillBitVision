@@ -242,6 +242,7 @@ def test_augment_data(mocker, _object):
 
     _object.augment_data(number_of_images_tobe_gen=5)
 
+
 # skip this test TODO: fix this test later
 @pytest.mark.skip
 def test_augment_data_2(mocker, _object):
