@@ -25,4 +25,24 @@ class ImageAddressObject:
 
 
 class TestAugmentData2Mock:
-    ...
+    def categorie_name(self, *args, **kwargs):
+        return ["pdc_bit", "rollercone_bit"]
+
+    def image_dict(self, *args, **kwargs):
+        return {
+            "pdc_bit": {"image_list": [ImageAddressObject], "number_of_images": 0},
+            "rollercone_bit": {
+                "image_list": [ImageAddressObject],
+                "number_of_images": 0,
+            },
+        }
+
+    def load_img(self, *args, **kwargs):
+        return None
+
+    def flow(self, *args, **kwargs):
+        return []
+
+    def img_to_array_func(*args, **kwargs):
+        # print(args, kwargs)
+        return XObjClass

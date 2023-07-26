@@ -20,7 +20,12 @@ import neural_network_model  # noqa: E402
 from neural_network_model.model import SETTING  # noqa: E402
 from neural_network_model.process_data import Preprocessing  # noqa: E402
 from neural_network_model.s3 import MyS3  # noqa: E402
-from tests.model import ImageObject, XObjClass, ImageAddressObject, TestAugmentData2Mock  # noqa: E402
+from tests.model import (
+    ImageObject,
+    XObjClass,
+    ImageAddressObject,
+    TestAugmentData2Mock,
+)  # noqa: E402
 
 warnings.filterwarnings("ignore", category=DeprecationWarning)
 
@@ -246,12 +251,12 @@ def test_augment_data(mocker, _object):
 # skip this test TODO: fix this test later
 @pytest.mark.skip
 def test_augment_data_2(mocker, _object):
-
     # mocker patch the property categories_name
     mocker.patch(
         "neural_network_model.process_data.Preprocessing.categorie_name",
         new_callable=mocker.PropertyMock,
-        return_value=["pdc_bit", "rollercone_bit"],
+        # return_value=["pdc_bit", "rollercone_bit"],
+        side_effect=TestAugmentData2Mock,
     )
 
     # mocker patch the image dict object
@@ -278,4 +283,5 @@ def test_augment_data_2(mocker, _object):
         "neural_network_model.process_data.image",
         side_effect=TestAugmentData2Mock,
     )
+
     _object.augment_data(number_of_images_tobe_gen=5)
