@@ -28,7 +28,8 @@ class TestAugmentData2Mock:
     def categorie_name(self, *args, **kwargs):
         return ["pdc_bit", "rollercone_bit"]
 
-    def image_dict(self, *args, **kwargs):
+    @staticmethod
+    def image_dict(*args, **kwargs):
         return {
             "pdc_bit": {"image_list": [ImageAddressObject], "number_of_images": 0},
             "rollercone_bit": {
@@ -37,12 +38,14 @@ class TestAugmentData2Mock:
             },
         }
 
-    def load_img(self, *args, **kwargs):
+    @staticmethod
+    def load_img(*args, **kwargs):
         return None
 
     def flow(self, *args, **kwargs):
         return []
 
+    @staticmethod
     def img_to_array_func(*args, **kwargs):
         # print(args, kwargs)
         return XObjClass

@@ -248,8 +248,7 @@ def test_augment_data(mocker, _object):
     _object.augment_data(number_of_images_tobe_gen=5)
 
 
-# skip this test TODO: fix this test later
-@pytest.mark.skip
+# here same test is done by just using one class
 def test_augment_data_2(mocker, _object):
     # mocker patch the property categories_name
     mocker.patch(
@@ -263,19 +262,19 @@ def test_augment_data_2(mocker, _object):
     mocker.patch(
         "neural_network_model.process_data.Preprocessing.image_dict",
         new_callable=mocker.PropertyMock,
-        side_effect=TestAugmentData2Mock,
+        side_effect=TestAugmentData2Mock.image_dict,
     )
 
     # mocker patch load_image function
     mocker.patch(
         "neural_network_model.process_data.load_img",
-        side_effect=TestAugmentData2Mock,
+        side_effect=TestAugmentData2Mock.load_img,
     )
 
     # mocker patch the img_to_array function
     mocker.patch(
         "neural_network_model.process_data.img_to_array",
-        side_effect=TestAugmentData2Mock,
+        side_effect=TestAugmentData2Mock.img_to_array_func,
     )
 
     # mocker patch the image module
