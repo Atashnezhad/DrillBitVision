@@ -13,18 +13,15 @@ current_dir = Path(__file__).resolve().parent
 # Get the parent directory of the current directory (assuming the test folder is one level below the main folder)
 main_dir = current_dir.parent
 # Add the main directory to the Python path
-sys.path.append(str(main_dir))
 
 import neural_network_model  # noqa: E402
 from neural_network_model.model import SETTING  # noqa: E402
 from neural_network_model.process_data import Preprocessing  # noqa: E402
 from neural_network_model.s3 import MyS3  # noqa: E402
-from tests.model import (  # noqa: E402
-    ImageObject,  # noqa: E402
-    XObjClass,  # noqa: E402
-    ImageAddressObject,  # noqa: E402
-    TestAugmentData2Mock,  # noqa: E402
-)  # noqa: E402
+from tests.model import ImageAddressObject  # noqa: E402
+from tests.model import ImageObject  # noqa: E402
+from tests.model import TestAugmentData2Mock  # noqa: E402
+from tests.model import XObjClass  # noqa: E402; noqa: E402
 
 warnings.filterwarnings("ignore", category=DeprecationWarning)
 
