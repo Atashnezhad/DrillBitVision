@@ -20,11 +20,11 @@ import neural_network_model  # noqa: E402
 from neural_network_model.model import SETTING  # noqa: E402
 from neural_network_model.process_data import Preprocessing  # noqa: E402
 from neural_network_model.s3 import MyS3  # noqa: E402
-from tests.model import (
-    ImageObject,
-    XObjClass,
-    ImageAddressObject,
-    TestAugmentData2Mock,
+from tests.model import ( # noqa: E402
+    ImageObject, # noqa: E402
+    XObjClass, # noqa: E402
+    ImageAddressObject, # noqa: E402
+    TestAugmentData2Mock, # noqa: E402
 )  # noqa: E402
 
 warnings.filterwarnings("ignore", category=DeprecationWarning)
