@@ -15,16 +15,15 @@ main_dir = current_dir.parent
 # Add the main directory to the Python path
 sys.path.append(str(main_dir))
 
-
 import neural_network_model  # noqa: E402
 from neural_network_model.model import SETTING  # noqa: E402
 from neural_network_model.process_data import Preprocessing  # noqa: E402
 from neural_network_model.s3 import MyS3  # noqa: E402
-from tests.model import ( # noqa: E402
-    ImageObject, # noqa: E402
-    XObjClass, # noqa: E402
-    ImageAddressObject, # noqa: E402
-    TestAugmentData2Mock, # noqa: E402
+from tests.model import (  # noqa: E402
+    ImageObject,  # noqa: E402
+    XObjClass,  # noqa: E402
+    ImageAddressObject,  # noqa: E402
+    TestAugmentData2Mock,  # noqa: E402
 )  # noqa: E402
 
 warnings.filterwarnings("ignore", category=DeprecationWarning)
@@ -47,7 +46,7 @@ def test_download_images_1(mocker, _object):
 # test_download_images_2, the mocker is used which is from pytest
 def test_download_images_2(_object):
     with mock.patch(
-        "neural_network_model.process_data.downloader"
+            "neural_network_model.process_data.downloader"
     ) as mock_bing_downloader:
         _object.download_images()
         print(mock_bing_downloader.download.call_count)
@@ -64,7 +63,7 @@ def test_download_images_3(mocker, _object):
     _object.download_images()
     print(mock_bing_downloader_download.call_count)
     assert (
-        mock_bing_downloader_download.call_count == 2
+            mock_bing_downloader_download.call_count == 2
     )  # by default, the number of categories to download is 2
     assert mock_logger_info.call_count == 1
     # assert mock_logger_info.call_args_list[0][0][0] == "Downloaded images"
