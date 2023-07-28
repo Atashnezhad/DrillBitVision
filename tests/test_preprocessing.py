@@ -60,7 +60,7 @@ def test_download_images_3(mocker, _object):
     _object.download_images()
     print(mock_bing_downloader_download.call_count)
     assert (
-            mock_bing_downloader_download.call_count == 2
+        mock_bing_downloader_download.call_count == 2
     )  # by default, the number of categories to download is 2
     assert mock_logger_info.call_count == 1
     # assert mock_logger_info.call_args_list[0][0][0] == "Downloaded images"
