@@ -475,7 +475,7 @@ class TransferModel(Preprocessing, BitVision):
             model_save_location: location to save the model default is self.model_save_location
             model_name: name of the model default is tf_model.h5
             loss: loss function default is categorical_crossentropy
-            metrics: metrics default is accuracy, precision, recall, f1_score
+            metrics:
         :return: None
         """
         if kwargs.get("model_save_path"):
@@ -613,6 +613,7 @@ class TransferModel(Preprocessing, BitVision):
         print("## Accuracy on the test set: {:.2f}%".format(results[1] * 100))
 
     def predict_test(self, model_path: str = None, **kwargs):
+
         (
             train_generator,
             test_generator,
