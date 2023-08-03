@@ -218,7 +218,7 @@ class Preprocessing:
                 img = load_img(img_address)
 
                 x = img_to_array(img)
-                x = x.reshape((1,) + x.shape)
+                x = x.reshape((1,) + x.shape())
 
                 for _ in Augment_data_gen.flow(
                     x,

@@ -5,6 +5,7 @@ from typing import List, Union
 from unittest import mock
 from unittest.mock import MagicMock, PropertyMock, patch
 
+import numpy as np
 import pytest
 
 # Get the parent directory of the current file (assuming the script is in the test folder)
@@ -12,13 +13,15 @@ current_dir = Path(__file__).resolve().parent
 # Get the parent directory of the current directory (assuming the test folder is one level below the main folder)
 main_dir = current_dir.parent
 # Add the main directory to the Python path
-sys.path.append(str(main_dir))
-
 
 import neural_network_model  # noqa: E402
 from neural_network_model.model import SETTING  # noqa: E402
 from neural_network_model.process_data import Preprocessing  # noqa: E402
 from neural_network_model.s3 import MyS3  # noqa: E402
+from tests.model import ImageAddressObject  # noqa: E402
+from tests.model import ImageObject  # noqa: E402
+from tests.model import TestAugmentData2Mock  # noqa: E402
+from tests.model import XObjClass  # noqa: E402; noqa: E402
 
 warnings.filterwarnings("ignore", category=DeprecationWarning)
 
@@ -40,7 +43,7 @@ def test_download_images_1(mocker, _object):
 # test_download_images_2, the mocker is used which is from pytest
 def test_download_images_2(_object):
     with mock.patch(
-        "neural_network_model.process_data.downloader"
+            "neural_network_model.process_data.downloader"
     ) as mock_bing_downloader:
         _object.download_images()
         print(mock_bing_downloader.download.call_count)
@@ -185,3 +188,95 @@ def test_integrated(_object):
     _object.download_images()
     # _object.augment_data(number_of_images_tobe_gen=10)
     # _object.train_test_split()
+
+
+def img_to_array_func(*args, **kwargs):
+    # print(args, kwargs)
+    return XObjClass
+
+
+def load_image_func(*args, **kwargs):
+    # print(args, kwargs)
+    return None
+
+
+def image_dict_object(*args, **kwargs):
+    # print(args, kwargs)
+    return {
+        "pdc_bit": {"image_list": [ImageAddressObject], "number_of_images": 0},
+        "rollercone_bit": {"image_list": [ImageAddressObject], "number_of_images": 0},
+    }
+
+
+def test_augment_data(mocker, _object):
+    # mocker patch the property categories_name
+    mocker.patch(
+        "neural_network_model.process_data.Preprocessing.categorie_name",
+        new_callable=mocker.PropertyMock,
+        return_value=["pdc_bit", "rollercone_bit"],
+    )
+
+    # mocker patch the image dict object
+    mocker.patch(
+        "neural_network_model.process_data.Preprocessing.image_dict",
+        new_callable=mocker.PropertyMock,
+        side_effect=image_dict_object,
+    )
+
+    # mocker patch load_image function
+    mocker.patch(
+        "neural_network_model.process_data.load_img",
+        side_effect=load_image_func,
+    )
+
+    # mocker patch the img_to_array function
+    mocker.patch(
+        "neural_network_model.process_data.img_to_array",
+        side_effect=img_to_array_func,
+    )
+
+    # mocker patch the image module
+    mocker.patch(
+        "neural_network_model.process_data.image",
+        side_effect=ImageObject,
+    )
+
+    _object.augment_data(number_of_images_tobe_gen=5)
+
+
+# here same test is done by just using one class
+def test_augment_data_2(mocker, _object):
+    # mocker patch the property categories_name
+    mocker.patch(
+        "neural_network_model.process_data.Preprocessing.categorie_name",
+        new_callable=mocker.PropertyMock,
+        # return_value=["pdc_bit", "rollercone_bit"],
+        side_effect=TestAugmentData2Mock,
+    )
+
+    # mocker patch the image dict object
+    mocker.patch(
+        "neural_network_model.process_data.Preprocessing.image_dict",
+        new_callable=mocker.PropertyMock,
+        side_effect=TestAugmentData2Mock.image_dict,
+    )
+
+    # mocker patch load_image function
+    mocker.patch(
+        "neural_network_model.process_data.load_img",
+        side_effect=TestAugmentData2Mock.load_img,
+    )
+
+    # mocker patch the img_to_array function
+    mocker.patch(
+        "neural_network_model.process_data.img_to_array",
+        side_effect=TestAugmentData2Mock.img_to_array_func,
+    )
+
+    # mocker patch the image module
+    mocker.patch(
+        "neural_network_model.process_data.image",
+        side_effect=TestAugmentData2Mock,
+    )
+
+    _object.augment_data(number_of_images_tobe_gen=5)
