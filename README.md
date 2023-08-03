@@ -146,14 +146,14 @@ if __name__ == "__main__":
 ```
 
 ## Using TransferLearning Module
+
 ```python
 from neural_network_model.transfer_learning import TransferModel
 from pathlib import Path
 
-
 transfer_model = TransferModel(
-        dataset_address=Path(__file__).parent / "dataset"
-    )
+    dataset_address=Path(__file__).parent / "dataset"
+)
 
 transfer_model.plot_classes_number()
 transfer_model.analyze_image_names()
@@ -164,7 +164,7 @@ transfer_model.train_model(epochs=3,
 transfer_model.plot_metrics_results()
 transfer_model.results()
 # one can pass the model address to the predict_test method
-transfer_model.predcit_test()
+transfer_model.predict_test()
 transfer_model.grad_cam_viz(num_rows=3, num_cols=2)
 ```
 

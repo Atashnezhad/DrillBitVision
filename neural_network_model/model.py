@@ -246,7 +246,12 @@ class TransferLearnignSetting(Setting):
 
     OPTIMIZER: str = "adam"
     LOSS: str = "categorical_crossentropy"
-    METRICS: list = ["accuracy"]
+    METRICS: list = [
+        "accuracy",
+        # 'precision',
+        # 'recall',
+        # 'f1_score'
+    ]
 
     MONITOR: str = "val_loss"
     PATIENCE: int = 5

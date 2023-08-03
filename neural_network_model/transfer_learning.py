@@ -473,6 +473,10 @@ class TransferModel(Preprocessing, BitVision):
         :param batch_size: batch size
         kwargs:
             model_save_location: location to save the model default is self.model_save_location
+            model_name: name of the model default is tf_model.h5
+            loss: loss function default is categorical_crossentropy
+            metrics: metrics default is accuracy, precision, recall, f1_score
+        :return: None
         """
         if kwargs.get("model_save_path"):
             # check if the path exists if not create it
@@ -516,10 +520,26 @@ class TransferModel(Preprocessing, BitVision):
         model = tf.keras.Model(inputs=inputs, outputs=outputs)
 
         optimizer = TRANSFER_LEARNING_SETTING.OPTIMIZER
-        loss = TRANSFER_LEARNING_SETTING.LOSS
-        metrics = TRANSFER_LEARNING_SETTING.METRICS
 
-        model.compile(optimizer=optimizer, loss=loss, metrics=metrics)
+        loss = kwargs.get("loss", TRANSFER_LEARNING_SETTING.LOSS)
+        metrics = kwargs.get("metrics", TRANSFER_LEARNING_SETTING.METRICS)
+
+        auc = tf.keras.metrics.AUC(
+            num_thresholds=200,
+            curve="ROC",
+            summation_method="interpolation",
+            name=None,
+            dtype=None,
+            thresholds=None,
+            multi_label=False,
+            num_labels=None,
+            label_weights=None,
+            from_logits=False,
+        )
+
+        categorical_accuracy = tf.keras.metrics.CategoricalAccuracy()
+
+        model.compile(optimizer=optimizer, loss=loss, metrics=[categorical_accuracy, auc])
 
         monitor = TRANSFER_LEARNING_SETTING.MONITOR
         patience = TRANSFER_LEARNING_SETTING.PATIENCE
@@ -552,24 +572,37 @@ class TransferModel(Preprocessing, BitVision):
         if not figure_folder_path.exists():
             os.makedirs(figure_folder_path)
 
-        # Create subplots with 1 row and 2 columns
-        fig, axes = plt.subplots(nrows=1, ncols=2, figsize=(12, 6))
+        nrows = kwargs.get("nrows", 2)
+        ncols = kwargs.get("ncols", 2)
+        figsize = kwargs.get("figsize", (14, 6))
 
-        # Plot Accuracy
-        axes[0].plot(self.model_history.history["accuracy"])
-        axes[0].plot(self.model_history.history["val_accuracy"])
-        axes[0].set_title("Accuracy")
-        axes[0].set_xlabel("Epoch")
-        axes[0].set_ylabel("Accuracy")
-        axes[0].legend(["Train", "Validation"])
+        # Create subplots dynamically based on the metrics present in self.model_history.history
+        num_metrics = len(self.model_history.history)
+        fig, axes = plt.subplots(nrows=1, ncols=num_metrics, figsize=(6 * num_metrics, 6))
 
-        # Plot Loss
-        axes[1].plot(self.model_history.history["loss"])
-        axes[1].plot(self.model_history.history["val_loss"])
-        axes[1].set_title("Loss")
-        axes[1].set_xlabel("Epoch")
-        axes[1].set_ylabel("Loss")
-        axes[1].legend(["Train", "Validation"])
+        # Define the metric names to plot (using the keys present in self.model_history.history)
+        metrics_to_plot = {
+            key: key.replace("val_", "").capitalize()
+            for key in self.model_history.history.keys()
+        }
+
+        for i, (metric, title) in enumerate(metrics_to_plot.items()):
+            # Plot metric
+            train_metric = self.model_history.history[metric]
+            val_metric = self.model_history.history.get('val_' + metric)
+            ax = axes[i]  # Get the individual axis for this metric
+            ax.plot(train_metric)
+            if val_metric is not None:
+                ax.plot(val_metric)
+                ax.set_title(title)
+                ax.set_xlabel("Epoch")
+                ax.set_ylabel(title)
+                ax.legend(["Train", "Validation"])
+            else:
+                ax.set_title(title)
+                ax.set_xlabel("Epoch")
+                ax.set_ylabel(title)
+                ax.legend(["Train"])
 
         plt.tight_layout()
         plt.savefig(figure_folder_path / "metrics.png")
@@ -598,7 +631,7 @@ class TransferModel(Preprocessing, BitVision):
         print(" ## Test Loss: {:.5f}".format(results[0]))
         print("## Accuracy on the test set: {:.2f}%".format(results[1] * 100))
 
-    def predcit_test(self, model_path: str = None, **kwargs):
+    def predict_test(self, model_path: str = None, **kwargs):
         (
             train_generator,
             test_generator,
@@ -771,6 +804,7 @@ class TransferModel(Preprocessing, BitVision):
         img_size = kwargs.get("img_size", (224, 224))
         gard_cam_image_name = kwargs.get("gard_cam_image_name", "transf_cam.jpg")
         figsize = kwargs.get("figsize", (8, 6))
+        title_lable_size = kwargs.get("title_lable_size", 12)
 
         # Remove last layer's softmax
         self.model.layers[-1].activation = None
@@ -802,6 +836,8 @@ class TransferModel(Preprocessing, BitVision):
                 ax.set_title(
                     f"True: {test_df.Label.iloc[i]}\nPredicted: {self.pred[i]}"
                 )
+                # title label size
+                ax.title.set_size(title_lable_size)
             else:
                 # Remove unused subplots
                 fig.delaxes(ax)
@@ -821,14 +857,16 @@ if __name__ == "__main__":
         dataset_address=Path(__file__).parent / ".." / "dataset"
     )
 
-    transfer_model.plot_classes_number()
-    transfer_model.analyze_image_names()
-    transfer_model.plot_data_images(num_rows=3, num_cols=3)
-    transfer_model.train_model(epochs=3,
-                               model_save_path=(Path(__file__).parent / ".." / "deep_model").resolve(),
-                               model_name="tf_model_2.h5")
+    # transfer_model.plot_classes_number()
+    # transfer_model.analyze_image_names()
+    # transfer_model.plot_data_images(num_rows=3, num_cols=3)
+    transfer_model.train_model(
+        epochs=3,
+        model_save_path=(Path(__file__).parent / ".." / "deep_model").resolve(),
+        model_name="tf_model_2.h5"
+    )
     transfer_model.plot_metrics_results()
     transfer_model.results()
     # one can pass the model address to the predict_test method
-    transfer_model.predcit_test()
+    transfer_model.predict_test()
     transfer_model.grad_cam_viz(num_rows=3, num_cols=2)
