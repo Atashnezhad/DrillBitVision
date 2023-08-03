@@ -568,7 +568,7 @@ class TransferModel(Preprocessing, BitVision):
 
         for metric, title in metrics_to_plot.items():
             logger.info(f"Plotting metric: {metric} and title: {title}")
-            plt.figure(figsize=(10, 6))
+            plt.figure(figsize=figsize)
             train_metric = self.model_history.history[metric.replace("val_", "")]
             val_metric = self.model_history.history[metric]
             plt.plot(train_metric)
@@ -812,18 +812,28 @@ class TransferModel(Preprocessing, BitVision):
                 heatmap = self._make_gradcam_heatmap(
                     img_array, self.model, last_conv_layer_name
                 )
-                cam_path = self._save_and_display_gradcam(img_path, heatmap)
+                cam_path = self._save_and_display_gradcam(
+                    img_path,
+                    heatmap,
+                    # cam_name=f"gard_cam_image_name_{i}.jpg"
+                )
                 ax.imshow(plt.imread(cam_path / f"{gard_cam_image_name}"))
                 ax.set_title(
                     f"True: {test_df.Label.iloc[i]}\nPredicted: {self.pred[i]}"
                 )
                 # title label size
                 ax.title.set_size(title_lable_size)
+
             else:
                 # Remove unused subplots
                 fig.delaxes(ax)
 
         plt.tight_layout()
+        # save the figure
+        plt.savefig(
+            Path(__file__).parent / ".." / "figures" / "grad_cam.png",
+            bbox_inches="tight",
+        )
         plt.show()
 
 
