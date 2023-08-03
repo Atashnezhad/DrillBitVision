@@ -568,17 +568,11 @@ class TransferModel(Preprocessing, BitVision):
         figure_folder_path = kwargs.get(
             "figure_folder_path", Path(__file__).parent / ".." / "figures"
         )
+
+        figsize = kwargs.get("figsize", (10, 6))
         # check if the folder exists if not create it
         if not figure_folder_path.exists():
             os.makedirs(figure_folder_path)
-
-        nrows = kwargs.get("nrows", 2)
-        ncols = kwargs.get("ncols", 2)
-        figsize = kwargs.get("figsize", (14, 6))
-
-        # Create subplots dynamically based on the metrics present in self.model_history.history
-        num_metrics = len(self.model_history.history)
-        fig, axes = plt.subplots(nrows=1, ncols=num_metrics, figsize=(6 * num_metrics, 6))
 
         # Define the metric names to plot (using the keys present in self.model_history.history)
         metrics_to_plot = {
@@ -586,26 +580,23 @@ class TransferModel(Preprocessing, BitVision):
             for key in self.model_history.history.keys()
         }
 
-        for i, (metric, title) in enumerate(metrics_to_plot.items()):
-            # Plot metric
+        for metric, title in metrics_to_plot.items():
+            plt.figure(figsize=figsize)
             train_metric = self.model_history.history[metric]
             val_metric = self.model_history.history.get('val_' + metric)
-            ax = axes[i]  # Get the individual axis for this metric
-            ax.plot(train_metric)
+            plt.plot(train_metric)
             if val_metric is not None:
-                ax.plot(val_metric)
-                ax.set_title(title)
-                ax.set_xlabel("Epoch")
-                ax.set_ylabel(title)
-                ax.legend(["Train", "Validation"])
-            else:
-                ax.set_title(title)
-                ax.set_xlabel("Epoch")
-                ax.set_ylabel(title)
-                ax.legend(["Train"])
+                plt.plot(val_metric)
+                plt.title(title)
+                plt.xlabel("Epoch")
+                plt.ylabel(title)
+                plt.legend(["Train", "Validation"])
+                plt.show()
 
-        plt.tight_layout()
-        plt.savefig(figure_folder_path / "metrics.png")
+            plt.tight_layout()
+            plt.savefig(figure_folder_path / f"{metric}.png")
+            plt.close()  # Close the figure after saving to avoid overlapping plots
+
         plt.show()
 
     @staticmethod
