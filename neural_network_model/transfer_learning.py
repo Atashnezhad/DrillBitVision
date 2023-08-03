@@ -240,7 +240,7 @@ class TransferModel(Preprocessing, BitVision):
         X = np.log(image_df[["width", "height"]].values)
         X = scaler.fit_transform(X)
 
-        km = KMeans(n_clusters=num_cluster, random_state=42)
+        km = KMeans(n_clusters=num_cluster, random_state=TRANSFER_LEARNING_SETTING.RANDOM_STATE)
         image_df["cluster_number"] = km.fit_predict(X)
 
         mean_width_height = image_df.groupby("cluster_number")[["width", "height"]].mean().values
