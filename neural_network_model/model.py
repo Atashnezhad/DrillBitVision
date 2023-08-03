@@ -5,7 +5,9 @@ from pprint import pprint
 from typing import List
 
 from dotenv import load_dotenv
-from pydantic import BaseModel
+from pydantic import BaseModel, Extra
+import tensorflow as tf
+from keras.metrics import AUC, CategoricalAccuracy
 from tensorflow import keras
 
 # Load environment variables from .env file
@@ -246,16 +248,35 @@ class TransferLearnignSetting(Setting):
 
     OPTIMIZER: str = "adam"
     LOSS: str = "categorical_crossentropy"
+    AUC_MTC: tf.keras.metrics.AUC = AUC(
+        num_thresholds=200,
+        curve="ROC",
+        summation_method="interpolation",
+        name=None,
+        dtype=None,
+        thresholds=None,
+        multi_label=False,
+        num_labels=None,
+        label_weights=None,
+        from_logits=False,
+    )
+
+    CAT_ACC: tf.keras.metrics.CategoricalAccuracy = CategoricalAccuracy()
+
     METRICS: list = [
-        "accuracy",
-        # 'precision',
-        # 'recall',
-        # 'f1_score'
+        AUC_MTC,
+        CAT_ACC
     ]
 
     MONITOR: str = "val_loss"
     PATIENCE: int = 5
     RESTORE_BEST_WEIGHTS: bool = True
+
+    class Config:
+        # Allow arbitrary types in default values
+        arbitrary_types_allowed = True
+        # Allow extra fields in the model (to ignore the pydantic ConfigError)
+        extra = Extra.allow
 
 
 SETTING = Setting()

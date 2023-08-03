@@ -524,22 +524,22 @@ class TransferModel(Preprocessing, BitVision):
         loss = kwargs.get("loss", TRANSFER_LEARNING_SETTING.LOSS)
         metrics = kwargs.get("metrics", TRANSFER_LEARNING_SETTING.METRICS)
 
-        auc = tf.keras.metrics.AUC(
-            num_thresholds=200,
-            curve="ROC",
-            summation_method="interpolation",
-            name=None,
-            dtype=None,
-            thresholds=None,
-            multi_label=False,
-            num_labels=None,
-            label_weights=None,
-            from_logits=False,
-        )
+        # auc = tf.keras.metrics.AUC(
+        #     num_thresholds=200,
+        #     curve="ROC",
+        #     summation_method="interpolation",
+        #     name=None,
+        #     dtype=None,
+        #     thresholds=None,
+        #     multi_label=False,
+        #     num_labels=None,
+        #     label_weights=None,
+        #     from_logits=False,
+        # )
+        #
+        # categorical_accuracy = tf.keras.metrics.CategoricalAccuracy()
 
-        categorical_accuracy = tf.keras.metrics.CategoricalAccuracy()
-
-        model.compile(optimizer=optimizer, loss=loss, metrics=[categorical_accuracy, auc])
+        model.compile(optimizer=optimizer, loss=loss, metrics=metrics)
 
         monitor = TRANSFER_LEARNING_SETTING.MONITOR
         patience = TRANSFER_LEARNING_SETTING.PATIENCE
@@ -578,23 +578,28 @@ class TransferModel(Preprocessing, BitVision):
         metrics_to_plot = {
             key: key.replace("val_", "").capitalize()
             for key in self.model_history.history.keys()
+            if key.startswith('val_')  # Only plot if there is a corresponding 'val_' metric
         }
 
         for metric, title in metrics_to_plot.items():
-            plt.figure(figsize=figsize)
-            train_metric = self.model_history.history[metric]
-            val_metric = self.model_history.history.get('val_' + metric)
+            logger.info(f"Plotting metric: {metric} and title: {title}")
+            plt.figure(figsize=(10, 6))
+            train_metric = self.model_history.history[metric.replace("val_", "")]
+            val_metric = self.model_history.history[metric]
             plt.plot(train_metric)
-            if val_metric is not None:
-                plt.plot(val_metric)
-                plt.title(title)
-                plt.xlabel("Epoch")
-                plt.ylabel(title)
-                plt.legend(["Train", "Validation"])
-                plt.show()
+            plt.plot(val_metric)
+            plt.title(title)
+            plt.xlabel("Epoch")
+            plt.ylabel(title)
+            plt.legend(["Train", "Validation"])
 
             plt.tight_layout()
+            # if val is in the metric name then strip it out
+            if "val" in metric:
+                metric = metric.replace("val_", "")
+
             plt.savefig(figure_folder_path / f"{metric}.png")
+            plt.show()
             plt.close()  # Close the figure after saving to avoid overlapping plots
 
         plt.show()
