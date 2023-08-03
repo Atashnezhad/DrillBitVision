@@ -524,21 +524,6 @@ class TransferModel(Preprocessing, BitVision):
         loss = kwargs.get("loss", TRANSFER_LEARNING_SETTING.LOSS)
         metrics = kwargs.get("metrics", TRANSFER_LEARNING_SETTING.METRICS)
 
-        # auc = tf.keras.metrics.AUC(
-        #     num_thresholds=200,
-        #     curve="ROC",
-        #     summation_method="interpolation",
-        #     name=None,
-        #     dtype=None,
-        #     thresholds=None,
-        #     multi_label=False,
-        #     num_labels=None,
-        #     label_weights=None,
-        #     from_logits=False,
-        # )
-        #
-        # categorical_accuracy = tf.keras.metrics.CategoricalAccuracy()
-
         model.compile(optimizer=optimizer, loss=loss, metrics=metrics)
 
         monitor = TRANSFER_LEARNING_SETTING.MONITOR
