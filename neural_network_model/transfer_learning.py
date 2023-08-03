@@ -612,7 +612,7 @@ class TransferModel(Preprocessing, BitVision):
         print(" ## Test Loss: {:.5f}".format(results[0]))
         print("## Accuracy on the test set: {:.2f}%".format(results[1] * 100))
 
-    def predict_test(self, model_path: str = None, **kwargs):
+    def predict_test(self, model_path: Path = None, **kwargs):
 
         (
             train_generator,
@@ -625,6 +625,7 @@ class TransferModel(Preprocessing, BitVision):
         figure_folder_path = kwargs.get(
             "figure_folder_path", Path(__file__).parent / ".." / "figures"
         )
+        conf_matx_normalize = kwargs.get("normalize", None)
 
         # Load the model
         # here we check if the model_path path is provided and load it otherwise we use the self.model
@@ -652,7 +653,7 @@ class TransferModel(Preprocessing, BitVision):
         y_test = list(test_df.Label)
         print(classification_report(y_test, pred))
 
-        cf_matrix = confusion_matrix(y_test, pred, normalize="true")
+        cf_matrix = confusion_matrix(y_test, pred, normalize=conf_matx_normalize)
         plt.figure(figsize=(10, 6))
         sns.heatmap(
             cf_matrix,
@@ -824,6 +825,8 @@ class TransferModel(Preprocessing, BitVision):
                 )
                 # title label size
                 ax.title.set_size(title_lable_size)
+                # set grid on
+                ax.grid(True)
 
             else:
                 # Remove unused subplots
@@ -852,13 +855,15 @@ if __name__ == "__main__":
     # transfer_model.plot_classes_number()
     # transfer_model.analyze_image_names()
     # transfer_model.plot_data_images(num_rows=3, num_cols=3)
-    transfer_model.train_model(
-        epochs=3,
-        model_save_path=(Path(__file__).parent / ".." / "deep_model").resolve(),
-        model_name="tf_model_2.h5"
-    )
-    transfer_model.plot_metrics_results()
-    transfer_model.results()
+    # transfer_model.train_model(
+    #     epochs=3,
+    #     model_save_path=(Path(__file__).parent / ".." / "deep_model").resolve(),
+    #     model_name="tf_model_2.h5"
+    # )
+    # transfer_model.plot_metrics_results()
+    # transfer_model.results()
     # one can pass the model address to the predict_test method
-    transfer_model.predict_test()
+    transfer_model.predict_test(
+        model_path=(Path(__file__).parent / ".." / "deep_model" / "tf_model.h5").resolve()
+    )
     transfer_model.grad_cam_viz(num_rows=3, num_cols=2)
