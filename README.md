@@ -91,11 +91,11 @@ The TransferModel class uses the MobileNetV2 architecture for transfer learning.
 pip install drillvision
 ```
 ## Usage
+
 ```python
 from pathlib import Path
 from neural_network_model.process_data import Preprocessing
 from neural_network_model.bit_vision import BitVision
-
 
 if __name__ == "__main__":
     # download the images
@@ -106,7 +106,7 @@ if __name__ == "__main__":
         number_of_images_tobe_gen=10,
         augment_data_address=Path(__file__).parent / "augmented_dataset"
     )
-    obj.train_test_split(
+    obj._train_test_split(
         augmented_data_address=Path(__file__).parent / "augmented_dataset",
         train_test_val_split_dir_address=Path(__file__).parent / "dataset_train_test_val"
     )
@@ -140,7 +140,8 @@ if __name__ == "__main__":
     obj.grad_cam_viz(
         model_path=Path(__file__).parent / "deep_model" / best_model,
         fig_to_save_address=Path(__file__).parent / "figures",
-        img_to_be_applied_path=Path(__file__).parent / "dataset_train_test_val" / "test" / "pdc_bit" / list_of_images[0],
+        img_to_be_applied_path=Path(__file__).parent / "dataset_train_test_val" / "test" / "pdc_bit" / list_of_images[
+            0],
         output_gradcam_fig_name="gradcam.png"
     )
 ```
