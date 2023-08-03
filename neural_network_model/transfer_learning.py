@@ -352,6 +352,7 @@ class TransferModel(Preprocessing, BitVision):
             train_size=train_size,
             shuffle=shuffle,
             random_state=random_state,
+            stratify=self.image_df[TRANSFER_LEARNING_SETTING.DF_Y_COL_NAME],  # Add stratify option
         )
         return train_df, test_df
 

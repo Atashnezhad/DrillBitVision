@@ -226,7 +226,7 @@ class TransferLearnignSetting(Setting):
 
     TRAIN_SIZE: float = 0.9
     SHUFFLE: bool = True
-    RANDOM_STATE: int = 1
+    RANDOM_STATE: int = 42
 
     # training
     VALIDATION_SPLIT: float = 0.1
