@@ -79,10 +79,10 @@ The TransferModel class uses the MobileNetV2 architecture for transfer learning.
 [//]: # (```)
 
 ## Grad Cam Heatmap - Rollercone Bit
-![alt text](figures/grad_cam_rc_1.png "Logo Title Text 1")
+![alt text](assets/grad_cam_rc_1.png "Logo Title Text 1")
 
 ## Grad Cam Heatmap - PDC Bit
-![alt text](figures/grad_cam_pdc_1.png "Logo Title Text 1")
+![alt text](assets/grad_cam_pdc_1.png "Logo Title Text 1")
 
 
 # How to use the Drill Bit Classifier Example
