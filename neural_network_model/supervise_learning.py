@@ -52,25 +52,26 @@ class SuperviseLearning:
         r, g, b = image[:, :, 0], image[:, :, 1], image[:, :, 2]
 
         # Compute Hessian matrix for each channel
-        H_r = hessian_matrix(r)
-        H_g = hessian_matrix(g)
-        H_b = hessian_matrix(b)
+        h_r = hessian_matrix(r)
+        h_g = hessian_matrix(g)
+        h_b = hessian_matrix(b)
 
         # Compute eigenvalues of Hessian matrix for each channel
-        eigenvals_r = hessian_matrix_eigvals(H_r)
-        eigenvals_g = hessian_matrix_eigvals(H_g)
-        eigenvals_b = hessian_matrix_eigvals(H_b)
+        eigenvals_r = hessian_matrix_eigvals(h_r)
+        eigenvals_g = hessian_matrix_eigvals(h_g)
+        eigenvals_b = hessian_matrix_eigvals(h_b)
 
         # Convert the image to grayscale
         image_gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
         # Compute Hessian matrix for the grayscale image
-        H = hessian_matrix(image_gray)
+        h = hessian_matrix(image_gray)
         # Compute eigenvalues of Hessian matrix
-        eigenvals = hessian_matrix_eigvals(H)
-        plt.imshow(eigenvals[0], cmap=cmap)
-        plt.title('Hessian Filter')
-        plt.axis('off')
-        plt.show()
+        eigenvals = hessian_matrix_eigvals(h)
+        if plt_show:
+            plt.imshow(eigenvals[0], cmap=cmap)
+            plt.title('Hessian Filter')
+            plt.axis('off')
+            plt.show()
 
         if plt_show:
             # Display the original image and Hessian filtered images side by side (optional)
