@@ -838,9 +838,14 @@ class TransferModel(Preprocessing, BitVision):
                     # cam_name=f"gard_cam_image_name_{i}.jpg"
                 )
                 ax.imshow(plt.imread(cam_path / f"{gard_cam_image_name}"))
-                ax.set_title(
-                    f"True: {test_df.Label.iloc[i]}\nPredicted: {self.pred[i]}"
-                )
+                true_label = test_df.Label.iloc[i]
+                predicted_label = self.pred[i]
+                title = f"True: {true_label}\nPredicted: {predicted_label}"
+                # Set the color of the title based on the prediction
+                if true_label == predicted_label:
+                    ax.set_title(title, color='green')
+                else:
+                    ax.set_title(title, color='red')
                 # title label size
                 ax.title.set_size(title_lable_size)
                 # set grid on
