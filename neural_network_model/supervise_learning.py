@@ -133,51 +133,102 @@ class SuperviseLearning:
         # Now you can use the sato_features list as the feature representation for the Sato-filtered image.
         return sato_features
 
-    def lbp_filter(self, image_path, radius=3, bins=40, cmap="jet", plt_show=False):
+    import cv2
+    import numpy as np
+    import matplotlib.pyplot as plt
+    from skimage.feature import local_binary_pattern
+
+    def lbp_feature_extraction(
+        self,
+        image_path,
+        radius=3,
+        n_points=8,
+        bins=40,
+        plt_show=False,
+        plt_log=False,
+        figsize=(10, 10),
+        width=0.5,
+    ):
         image = cv2.imread(image_path)
-        # Define LBP parameters
-        n_points = 8 * radius
-        # Convert the image to grayscale if it's in color
-        if len(image.shape) == 3:
-            image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-        # Apply LBP filter
-        lbp_result = local_binary_pattern(image, n_points, radius, method="uniform")
+
+        # Convert the image to RGB if it's in BGR
+        if len(image.shape) == 3:  # Check if the image is color (has 3 channels)
+            image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+
+        # Split the image into R, G, and B channels
+        r, g, b = image[:, :, 0], image[:, :, 1], image[:, :, 2]
+
+        # Compute LBP for each channel
+        lbp_r = local_binary_pattern(r, n_points, radius, method="uniform")
+        lbp_g = local_binary_pattern(g, n_points, radius, method="uniform")
+        lbp_b = local_binary_pattern(b, n_points, radius, method="uniform")
+
+        # Compute histograms for each LBP image
+        hist_r, bins_r = np.histogram(lbp_r.ravel(), bins=bins, range=(0, n_points + 2))
+        hist_g, bins_g = np.histogram(lbp_g.ravel(), bins=bins, range=(0, n_points + 2))
+        hist_b, bins_b = np.histogram(lbp_b.ravel(), bins=bins, range=(0, n_points + 2))
 
         if plt_show:
-            # Display the result (optional)
-            plt.imshow(lbp_result, cmap=cmap)
-            # set title
-            plt.title("lbp_filter Result")
+            # Display the original image and LBP images side by side (optional)
+            plt.subplot(2, 2, 1)
+            plt.imshow(image)
+            plt.title("Original Image")
+            plt.axis("off")
+
+            plt.subplot(2, 2, 2)
+            plt.imshow(lbp_r, cmap="gray")
+            plt.title("LBP (R channel)", color="r")
+            plt.axis("off")
+
+            plt.subplot(2, 2, 3)
+            plt.imshow(lbp_g, cmap="gray")
+            plt.title("LBP (G channel)", color="g")
+            plt.axis("off")
+
+            plt.subplot(2, 2, 4)
+            plt.imshow(lbp_b, cmap="gray")
+            plt.title("LBP (B channel)", color="b")
             plt.axis("off")
             plt.show()
 
-        # Compute the histogram of the LBP result
-        hist, bins = np.histogram(
-            lbp_result.ravel(), bins=bins, range=(0, n_points + 2)
-        )
-
         if plt_show:
-            # Display the result (optional)
-            plt.subplot(1, 2, 1)
-            # set title
-            plt.title("lbp_filter Result")
-            plt.imshow(lbp_result, cmap=cmap)
-            plt.axis("off")
-
-            # Plot the histogram
-            plt.subplot(1, 2, 2)
-            plt.bar(bins[:-1], hist, width=0.5, align="center")
-            plt.xlabel("Pixel Value (Binary)")
+            plt.figure(figsize=figsize)
+            # Display the histograms (optional)
+            plt.subplot(3, 1, 1)
+            plt.bar(bins_r[:-1], hist_r, width=width, color="r")
+            plt.xlabel("LBP Value")
             plt.ylabel("Counts")
-            plt.title("Histogram of lbp_filter\nThresholded Image")
+            plt.title("Histogram of LBP (R channel)", color="r")
+            if plt_log:
+                plt.yscale("log")
+            plt.grid(True)
+            plt.subplot(3, 1, 2)
+            plt.bar(bins_g[:-1], hist_g, width=width, color="g")
+            plt.xlabel("LBP Value")
+            plt.ylabel("Counts")
+            plt.title("Histogram of LBP (G channel)", color="g")
+            if plt_log:
+                plt.yscale("log")
+            plt.grid(True)
+            plt.subplot(3, 1, 3)
+            plt.bar(bins_b[:-1], hist_b, width=width, color="b")
+            plt.xlabel("LBP Value")
+            plt.ylabel("Counts")
+            plt.title("Histogram of LBP (B channel)", color="b")
+            if plt_log:
+                plt.yscale("log")
+            plt.grid(True)
             plt.tight_layout()
             plt.show()
 
-        # Store the histogram counts per bin as features
-        lbp_features = hist.tolist()
+        # Store the histogram counts per bin as features for each channel
+        _lbp_features = {
+            "R_channel": hist_r.tolist(),
+            "G_channel": hist_g.tolist(),
+            "B_channel": hist_b.tolist(),
+        }
 
-        # Now you can use the lbp_features list as the feature representation for the LBP-filtered image.
-        return lbp_features
+        return _lbp_features
 
     def multiotsu_threshold_sk(
         self, image_path, bins=40, plt_show=False, plt_log=False, figsize=(10, 10)
@@ -244,6 +295,7 @@ class SuperviseLearning:
             plt.title("Histogram of multiotsu threshold_sk (R channel)", color="red")
             if plt_log:
                 plt.yscale("log")
+            plt.grid(True)
 
             plt.subplot(3, 1, 2)
             plt.bar(bins_g[:-1], hist_g, width=0.01, color="green")
@@ -252,6 +304,7 @@ class SuperviseLearning:
             plt.title("Histogram of multiotsu threshold_sk (G channel)", color="green")
             if plt_log:
                 plt.yscale("log")
+            plt.grid(True)
 
             plt.subplot(3, 1, 3)
             plt.bar(bins_b[:-1], hist_b, width=0.01, color="blue")
@@ -260,6 +313,7 @@ class SuperviseLearning:
             plt.title("Histogram of multiotsu threshold_sk (B channel)", color="blue")
             if plt_log:
                 plt.yscale("log")
+            plt.grid(True)
 
             plt.tight_layout()
             plt.show()
@@ -403,7 +457,7 @@ if __name__ == "__main__":
     # print(sato_features)
 
     # Apply LBP filter
-    lbp_result = obj.lbp_filter(image_path)
+    lbp_result = obj.lbp_feature_extraction(image_path, plt_show=True)
     print(lbp_result)
 
     # # # Apply Multi-Otsu thresholding
