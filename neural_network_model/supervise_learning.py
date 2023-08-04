@@ -33,20 +33,6 @@ class SuperviseLearning:
             "dataset_address", Path(__file__).parent / ".." / "dataset"
         )
 
-    def hessian_filter_cv2(self, image_path):
-        image = cv2.imread(image_path)
-        # Convert the image to grayscale if it's in color
-        if len(image.shape) == 3:
-            image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-
-        # Apply Hessian filter
-        hessian_result = cv2.Laplacian(image, cv2.CV_64F)
-
-        # Display the result (optional)
-        cv2.imshow("Hessian Result", hessian_result)
-        cv2.waitKey(0)
-        cv2.destroyAllWindows()
-
     def hessian_filter_skimage(self, image_path):
 
         image = cv2.imread(image_path)
@@ -188,26 +174,6 @@ class SuperviseLearning:
         multi_otsu_features = hist.tolist()
         return multi_otsu_features
 
-    def sobel_edge_detection_cv2(self, image_path):
-        image = cv2.imread(image_path)
-
-        # Convert the image to grayscale if it's in color
-        if len(image.shape) == 3:
-            image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-
-        # Apply Sobel edge detector
-        sobel_x = cv2.Sobel(image, cv2.CV_64F, 1, 0, ksize=3)
-        sobel_y = cv2.Sobel(image, cv2.CV_64F, 0, 1, ksize=3)
-
-        # Calculate gradient magnitude
-        gradient_magnitude = np.sqrt(sobel_x ** 2 + sobel_y ** 2)
-
-        # Display the original image and Sobel edges side by side (optional)
-        cv2.imshow("Original Image", image)
-        cv2.imshow("Sobel Edges", gradient_magnitude.astype(np.uint8))
-        cv2.waitKey(0)
-        cv2.destroyAllWindows()
-
     def sobel_edge_detection_sk(self, image_path, bins=40):
         image = cv2.imread(image_path)
         # Convert the image to grayscale if it's in color
@@ -258,23 +224,20 @@ if __name__ == "__main__":
     # Load the image
     image_path = str((Path(__file__).parent / ".." / "dataset" / "pdc_bit" / "Image_1.png"))
 
-    # Apply Hessian filter_ cv2
-    # obj.hessian_filter_cv2(image_path)
-
     obj.hessian_filter_skimage(image_path)
 
     # Apply Sato filter
-    # sato_features = obj.sato_filter(image_path)
-    # print(sato_features)
+    sato_features = obj.sato_filter(image_path)
+    print(sato_features)
 
     # Apply LBP filter
-    # lbp_result = obj.lbp_filter(image_path)
-    # print(len(lbp_result))
+    lbp_result = obj.lbp_filter(image_path)
+    print(lbp_result)
 
     # Apply Multi-Otsu thresholding
-    # multi_otsu_features = obj.multi_otsu_threshold(image_path)
-    # print(multi_otsu_features)
+    multi_otsu_features = obj.multi_otsu_threshold(image_path)
+    print(multi_otsu_features)
 
     # Apply Sobel edge detector
-    # sobel_features = obj.sobel_edge_detection_sk(image_path)
-    # print(len(sobel_features))
+    sobel_features = obj.sobel_edge_detection_sk(image_path)
+    print(sobel_features)
