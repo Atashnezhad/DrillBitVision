@@ -30,7 +30,7 @@ class SuperviseLearning:
             "dataset_address", Path(__file__).parent / ".." / "dataset"
         )
 
-    def hessian_filter(self, image_path):
+    def hessian_filter_cv2(self, image_path):
         image = cv2.imread(image_path)
         # Convert the image to grayscale if it's in color
         if len(image.shape) == 3:
@@ -128,7 +128,6 @@ class SuperviseLearning:
 
         # Now you can use the lbp_features list as the feature representation for the LBP-filtered image.
         return lbp_features
-
 
     def multi_otsu_threshold(self, image_path, classes=2, bins=40, cmap="gray"):
         image = cv2.imread(image_path)
@@ -237,16 +236,16 @@ if __name__ == "__main__":
     # Load the image
     image_path = str((Path(__file__).parent / ".." / "dataset" / "pdc_bit" / "Image_1.png"))
 
-    # Apply Hessian filter
-    # obj.hessian_filter(image_path)
+    # Apply Hessian filter_ cv2
+    # obj.hessian_filter_cv2(image_path)
 
     # Apply Sato filter
     # sato_features = obj.sato_filter(image_path)
     # print(sato_features)
 
     # Apply LBP filter
-    lbp_result = obj.lbp_filter(image_path)
-    print(len(lbp_result))
+    # lbp_result = obj.lbp_filter(image_path)
+    # print(len(lbp_result))
 
     # Apply Multi-Otsu thresholding
     # multi_otsu_features = obj.multi_otsu_threshold(image_path)
