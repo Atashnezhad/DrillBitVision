@@ -46,12 +46,31 @@ class SuperviseLearning:
 
     def sato_filter(self, image_path, bins=40):
         image = cv2.imread(image_path, cv2.IMREAD_GRAYSCALE)
+
         # Apply Sato filter
         sato_result = frangi(image)
-        # Display the result (optional)
-        plt.imshow(sato_result, cmap="gray")
-        plt.axis("off")
+
+        # Normalize the Sato-filtered image to [0, 1]
+        sato_result = (sato_result - np.min(sato_result)) / (np.max(sato_result) - np.min(sato_result))
+
+        # Convert the Sato-filtered image to uint8
+        sato_result_uint8 = (sato_result * 255).astype(np.uint8)
+
+        # Compute the histogram of the Sato-filtered image
+        hist, bins = np.histogram(sato_result_uint8, bins=bins, range=(0, 255))
+
+        # Display the histogram (optional)
+        plt.bar(bins[:-1], hist, width=5)
+        plt.xlabel('Pixel Value')
+        plt.ylabel('Counts')
+        plt.title('Histogram of Sato Filtered Image')
         plt.show()
+
+        # Store the histogram counts per bin as features
+        sato_features = hist.tolist()
+
+        # Now you can use the sato_features list as the feature representation for the Sato-filtered image.
+        return sato_features
 
     def lbp_filter(self, image_path, radius=3, bins=40, cmap="jet"):
         image = cv2.imread(image_path)
@@ -203,7 +222,8 @@ if __name__ == "__main__":
     # obj.hessian_filter(image_path)
 
     # Apply Sato filter
-    obj.sato_filter(image_path)
+    sato_features = obj.sato_filter(image_path)
+    print(sato_features)
 
     # Apply LBP filter
     # lbp_result = obj.lbp_filter(image_path)
