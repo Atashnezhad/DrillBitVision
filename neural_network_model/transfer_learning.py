@@ -803,7 +803,7 @@ class TransferModel(Preprocessing, BitVision):
         img_size = kwargs.get("img_size", (224, 224))
         gard_cam_image_name = kwargs.get("gard_cam_image_name", "transf_cam.jpg")
         figsize = kwargs.get("figsize", (8, 6))
-        title_lable_size = kwargs.get("title_lable_size", 12)
+        title_lable_size = kwargs.get("title_lable_size", 8)
 
         # Remove last layer's softmax
         self.model.layers[-1].activation = None
