@@ -447,13 +447,13 @@ if __name__ == "__main__":
     # hessian_features = obj.hessian_filter_skimage(image_path, plt_show=False)
     # print(hessian_features)
 
-    # # # Apply Sato filter
-    # sato_features = obj.sato_filter(image_path, plt_show=False)
-    # print(sato_features)
+    # # Apply Sato filter
+    sato_features = obj.sato_filter(image_path, plt_show=True)
+    print(sato_features)
 
-    # Apply LBP filter
-    lbp_result = obj.lbp_feature_extraction(image_path, plt_show=True)
-    print(lbp_result)
+    # # Apply LBP filter
+    # lbp_result = obj.lbp_feature_extraction(image_path, plt_show=True)
+    # print(lbp_result)
 
     # # # Apply Multi-Otsu thresholding
     # multi_otsu_features = obj.multiotsu_threshold_sk(
