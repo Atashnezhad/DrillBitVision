@@ -3,6 +3,7 @@ import os
 import random
 import shutil
 import warnings
+
 # ignore warnings
 warnings.filterwarnings("ignore")
 from pathlib import Path
@@ -34,14 +35,13 @@ class SuperviseLearning:
         )
 
     def hessian_filter_skimage(self, image_path, plt_show=False):
-
         image = cv2.imread(image_path)
         # Convert the image to grayscale if it's in color
         if len(image.shape) == 3:
             image = rgb2gray(image)
 
         # Calculate the Hessian matrix and its eigenvalues
-        hessian_mat = hessian_matrix(image, sigma=1.0, order='rc')
+        hessian_mat = hessian_matrix(image, sigma=1.0, order="rc")
         eigvals = hessian_matrix_eigvals(hessian_mat)
 
         # Choose one of the eigenvalues to get the Hessian result
@@ -49,14 +49,16 @@ class SuperviseLearning:
 
         if plt_show:
             # Display the Hessian result (optional)
-            plt.imshow(hessian_output, cmap='gray')
+            plt.imshow(hessian_output, cmap="gray")
             # set title
             plt.title("Hessian Filter Result")
-            plt.axis('off')
+            plt.axis("off")
             plt.show()
 
         # Normalize the Hessian-filtered image to [0, 1]
-        hessian_output = (hessian_output - np.min(hessian_output)) / (np.max(hessian_output) - np.min(hessian_output))
+        hessian_output = (hessian_output - np.min(hessian_output)) / (
+            np.max(hessian_output) - np.min(hessian_output)
+        )
 
         # Convert the Hessian-filtered image to uint8
         hessian_output_uint8 = (hessian_output * 255).astype(np.uint8)
@@ -68,15 +70,15 @@ class SuperviseLearning:
             # Display the Hessian-filtered image and its histogram side by side
             plt.figure(figsize=(10, 5))
             plt.subplot(1, 2, 1)
-            plt.imshow(hessian_output_uint8, cmap='gray')
-            plt.title('Hessian Filtered Image')
-            plt.axis('off')
+            plt.imshow(hessian_output_uint8, cmap="gray")
+            plt.title("Hessian Filtered Image")
+            plt.axis("off")
 
             plt.subplot(1, 2, 2)
             plt.bar(bins[:-1], hist, width=5)
-            plt.xlabel('Pixel Value')
-            plt.ylabel('Counts')
-            plt.title('Histogram of Hessian Filtered Image')
+            plt.xlabel("Pixel Value")
+            plt.ylabel("Counts")
+            plt.title("Histogram of Hessian Filtered Image")
             plt.show()
 
         Hessian_features = hist.tolist()
@@ -99,7 +101,9 @@ class SuperviseLearning:
             plt.show()
 
         # Normalize the Sato-filtered image to [0, 1]
-        sato_result = (sato_result - np.min(sato_result)) / (np.max(sato_result) - np.min(sato_result))
+        sato_result = (sato_result - np.min(sato_result)) / (
+            np.max(sato_result) - np.min(sato_result)
+        )
 
         # Convert the Sato-filtered image to uint8
         sato_result_uint8 = (sato_result * 255).astype(np.uint8)
@@ -116,10 +120,10 @@ class SuperviseLearning:
 
             # Plot the histogram
             plt.subplot(1, 2, 2)
-            plt.bar(bins[:-1], hist, width=0.5, align='center')
-            plt.xlabel('Pixel Value (Binary)')
-            plt.ylabel('Counts')
-            plt.title('Histogram of sato_filter\nThresholded Image')
+            plt.bar(bins[:-1], hist, width=0.5, align="center")
+            plt.xlabel("Pixel Value (Binary)")
+            plt.ylabel("Counts")
+            plt.title("Histogram of sato_filter\nThresholded Image")
             plt.tight_layout()
             plt.show()
 
@@ -148,7 +152,9 @@ class SuperviseLearning:
             plt.show()
 
         # Compute the histogram of the LBP result
-        hist, bins = np.histogram(lbp_result.ravel(), bins=bins, range=(0, n_points + 2))
+        hist, bins = np.histogram(
+            lbp_result.ravel(), bins=bins, range=(0, n_points + 2)
+        )
 
         if plt_show:
             # Display the result (optional)
@@ -160,10 +166,10 @@ class SuperviseLearning:
 
             # Plot the histogram
             plt.subplot(1, 2, 2)
-            plt.bar(bins[:-1], hist, width=0.5, align='center')
-            plt.xlabel('Pixel Value (Binary)')
-            plt.ylabel('Counts')
-            plt.title('Histogram of lbp_filter\nThresholded Image')
+            plt.bar(bins[:-1], hist, width=0.5, align="center")
+            plt.xlabel("Pixel Value (Binary)")
+            plt.ylabel("Counts")
+            plt.title("Histogram of lbp_filter\nThresholded Image")
             plt.tight_layout()
             plt.show()
 
@@ -173,49 +179,103 @@ class SuperviseLearning:
         # Now you can use the lbp_features list as the feature representation for the LBP-filtered image.
         return lbp_features
 
-    def multi_otsu_threshold(self, image_path, classes=2, bins=40, cmap="gray", plt_show=False):
+    def multiotsu_threshold_sk(
+        self, image_path, bins=40, plt_show=False, plt_log=False, figsize=(10, 10)
+    ):
         image = cv2.imread(image_path)
 
-        # Convert the image to grayscale if it's in color
-        if len(image.shape) == 3:
-            image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+        # Convert the image to RGB if it's in BGR
+        if len(image.shape) == 3:  # Check if the image is color (has 3 channels)
+            image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
 
-        # Apply Multi-Otsu thresholding
-        thresholds = threshold_multiotsu(image, classes=classes)
-        multi_otsu_output = image >= thresholds
+        # Split the image into R, G, and B channels
+        r, g, b = image[:, :, 0], image[:, :, 1], image[:, :, 2]
+
+        # Apply multi-Otsu thresholding to each channel
+        thresholds_r = threshold_multiotsu(r, classes=3)
+        thresholds_g = threshold_multiotsu(g, classes=3)
+        thresholds_b = threshold_multiotsu(b, classes=3)
+
+        # Convert the thresholded images to binary
+        binary_r = r > thresholds_r[1]
+        binary_g = g > thresholds_g[1]
+        binary_b = b > thresholds_b[1]
+
+        # Combine the binary images from each channel using max (you can use other methods as well)
+        binary_combined = np.maximum.reduce([binary_r, binary_g, binary_b])
 
         if plt_show:
-            # Display the result (optional)
-            plt.imshow(multi_otsu_output, cmap=cmap)
-            # set title
-            plt.title("multi_otsu_threshold Result")
-            plt.axis("off")
-            plt.show()
-
-        # extract features, Compute the histogram of the Multi-Otsu thresholded image
-        hist, bins = np.histogram(multi_otsu_output, bins=bins)
-
-        if plt_show:
-            # Display the result (optional)
-            plt.subplot(1, 2, 1)
-            plt.imshow(multi_otsu_output, cmap=cmap)
-            plt.title("multi_otsu_threshold Result")
+            # Display the original image and binary thresholded images side by side (optional)
+            plt.subplot(2, 2, 1)
+            plt.imshow(image)
+            plt.title("Original Image")
+            plt.grid(True)
             plt.axis("off")
 
-            # Plot the histogram
-            plt.subplot(1, 2, 2)
-            plt.bar(bins[:-1], hist, width=0.5, align='center')
-            plt.xlabel('Pixel Value (Binary)')
-            plt.ylabel('Counts')
-            plt.title('Histogram of Multi-Otsu\nThresholded Image')
+            plt.subplot(2, 2, 2)
+            plt.imshow(binary_r, cmap="gray")
+            plt.title("Binary Threshold (R channel)")
+            plt.axis("off")
+
+            plt.subplot(2, 2, 3)
+            plt.imshow(binary_g, cmap="gray")
+            plt.title("Binary Threshold (G channel)")
+            plt.axis("off")
+
+            plt.subplot(2, 2, 4)
+            plt.imshow(binary_b, cmap="gray")
+            plt.title("Binary Threshold (B channel)")
+            plt.axis("off")
             plt.tight_layout()
             plt.show()
 
-        # Store the histogram counts per bin as features
-        multi_otsu_features = hist.tolist()
-        return multi_otsu_features
+        # Compute the histograms of the binary thresholded images
+        hist_r, bins_r = np.histogram(binary_r, bins=bins, range=(0, 1))
+        hist_g, bins_g = np.histogram(binary_g, bins=bins, range=(0, 1))
+        hist_b, bins_b = np.histogram(binary_b, bins=bins, range=(0, 1))
 
-    def sobel_edge_detection_sk(self, image_path, bins=40, plt_show=False, plt_log=False):
+        if plt_show:
+            plt.figure(figsize=figsize)
+            # Display the histograms (optional)
+            plt.subplot(3, 1, 1)
+            plt.bar(bins_r[:-1], hist_r, width=0.01, color="red")
+            plt.xlabel("Pixel Value")
+            plt.ylabel("Counts")
+            plt.title("Histogram of Binary Threshold (R channel)", color="red")
+            if plt_log:
+                plt.yscale("log")
+
+            plt.subplot(3, 1, 2)
+            plt.bar(bins_g[:-1], hist_g, width=0.01)
+            plt.xlabel("Pixel Value")
+            plt.ylabel("Counts")
+            plt.title("Histogram of Binary Threshold (G channel)")
+            if plt_log:
+                plt.yscale("log")
+
+            plt.subplot(3, 1, 3)
+            plt.bar(bins_b[:-1], hist_b, width=0.01)
+            plt.xlabel("Pixel Value")
+            plt.ylabel("Counts")
+            plt.title("Histogram of Binary Threshold (B channel)")
+            if plt_log:
+                plt.yscale("log")
+
+            plt.tight_layout()
+            plt.show()
+
+        # Store the histogram counts per bin as features for each channel
+        _threshold_features = {
+            "R_channel": hist_r.tolist(),
+            "G_channel": hist_g.tolist(),
+            "B_channel": hist_b.tolist(),
+        }
+
+        return _threshold_features
+
+    def sobel_edge_detection_sk(
+        self, image_path, bins=40, plt_show=False, plt_log=False, figsize=(10, 10)
+    ):
         image = cv2.imread(image_path)
 
         # Convert the image to RGB if it's in BGR
@@ -231,36 +291,44 @@ class SuperviseLearning:
         sobel_edges_b = sobel(b)
 
         # Combine the Sobel edges from each channel using max (you can use other methods as well)
-        sobel_edges_combined = np.maximum.reduce([sobel_edges_r, sobel_edges_g, sobel_edges_b])
+        sobel_edges_combined = np.maximum.reduce(
+            [sobel_edges_r, sobel_edges_g, sobel_edges_b]
+        )
 
         if plt_show:
             # Display the original image and Sobel edges side by side (optional)
             plt.subplot(2, 2, 1)
             plt.imshow(image)
-            plt.title('Original Image')
-            plt.axis('off')
+            plt.title("Original Image")
+            plt.axis("off")
 
             plt.subplot(2, 2, 2)
-            plt.imshow(sobel_edges_r, cmap='jet')
-            plt.title('Sobel Edges (R channel)')
-            plt.axis('off')
+            plt.imshow(sobel_edges_r, cmap="jet")
+            plt.title("Sobel Edges (R channel)")
+            plt.axis("off")
 
             plt.subplot(2, 2, 3)
-            plt.imshow(sobel_edges_g, cmap='jet')
-            plt.title('Sobel Edges (G channel)')
-            plt.axis('off')
+            plt.imshow(sobel_edges_g, cmap="jet")
+            plt.title("Sobel Edges (G channel)")
+            plt.axis("off")
 
             plt.subplot(2, 2, 4)
-            plt.imshow(sobel_edges_b, cmap='jet')
-            plt.title('Sobel Edges (B channel)')
-            plt.axis('off')
+            plt.imshow(sobel_edges_b, cmap="jet")
+            plt.title("Sobel Edges (B channel)")
+            plt.axis("off")
             plt.tight_layout()
             plt.show()
 
         # Normalize the Sobel edges image to [0, 1]
-        sobel_edges_r = (sobel_edges_r - np.min(sobel_edges_r)) / (np.max(sobel_edges_r) - np.min(sobel_edges_r))
-        sobel_edges_g = (sobel_edges_g - np.min(sobel_edges_g)) / (np.max(sobel_edges_g) - np.min(sobel_edges_g))
-        sobel_edges_b = (sobel_edges_b - np.min(sobel_edges_b)) / (np.max(sobel_edges_b) - np.min(sobel_edges_b))
+        sobel_edges_r = (sobel_edges_r - np.min(sobel_edges_r)) / (
+            np.max(sobel_edges_r) - np.min(sobel_edges_r)
+        )
+        sobel_edges_g = (sobel_edges_g - np.min(sobel_edges_g)) / (
+            np.max(sobel_edges_g) - np.min(sobel_edges_g)
+        )
+        sobel_edges_b = (sobel_edges_b - np.min(sobel_edges_b)) / (
+            np.max(sobel_edges_b) - np.min(sobel_edges_b)
+        )
 
         # Convert the Sobel edges images to uint8
         sobel_edges_r_uint8 = (sobel_edges_r * 255).astype(np.uint8)
@@ -273,46 +341,46 @@ class SuperviseLearning:
         hist_b, bins_b = np.histogram(sobel_edges_b_uint8, bins=bins, range=(0, 255))
 
         if plt_show:
-            plt.figure(figsize=(10, 10))
+            plt.figure(figsize=figsize)
             # Display the histograms (optional)
             plt.subplot(3, 1, 1)
-            plt.bar(bins_r[:-1], hist_r, width=5, color='r')
-            plt.xlabel('Pixel Value')
-            plt.ylabel('Counts')
+            plt.bar(bins_r[:-1], hist_r, width=5, color="r")
+            plt.xlabel("Pixel Value")
+            plt.ylabel("Counts")
             if plt_log:
                 # y scale is logarithmic
-                plt.yscale('log')
+                plt.yscale("log")
             plt.grid(True)
-            plt.title('Histogram of Sobel\nEdges (R channel)', color='r')
+            plt.title("Histogram of Sobel Edges (R channel)", color="r")
 
             plt.subplot(3, 1, 2)
-            plt.bar(bins_g[:-1], hist_g, width=5, color='g')
-            plt.xlabel('Pixel Value')
-            plt.ylabel('Counts')
+            plt.bar(bins_g[:-1], hist_g, width=5, color="g")
+            plt.xlabel("Pixel Value")
+            plt.ylabel("Counts")
             if plt_log:
                 # y scale is logarithmic
-                plt.yscale('log')
+                plt.yscale("log")
             plt.grid(True)
-            plt.title('Histogram of Sobel\nEdges (G channel)', color='g')
+            plt.title("Histogram of Sobel Edges (G channel)", color="g")
 
             plt.subplot(3, 1, 3)
-            plt.bar(bins_b[:-1], hist_b, width=5, color='b')
-            plt.xlabel('Pixel Value')
-            plt.ylabel('Counts')
+            plt.bar(bins_b[:-1], hist_b, width=5, color="b")
+            plt.xlabel("Pixel Value")
+            plt.ylabel("Counts")
             if plt_log:
                 # y scale is logarithmic
-                plt.yscale('log')
+                plt.yscale("log")
             plt.grid(True)
-            plt.title('Histogram of Sobel\nEdges (B channel)', color='b')
+            plt.title("Histogram of Sobel Edges (B channel)", color="b")
 
             plt.tight_layout()
             plt.show()
 
         # Store the histogram counts per bin as features for each channel
         _sobel_features = {
-            'R_channel': hist_r.tolist(),
-            'G_channel': hist_g.tolist(),
-            'B_channel': hist_b.tolist()
+            "R_channel": hist_r.tolist(),
+            "G_channel": hist_g.tolist(),
+            "B_channel": hist_b.tolist(),
         }
 
         return _sobel_features
@@ -322,7 +390,9 @@ if __name__ == "__main__":
     obj = SuperviseLearning()
 
     # Load the image
-    image_path = str((Path(__file__).parent / ".." / "dataset" / "pdc_bit" / "Image_1.png"))
+    image_path = str(
+        (Path(__file__).parent / ".." / "dataset" / "rollercone_bit" / "Image_3.jpg")
+    )
 
     # # Apply hessian filter
     # hessian_features = obj.hessian_filter_skimage(image_path, plt_show=False)
@@ -337,9 +407,11 @@ if __name__ == "__main__":
     # print(lbp_result)
     #
     # # Apply Multi-Otsu thresholding
-    # multi_otsu_features = obj.multi_otsu_threshold(image_path)
-    # print(multi_otsu_features)
+    multi_otsu_features = obj.multiotsu_threshold_sk(
+        image_path, plt_show=True, plt_log=True
+    )
+    print(multi_otsu_features)
 
-    # Apply Sobel edge detector
-    sobel_features = obj.sobel_edge_detection_sk(image_path, plt_show=True)
-    print(sobel_features)
+    # # Apply Sobel edge detector
+    # sobel_features = obj.sobel_edge_detection_sk(image_path, plt_show=True, plt_log=True)
+    # print(sobel_features)
