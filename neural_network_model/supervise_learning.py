@@ -215,48 +215,105 @@ class SuperviseLearning:
         multi_otsu_features = hist.tolist()
         return multi_otsu_features
 
-    def sobel_edge_detection_sk(self, image_path, bins=40, plt_show=False):
+    def sobel_edge_detection_sk(self, image_path, bins=40, plt_show=False, plt_log=False):
         image = cv2.imread(image_path)
-        # Convert the image to grayscale if it's in color
-        if len(image.shape) == 2:
-            image = rgb2gray(image)
 
-        # Apply Sobel edge detector
-        sobel_edges = sobel(image)
+        # Convert the image to RGB if it's in BGR
+        if len(image.shape) == 3:  # Check if the image is color (has 3 channels)
+            image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+
+        # Split the image into R, G, and B channels
+        r, g, b = image[:, :, 0], image[:, :, 1], image[:, :, 2]
+
+        # Apply Sobel edge detector to each channel
+        sobel_edges_r = sobel(r)
+        sobel_edges_g = sobel(g)
+        sobel_edges_b = sobel(b)
+
+        # Combine the Sobel edges from each channel using max (you can use other methods as well)
+        sobel_edges_combined = np.maximum.reduce([sobel_edges_r, sobel_edges_g, sobel_edges_b])
 
         if plt_show:
             # Display the original image and Sobel edges side by side (optional)
-            plt.imshow(sobel_edges, cmap='jet')
-            plt.title('Sobel Edges')
-            plt.axis('off')
-            plt.show()
-
-        # Normalize the Sobel edges image to [0, 1]
-        sobel_edges = (sobel_edges - np.min(sobel_edges)) / (np.max(sobel_edges) - np.min(sobel_edges))
-
-        # Convert the Sobel edges image to uint8
-        sobel_edges_uint8 = (sobel_edges * 255).astype(np.uint8)
-
-        # Compute the histogram of the Sobel edges image
-        hist, bins = np.histogram(sobel_edges_uint8, bins=bins, range=(0, 255))
-
-        if plt_show:
-            plt.subplot(1, 2, 1)
-            plt.imshow(sobel_edges, cmap='jet')
-            plt.title('Sobel Edges')
+            plt.subplot(2, 2, 1)
+            plt.imshow(image)
+            plt.title('Original Image')
             plt.axis('off')
 
-            # Display the histogram (optional)
-            plt.subplot(1, 2, 2)
-            plt.bar(bins[:-1], hist, width=5)
-            plt.xlabel('Pixel Value')
-            plt.ylabel('Counts')
-            plt.title('Histogram of Sobel Edges')
+            plt.subplot(2, 2, 2)
+            plt.imshow(sobel_edges_r, cmap='jet')
+            plt.title('Sobel Edges (R channel)')
+            plt.axis('off')
+
+            plt.subplot(2, 2, 3)
+            plt.imshow(sobel_edges_g, cmap='jet')
+            plt.title('Sobel Edges (G channel)')
+            plt.axis('off')
+
+            plt.subplot(2, 2, 4)
+            plt.imshow(sobel_edges_b, cmap='jet')
+            plt.title('Sobel Edges (B channel)')
+            plt.axis('off')
             plt.tight_layout()
             plt.show()
 
-        # Store the histogram counts per bin as features
-        _sobel_features = hist.tolist()
+        # Normalize the Sobel edges image to [0, 1]
+        sobel_edges_r = (sobel_edges_r - np.min(sobel_edges_r)) / (np.max(sobel_edges_r) - np.min(sobel_edges_r))
+        sobel_edges_g = (sobel_edges_g - np.min(sobel_edges_g)) / (np.max(sobel_edges_g) - np.min(sobel_edges_g))
+        sobel_edges_b = (sobel_edges_b - np.min(sobel_edges_b)) / (np.max(sobel_edges_b) - np.min(sobel_edges_b))
+
+        # Convert the Sobel edges images to uint8
+        sobel_edges_r_uint8 = (sobel_edges_r * 255).astype(np.uint8)
+        sobel_edges_g_uint8 = (sobel_edges_g * 255).astype(np.uint8)
+        sobel_edges_b_uint8 = (sobel_edges_b * 255).astype(np.uint8)
+
+        # Compute the histograms of the Sobel edges images
+        hist_r, bins_r = np.histogram(sobel_edges_r_uint8, bins=bins, range=(0, 255))
+        hist_g, bins_g = np.histogram(sobel_edges_g_uint8, bins=bins, range=(0, 255))
+        hist_b, bins_b = np.histogram(sobel_edges_b_uint8, bins=bins, range=(0, 255))
+
+        if plt_show:
+            plt.figure(figsize=(10, 10))
+            # Display the histograms (optional)
+            plt.subplot(3, 1, 1)
+            plt.bar(bins_r[:-1], hist_r, width=5, color='r')
+            plt.xlabel('Pixel Value')
+            plt.ylabel('Counts')
+            if plt_log:
+                # y scale is logarithmic
+                plt.yscale('log')
+            plt.grid(True)
+            plt.title('Histogram of Sobel\nEdges (R channel)', color='r')
+
+            plt.subplot(3, 1, 2)
+            plt.bar(bins_g[:-1], hist_g, width=5, color='g')
+            plt.xlabel('Pixel Value')
+            plt.ylabel('Counts')
+            if plt_log:
+                # y scale is logarithmic
+                plt.yscale('log')
+            plt.grid(True)
+            plt.title('Histogram of Sobel\nEdges (G channel)', color='g')
+
+            plt.subplot(3, 1, 3)
+            plt.bar(bins_b[:-1], hist_b, width=5, color='b')
+            plt.xlabel('Pixel Value')
+            plt.ylabel('Counts')
+            if plt_log:
+                # y scale is logarithmic
+                plt.yscale('log')
+            plt.grid(True)
+            plt.title('Histogram of Sobel\nEdges (B channel)', color='b')
+
+            plt.tight_layout()
+            plt.show()
+
+        # Store the histogram counts per bin as features for each channel
+        _sobel_features = {
+            'R_channel': hist_r.tolist(),
+            'G_channel': hist_g.tolist(),
+            'B_channel': hist_b.tolist()
+        }
 
         return _sobel_features
 
@@ -284,5 +341,5 @@ if __name__ == "__main__":
     # print(multi_otsu_features)
 
     # Apply Sobel edge detector
-    sobel_features = obj.sobel_edge_detection_sk(image_path)
+    sobel_features = obj.sobel_edge_detection_sk(image_path, plt_show=True)
     print(sobel_features)
