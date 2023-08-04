@@ -86,52 +86,102 @@ class SuperviseLearning:
         # Return the histogram counts as features
         return Hessian_features
 
-    def sato_filter(self, image_path, bins=40, cmap="jet", plt_show=False):
-        image = cv2.imread(image_path, cv2.IMREAD_GRAYSCALE)
+    import cv2
+    import numpy as np
+    import matplotlib.pyplot as plt
+    from skimage.filters import frangi
 
-        # Apply Sato filter
-        sato_result = frangi(image)
+    def frangi_feature_extraction(
+        self, image_path, plt_show=True, plt_log=False, figsize=(10, 10), bins=40
+    ):
+        image = cv2.imread(image_path)
+
+        # Convert the image to RGB if it's in BGR
+        if len(image.shape) == 3:  # Check if the image is color (has 3 channels)
+            image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+
+        # Split the image into R, G, and B channels
+        r, g, b = image[:, :, 0], image[:, :, 1], image[:, :, 2]
+
+        # Apply Frangi filter to each channel
+        frangi_r = frangi(r)
+        frangi_g = frangi(g)
+        frangi_b = frangi(b)
 
         if plt_show:
-            # Display the result (optional)
-            plt.imshow(sato_result, cmap=cmap)
-            # set title
-            plt.title("Sato Filter Result")
+            # Display the original image and Frangi filtered images side by side (optional)
+            plt.subplot(2, 2, 1)
+            plt.imshow(image)
+            plt.title("Original Image")
+            plt.axis("off")
+
+            plt.subplot(2, 2, 2)
+            plt.imshow(frangi_r, cmap="gray")
+            plt.title("Frangi Filter (R channel)", color="r")
+            plt.axis("off")
+
+            plt.subplot(2, 2, 3)
+            plt.imshow(frangi_g, cmap="gray")
+            plt.title("Frangi Filter (G channel)", color="g")
+            plt.axis("off")
+
+            plt.subplot(2, 2, 4)
+            plt.imshow(frangi_b, cmap="gray")
+            plt.title("Frangi Filter (B channel)", color="b")
             plt.axis("off")
             plt.show()
 
-        # Normalize the Sato-filtered image to [0, 1]
-        sato_result = (sato_result - np.min(sato_result)) / (
-            np.max(sato_result) - np.min(sato_result)
+        # Compute histograms for each Frangi filtered image
+        hist_r, bins_r = np.histogram(
+            frangi_r.ravel(), bins=bins, range=(0, np.max(frangi_r))
+        )
+        hist_g, bins_g = np.histogram(
+            frangi_g.ravel(), bins=bins, range=(0, np.max(frangi_g))
+        )
+        hist_b, bins_b = np.histogram(
+            frangi_b.ravel(), bins=bins, range=(0, np.max(frangi_b))
         )
 
-        # Convert the Sato-filtered image to uint8
-        sato_result_uint8 = (sato_result * 255).astype(np.uint8)
-
-        # Compute the histogram of the Sato-filtered image
-        hist, bins = np.histogram(sato_result_uint8, bins=bins, range=(0, 255))
-
         if plt_show:
-            # Display the result (optional)
-            plt.subplot(1, 2, 1)
-            plt.imshow(sato_result, cmap=cmap)
-            plt.title("Sato Filter Result")
-            plt.axis("off")
-
-            # Plot the histogram
-            plt.subplot(1, 2, 2)
-            plt.bar(bins[:-1], hist, width=0.5, align="center")
-            plt.xlabel("Pixel Value (Binary)")
+            # Display the histograms (optional)
+            plt.subplot(3, 1, 1)
+            plt.bar(bins_r[:-1], hist_r, width=np.max(frangi_r) / bins, color="r")
+            plt.xlabel("Frangi Value")
             plt.ylabel("Counts")
-            plt.title("Histogram of sato_filter\nThresholded Image")
+            if plt_log:
+                plt.yscale("log")
+            plt.grid(True)
+            plt.title("Histogram of Frangi Filter (R channel)", color="r")
+
+            plt.subplot(3, 1, 2)
+            plt.bar(bins_g[:-1], hist_g, width=np.max(frangi_g) / bins, color="g")
+            plt.xlabel("Frangi Value")
+            plt.ylabel("Counts")
+            if plt_log:
+                plt.yscale("log")
+            plt.grid(True)
+            plt.title("Histogram of Frangi Filter (G channel)", color="g")
+
+            plt.subplot(3, 1, 3)
+            plt.bar(bins_b[:-1], hist_b, width=np.max(frangi_b) / bins, color="b")
+            plt.xlabel("Frangi Value")
+            plt.ylabel("Counts")
+            if plt_log:
+                plt.yscale("log")
+            plt.grid(True)
+            plt.title("Histogram of Frangi Filter (B channel)", color="b")
+
             plt.tight_layout()
             plt.show()
 
-        # Store the histogram counts per bin as features
-        sato_features = hist.tolist()
+        # Store the histogram counts per bin as features for each channel
+        _frangi_features = {
+            "R_channel": hist_r.tolist(),
+            "G_channel": hist_g.tolist(),
+            "B_channel": hist_b.tolist(),
+        }
 
-        # Now you can use the sato_features list as the feature representation for the Sato-filtered image.
-        return sato_features
+        return _frangi_features
 
     def lbp_feature_extraction(
         self,
@@ -448,7 +498,7 @@ if __name__ == "__main__":
     # print(hessian_features)
 
     # # Apply Sato filter
-    sato_features = obj.sato_filter(image_path, plt_show=True)
+    sato_features = obj.frangi_feature_extraction(image_path, plt_show=True, plt_log=True)
     print(sato_features)
 
     # # Apply LBP filter
