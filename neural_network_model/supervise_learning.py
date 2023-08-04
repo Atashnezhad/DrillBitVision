@@ -45,12 +45,42 @@ class SuperviseLearning:
         eigvals = hessian_matrix_eigvals(hessian_mat)
 
         # Choose one of the eigenvalues to get the Hessian result
-        hessian_output  = eigvals[1]  # For instance, using the second eigenvalue
+        hessian_output = eigvals[1]  # For instance, using the second eigenvalue
 
         # Display the Hessian result (optional)
         plt.imshow(hessian_output, cmap='gray')
+        # set title
+        plt.title("Hessian Filter Result")
         plt.axis('off')
         plt.show()
+
+        # Normalize the Hessian-filtered image to [0, 1]
+        hessian_output = (hessian_output - np.min(hessian_output)) / (np.max(hessian_output) - np.min(hessian_output))
+
+        # Convert the Hessian-filtered image to uint8
+        hessian_output_uint8 = (hessian_output * 255).astype(np.uint8)
+
+        # Compute the histogram of the Hessian-filtered image
+        hist, bins = np.histogram(hessian_output_uint8, bins=40, range=(0, 255))
+
+        # Display the Hessian-filtered image and its histogram side by side
+        plt.figure(figsize=(10, 5))
+        plt.subplot(1, 2, 1)
+        plt.imshow(hessian_output_uint8, cmap='gray')
+        plt.title('Hessian Filtered Image')
+        plt.axis('off')
+
+        plt.subplot(1, 2, 2)
+        plt.bar(bins[:-1], hist, width=5)
+        plt.xlabel('Pixel Value')
+        plt.ylabel('Counts')
+        plt.title('Histogram of Hessian Filtered Image')
+        plt.show()
+        Hessian_features = hist.tolist()
+
+        # Return the histogram counts as features
+        return Hessian_features
+
 
     def sato_filter(self, image_path, bins=40, cmap="jet"):
         image = cv2.imread(image_path, cv2.IMREAD_GRAYSCALE)
@@ -224,20 +254,21 @@ if __name__ == "__main__":
     # Load the image
     image_path = str((Path(__file__).parent / ".." / "dataset" / "pdc_bit" / "Image_1.png"))
 
-    obj.hessian_filter_skimage(image_path)
+    hessian_features = obj.hessian_filter_skimage(image_path)
+    print(hessian_features)
 
-    # Apply Sato filter
-    sato_features = obj.sato_filter(image_path)
-    print(sato_features)
+    # # Apply Sato filter
+    # sato_features = obj.sato_filter(image_path)
+    # print(sato_features)
+    #
+    # # Apply LBP filter
+    # lbp_result = obj.lbp_filter(image_path)
+    # print(lbp_result)
 
-    # Apply LBP filter
-    lbp_result = obj.lbp_filter(image_path)
-    print(lbp_result)
-
-    # Apply Multi-Otsu thresholding
-    multi_otsu_features = obj.multi_otsu_threshold(image_path)
-    print(multi_otsu_features)
-
-    # Apply Sobel edge detector
-    sobel_features = obj.sobel_edge_detection_sk(image_path)
-    print(sobel_features)
+    # # Apply Multi-Otsu thresholding
+    # multi_otsu_features = obj.multi_otsu_threshold(image_path)
+    # print(multi_otsu_features)
+    #
+    # # Apply Sobel edge detector
+    # sobel_features = obj.sobel_edge_detection_sk(image_path)
+    # print(sobel_features)
