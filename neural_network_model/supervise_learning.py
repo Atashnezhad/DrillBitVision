@@ -44,11 +44,18 @@ class SuperviseLearning:
         cv2.waitKey(0)
         cv2.destroyAllWindows()
 
-    def sato_filter(self, image_path, bins=40):
+    def sato_filter(self, image_path, bins=40, cmap="jet"):
         image = cv2.imread(image_path, cv2.IMREAD_GRAYSCALE)
 
         # Apply Sato filter
         sato_result = frangi(image)
+
+        # Display the result (optional)
+        plt.imshow(sato_result, cmap=cmap)
+        # set title
+        plt.title("Sato Filter Result")
+        plt.axis("off")
+        plt.show()
 
         # Normalize the Sato-filtered image to [0, 1]
         sato_result = (sato_result - np.min(sato_result)) / (np.max(sato_result) - np.min(sato_result))
@@ -59,11 +66,19 @@ class SuperviseLearning:
         # Compute the histogram of the Sato-filtered image
         hist, bins = np.histogram(sato_result_uint8, bins=bins, range=(0, 255))
 
-        # Display the histogram (optional)
-        plt.bar(bins[:-1], hist, width=5)
-        plt.xlabel('Pixel Value')
+        # Display the result (optional)
+        plt.subplot(1, 2, 1)
+        plt.imshow(sato_result, cmap=cmap)
+        plt.title("Sato Filter Result")
+        plt.axis("off")
+
+        # Plot the histogram
+        plt.subplot(1, 2, 2)
+        plt.bar(bins[:-1], hist, width=0.5, align='center')
+        plt.xlabel('Pixel Value (Binary)')
         plt.ylabel('Counts')
-        plt.title('Histogram of Sato Filtered Image')
+        plt.title('Histogram of sato_filter\nThresholded Image')
+        plt.tight_layout()
         plt.show()
 
         # Store the histogram counts per bin as features
@@ -82,13 +97,13 @@ class SuperviseLearning:
         # Apply LBP filter
         lbp_result = local_binary_pattern(image, n_points, radius, method="uniform")
 
-        # Compute the histogram of the LBP result
-        hist, bins = np.histogram(lbp_result.ravel(), bins=bins, range=(0, n_points + 2))
-
         # Display the result (optional)
         plt.imshow(lbp_result, cmap=cmap)
         plt.axis("off")
         plt.show()
+
+        # Compute the histogram of the LBP result
+        hist, bins = np.histogram(lbp_result.ravel(), bins=bins, range=(0, n_points + 2))
 
         # Display the result (optional)
         plt.subplot(1, 2, 1)
