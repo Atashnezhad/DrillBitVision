@@ -99,6 +99,8 @@ class SuperviseLearning:
 
         # Display the result (optional)
         plt.imshow(lbp_result, cmap=cmap)
+        # set title
+        plt.title("lbp_filter Result")
         plt.axis("off")
         plt.show()
 
@@ -107,6 +109,8 @@ class SuperviseLearning:
 
         # Display the result (optional)
         plt.subplot(1, 2, 1)
+        # set title
+        plt.title("lbp_filter Result")
         plt.imshow(lbp_result, cmap=cmap)
         plt.axis("off")
 
@@ -237,12 +241,12 @@ if __name__ == "__main__":
     # obj.hessian_filter(image_path)
 
     # Apply Sato filter
-    sato_features = obj.sato_filter(image_path)
-    print(sato_features)
+    # sato_features = obj.sato_filter(image_path)
+    # print(sato_features)
 
     # Apply LBP filter
-    # lbp_result = obj.lbp_filter(image_path)
-    # print(len(lbp_result))
+    lbp_result = obj.lbp_filter(image_path)
+    print(len(lbp_result))
 
     # Apply Multi-Otsu thresholding
     # multi_otsu_features = obj.multi_otsu_threshold(image_path)
