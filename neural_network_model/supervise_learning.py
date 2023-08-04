@@ -61,6 +61,17 @@ class SuperviseLearning:
         eigenvals_g = hessian_matrix_eigvals(H_g)
         eigenvals_b = hessian_matrix_eigvals(H_b)
 
+        # Convert the image to grayscale
+        image_gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+        # Compute Hessian matrix for the grayscale image
+        H = hessian_matrix(image_gray)
+        # Compute eigenvalues of Hessian matrix
+        eigenvals = hessian_matrix_eigvals(H)
+        plt.imshow(eigenvals[0], cmap=cmap)
+        plt.title('Hessian Filter')
+        plt.axis('off')
+        plt.show()
+
         if plt_show:
             # Display the original image and Hessian filtered images side by side (optional)
             plt.subplot(2, 2, 1)
@@ -558,7 +569,7 @@ if __name__ == "__main__":
 
     # Load the image
     image_path = str(
-        (Path(__file__).parent / ".." / "dataset" / "rollercone_bit" / "Image_3.jpg")
+        (Path(__file__).parent / ".." / "dataset" / "pdc_bit" / "Image_1.png")
     )
 
     # Apply hessian filter
@@ -570,17 +581,17 @@ if __name__ == "__main__":
     # # # # Apply Sato filter
     # sato_features = obj.frangi_feature_extraction(image_path, plt_show=True, plt_log=True)
     # print(sato_features)
-
+    #
     # # Apply LBP filter
     # lbp_result = obj.lbp_feature_extraction(image_path, plt_show=True)
     # print(lbp_result)
-
+    #
     # # # Apply Multi-Otsu thresholding
     # multi_otsu_features = obj.multiotsu_threshold_sk(
     #     image_path, plt_show=True, plt_log=True
     # )
     # print(multi_otsu_features)
-
+    #
     # # Apply Sobel edge detector
     # sobel_features = obj.sobel_edge_detection_sk(
     #     image_path, plt_show=True, plt_log=True
