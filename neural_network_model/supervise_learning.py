@@ -241,23 +241,23 @@ class SuperviseLearning:
             plt.bar(bins_r[:-1], hist_r, width=0.01, color="red")
             plt.xlabel("Pixel Value")
             plt.ylabel("Counts")
-            plt.title("Histogram of Binary Threshold (R channel)", color="red")
+            plt.title("Histogram of multiotsu threshold_sk (R channel)", color="red")
             if plt_log:
                 plt.yscale("log")
 
             plt.subplot(3, 1, 2)
-            plt.bar(bins_g[:-1], hist_g, width=0.01)
+            plt.bar(bins_g[:-1], hist_g, width=0.01, color="green")
             plt.xlabel("Pixel Value")
             plt.ylabel("Counts")
-            plt.title("Histogram of Binary Threshold (G channel)")
+            plt.title("Histogram of multiotsu threshold_sk (G channel)", color="green")
             if plt_log:
                 plt.yscale("log")
 
             plt.subplot(3, 1, 3)
-            plt.bar(bins_b[:-1], hist_b, width=0.01)
+            plt.bar(bins_b[:-1], hist_b, width=0.01, color="blue")
             plt.xlabel("Pixel Value")
             plt.ylabel("Counts")
-            plt.title("Histogram of Binary Threshold (B channel)")
+            plt.title("Histogram of multiotsu threshold_sk (B channel)", color="blue")
             if plt_log:
                 plt.yscale("log")
 
