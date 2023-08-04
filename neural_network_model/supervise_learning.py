@@ -81,7 +81,6 @@ class SuperviseLearning:
         # Return the histogram counts as features
         return Hessian_features
 
-
     def sato_filter(self, image_path, bins=40, cmap="jet"):
         image = cv2.imread(image_path, cv2.IMREAD_GRAYSCALE)
 
@@ -180,6 +179,8 @@ class SuperviseLearning:
 
         # Display the result (optional)
         plt.imshow(multi_otsu_output, cmap=cmap)
+        # set title
+        plt.title("multi_otsu_threshold Result")
         plt.axis("off")
         plt.show()
 
@@ -189,6 +190,7 @@ class SuperviseLearning:
         # Display the result (optional)
         plt.subplot(1, 2, 1)
         plt.imshow(multi_otsu_output, cmap=cmap)
+        plt.title("multi_otsu_threshold Result")
         plt.axis("off")
 
         # Plot the histogram
@@ -197,7 +199,7 @@ class SuperviseLearning:
         plt.xlabel('Pixel Value (Binary)')
         plt.ylabel('Counts')
         plt.title('Histogram of Multi-Otsu\nThresholded Image')
-
+        plt.tight_layout()
         plt.show()
 
         # Store the histogram counts per bin as features
@@ -216,9 +218,9 @@ class SuperviseLearning:
         # Display the original image and Sobel edges side by side (optional)
         plt.figure(figsize=(10, 5))
         # plt.subplot(1, 2, 1)
-        # plt.imshow(cv2.cvtColor(image, cv2.COLOR_BGR2RGB))
-        # plt.title('Original Image')
-        # plt.axis('off')
+        plt.imshow(cv2.cvtColor(image, cv2.COLOR_BGR2RGB))
+        plt.title('Original Image')
+        plt.axis('off')
 
         # plt.subplot(1, 2, 2)
         plt.imshow(sobel_edges, cmap='jet')
@@ -254,9 +256,10 @@ if __name__ == "__main__":
     # Load the image
     image_path = str((Path(__file__).parent / ".." / "dataset" / "pdc_bit" / "Image_1.png"))
 
-    hessian_features = obj.hessian_filter_skimage(image_path)
-    print(hessian_features)
-
+    # # Apply hessian filter
+    # hessian_features = obj.hessian_filter_skimage(image_path)
+    # print(hessian_features)
+    #
     # # Apply Sato filter
     # sato_features = obj.sato_filter(image_path)
     # print(sato_features)
@@ -264,11 +267,11 @@ if __name__ == "__main__":
     # # Apply LBP filter
     # lbp_result = obj.lbp_filter(image_path)
     # print(lbp_result)
-
-    # # Apply Multi-Otsu thresholding
-    # multi_otsu_features = obj.multi_otsu_threshold(image_path)
-    # print(multi_otsu_features)
     #
+    # Apply Multi-Otsu thresholding
+    multi_otsu_features = obj.multi_otsu_threshold(image_path)
+    print(multi_otsu_features)
+
     # # Apply Sobel edge detector
     # sobel_features = obj.sobel_edge_detection_sk(image_path)
     # print(sobel_features)
