@@ -143,6 +143,7 @@ class SuperviseLearning:
         )
 
         if plt_show:
+            plt.figure(figsize=figsize)
             # Display the histograms (optional)
             plt.subplot(3, 1, 1)
             plt.bar(bins_r[:-1], hist_r, width=np.max(frangi_r) / bins, color="r")
@@ -493,13 +494,13 @@ if __name__ == "__main__":
         (Path(__file__).parent / ".." / "dataset" / "rollercone_bit" / "Image_3.jpg")
     )
 
-    # # Apply hessian filter
-    # hessian_features = obj.hessian_filter_skimage(image_path, plt_show=False)
-    # print(hessian_features)
+    # Apply hessian filter
+    hessian_features = obj.hessian_filter_skimage(image_path, plt_show=False)
+    print(hessian_features)
 
-    # # Apply Sato filter
-    sato_features = obj.frangi_feature_extraction(image_path, plt_show=True, plt_log=True)
-    print(sato_features)
+    # # # # Apply Sato filter
+    # sato_features = obj.frangi_feature_extraction(image_path, plt_show=True, plt_log=True)
+    # print(sato_features)
 
     # # Apply LBP filter
     # lbp_result = obj.lbp_feature_extraction(image_path, plt_show=True)
