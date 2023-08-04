@@ -17,6 +17,7 @@ from skimage.filters import threshold_multiotsu
 from skimage.filters import sobel
 from skimage.feature import hessian_matrix, hessian_matrix_eigvals
 
+
 class SuperviseLearning:
     """
     This is a class for Supervise Learning approach
@@ -32,7 +33,15 @@ class SuperviseLearning:
             "dataset_address", Path(__file__).parent / ".." / "dataset"
         )
 
-    def hessian_filter_feature_extraction(self, image_path, bins=40, cmap="jet", plt_show=False):
+    def hessian_filter_feature_extraction(
+        self,
+        image_path,
+        bins=40,
+        cmap="jet",
+        plt_show=False,
+        plt_log=False,
+        figsize=(10, 10),
+    ):
         image = cv2.imread(image_path)
 
         # Convert the image to RGB if it's in BGR
@@ -56,61 +65,95 @@ class SuperviseLearning:
             # Display the original image and Hessian filtered images side by side (optional)
             plt.subplot(2, 2, 1)
             plt.imshow(image)
-            plt.title('Original Image')
-            plt.axis('off')
+            plt.title("Original Image")
+            plt.axis("off")
 
             plt.subplot(2, 2, 2)
             plt.imshow(eigenvals_r[0], cmap=cmap)
-            plt.title('Hessian Filter (R channel)')
-            plt.axis('off')
+            plt.title("Hessian Filter (R channel)", color="red")
+            plt.axis("off")
 
             plt.subplot(2, 2, 3)
             plt.imshow(eigenvals_g[0], cmap=cmap)
-            plt.title('Hessian Filter (G channel)')
-            plt.axis('off')
+            plt.title("Hessian Filter (G channel)", color="green")
+            plt.axis("off")
 
             plt.subplot(2, 2, 4)
             plt.imshow(eigenvals_b[0], cmap=cmap)
-            plt.title('Hessian Filter (B channel)')
-            plt.axis('off')
+            plt.title("Hessian Filter (B channel)", color="blue")
+            plt.axis("off")
             plt.show()
 
         # Compute histograms for each Hessian filtered image
-        hist_r, bins_r = np.histogram(eigenvals_r[0].ravel(), bins=bins,
-                                      range=(np.min(eigenvals_r[0]), np.max(eigenvals_r[0])))
-        hist_g, bins_g = np.histogram(eigenvals_g[0].ravel(), bins=bins,
-                                      range=(np.min(eigenvals_g[0]), np.max(eigenvals_g[0])))
-        hist_b, bins_b = np.histogram(eigenvals_b[0].ravel(), bins=bins,
-                                      range=(np.min(eigenvals_b[0]), np.max(eigenvals_b[0])))
+        hist_r, bins_r = np.histogram(
+            eigenvals_r[0].ravel(),
+            bins=bins,
+            range=(np.min(eigenvals_r[0]), np.max(eigenvals_r[0])),
+        )
+        hist_g, bins_g = np.histogram(
+            eigenvals_g[0].ravel(),
+            bins=bins,
+            range=(np.min(eigenvals_g[0]), np.max(eigenvals_g[0])),
+        )
+        hist_b, bins_b = np.histogram(
+            eigenvals_b[0].ravel(),
+            bins=bins,
+            range=(np.min(eigenvals_b[0]), np.max(eigenvals_b[0])),
+        )
 
         if plt_show:
+            plt.figure(figsize=figsize)
             # Display the histograms (optional)
-            plt.subplot(1, 3, 1)
-            plt.bar(bins_r[:-1], hist_r, width=(np.max(eigenvals_r[0]) - np.min(eigenvals_r[0])) / bins)
-            plt.xlabel('Hessian Value')
-            plt.ylabel('Counts')
-            plt.title('Histogram of Hessian Filter (R channel)')
+            plt.subplot(3, 1, 1)
+            plt.bar(
+                bins_r[:-1],
+                hist_r,
+                width=(np.max(eigenvals_r[0]) - np.min(eigenvals_r[0])) / bins,
+                color="red",
+            )
+            plt.xlabel("Hessian Value")
+            plt.ylabel("Counts")
+            plt.title("Histogram of Hessian Filter (R channel)", color="red")
+            if plt_log:
+                plt.yscale("log")
+            plt.grid(True)
 
-            plt.subplot(1, 3, 2)
-            plt.bar(bins_g[:-1], hist_g, width=(np.max(eigenvals_g[0]) - np.min(eigenvals_g[0])) / bins)
-            plt.xlabel('Hessian Value')
-            plt.ylabel('Counts')
-            plt.title('Histogram of Hessian Filter (G channel)')
+            plt.subplot(3, 1, 2)
+            plt.bar(
+                bins_g[:-1],
+                hist_g,
+                width=(np.max(eigenvals_g[0]) - np.min(eigenvals_g[0])) / bins,
+                color="green",
+            )
+            plt.xlabel("Hessian Value")
+            plt.ylabel("Counts")
+            plt.title("Histogram of Hessian Filter (G channel)", color="green")
+            if plt_log:
+                plt.yscale("log")
+            plt.grid(True)
 
-            plt.subplot(1, 3, 3)
-            plt.bar(bins_b[:-1], hist_b, width=(np.max(eigenvals_b[0]) - np.min(eigenvals_b[0])) / bins)
-            plt.xlabel('Hessian Value')
-            plt.ylabel('Counts')
-            plt.title('Histogram of Hessian Filter (B channel)')
+            plt.subplot(3, 1, 3)
+            plt.bar(
+                bins_b[:-1],
+                hist_b,
+                width=(np.max(eigenvals_b[0]) - np.min(eigenvals_b[0])) / bins,
+                color="blue",
+            )
+            plt.xlabel("Hessian Value")
+            plt.ylabel("Counts")
+            plt.title("Histogram of Hessian Filter (B channel)", color="blue")
+            if plt_log:
+                plt.yscale("log")
+            plt.grid(True)
 
             plt.tight_layout()
             plt.show()
 
         # Store the histogram counts per bin as features for each channel
         _hessian_features = {
-            'R_channel': hist_r.tolist(),
-            'G_channel': hist_g.tolist(),
-            'B_channel': hist_b.tolist()
+            "R_channel": hist_r.tolist(),
+            "G_channel": hist_g.tolist(),
+            "B_channel": hist_b.tolist(),
         }
 
         return _hessian_features
@@ -520,7 +563,7 @@ if __name__ == "__main__":
 
     # Apply hessian filter
     hessian_features = obj.hessian_filter_feature_extraction(
-        image_path, plt_show=True,
+        image_path, plt_show=True, plt_log=True
     )
     print(hessian_features)
 
