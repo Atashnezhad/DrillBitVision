@@ -203,11 +203,11 @@ if __name__ == "__main__":
     # obj.hessian_filter(image_path)
 
     # Apply Sato filter
-    # obj.sato_filter(image_path)
+    obj.sato_filter(image_path)
 
     # Apply LBP filter
-    lbp_result = obj.lbp_filter(image_path)
-    print(len(lbp_result))
+    # lbp_result = obj.lbp_filter(image_path)
+    # print(len(lbp_result))
 
     # Apply Multi-Otsu thresholding
     # multi_otsu_features = obj.multi_otsu_threshold(image_path)
