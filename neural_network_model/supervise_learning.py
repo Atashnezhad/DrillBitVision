@@ -133,11 +133,6 @@ class SuperviseLearning:
         # Now you can use the sato_features list as the feature representation for the Sato-filtered image.
         return sato_features
 
-    import cv2
-    import numpy as np
-    import matplotlib.pyplot as plt
-    from skimage.feature import local_binary_pattern
-
     def lbp_feature_extraction(
         self,
         image_path,
