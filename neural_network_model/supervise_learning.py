@@ -214,17 +214,17 @@ class SuperviseLearning:
 
             plt.subplot(2, 2, 2)
             plt.imshow(binary_r, cmap="gray")
-            plt.title("Binary Threshold (R channel)")
+            plt.title("Binary Threshold (R channel)", color="r")
             plt.axis("off")
 
             plt.subplot(2, 2, 3)
             plt.imshow(binary_g, cmap="gray")
-            plt.title("Binary Threshold (G channel)")
+            plt.title("Binary Threshold (G channel)", color="g")
             plt.axis("off")
 
             plt.subplot(2, 2, 4)
             plt.imshow(binary_b, cmap="gray")
-            plt.title("Binary Threshold (B channel)")
+            plt.title("Binary Threshold (B channel)", color="b")
             plt.axis("off")
             plt.tight_layout()
             plt.show()
@@ -304,17 +304,17 @@ class SuperviseLearning:
 
             plt.subplot(2, 2, 2)
             plt.imshow(sobel_edges_r, cmap="jet")
-            plt.title("Sobel Edges (R channel)")
+            plt.title("Sobel Edges (R channel)", color="r")
             plt.axis("off")
 
             plt.subplot(2, 2, 3)
             plt.imshow(sobel_edges_g, cmap="jet")
-            plt.title("Sobel Edges (G channel)")
+            plt.title("Sobel Edges (G channel)", color="g")
             plt.axis("off")
 
             plt.subplot(2, 2, 4)
             plt.imshow(sobel_edges_b, cmap="jet")
-            plt.title("Sobel Edges (B channel)")
+            plt.title("Sobel Edges (B channel)", color="b")
             plt.axis("off")
             plt.tight_layout()
             plt.show()
@@ -401,17 +401,19 @@ if __name__ == "__main__":
     # # # Apply Sato filter
     # sato_features = obj.sato_filter(image_path, plt_show=False)
     # print(sato_features)
-    #
-    # # Apply LBP filter
-    # lbp_result = obj.lbp_filter(image_path)
-    # print(lbp_result)
-    #
-    # # Apply Multi-Otsu thresholding
-    multi_otsu_features = obj.multiotsu_threshold_sk(
-        image_path, plt_show=True, plt_log=True
-    )
-    print(multi_otsu_features)
+
+    # Apply LBP filter
+    lbp_result = obj.lbp_filter(image_path)
+    print(lbp_result)
+
+    # # # Apply Multi-Otsu thresholding
+    # multi_otsu_features = obj.multiotsu_threshold_sk(
+    #     image_path, plt_show=True, plt_log=True
+    # )
+    # print(multi_otsu_features)
 
     # # Apply Sobel edge detector
-    # sobel_features = obj.sobel_edge_detection_sk(image_path, plt_show=True, plt_log=True)
+    # sobel_features = obj.sobel_edge_detection_sk(
+    #     image_path, plt_show=True, plt_log=True
+    # )
     # print(sobel_features)
