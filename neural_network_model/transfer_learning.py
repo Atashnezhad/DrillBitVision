@@ -823,7 +823,9 @@ class TransferModel(Preprocessing, BitVision):
 
         for i, ax in enumerate(axes.flat):
             if i < num_images:
-                img_path = test_df.Filepath.iloc[i]
+                # generate a random number between 0 and len(test_df)
+                j = np.random.randint(0, len(test_df))
+                img_path = test_df.Filepath.iloc[j]
                 img_array = preprocess_input(
                     self._get_img_array(img_path, size=img_size)
                 )
