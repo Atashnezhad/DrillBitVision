@@ -3,6 +3,8 @@ import os
 import random
 import shutil
 import warnings
+# ignore warnings
+warnings.filterwarnings("ignore")
 from pathlib import Path
 import cv2
 import numpy as np
@@ -12,6 +14,7 @@ from skimage.feature import local_binary_pattern
 from skimage.filters import threshold_multiotsu
 
 from skimage.filters import sobel
+from skimage.feature import hessian_matrix, hessian_matrix_eigvals
 from skimage.color import rgb2gray
 
 
@@ -43,6 +46,25 @@ class SuperviseLearning:
         cv2.imshow("Hessian Result", hessian_result)
         cv2.waitKey(0)
         cv2.destroyAllWindows()
+
+    def hessian_filter_skimage(self, image_path):
+
+        image = cv2.imread(image_path)
+        # Convert the image to grayscale if it's in color
+        if len(image.shape) == 3:
+            image = rgb2gray(image)
+
+        # Calculate the Hessian matrix and its eigenvalues
+        hessian_mat = hessian_matrix(image, sigma=1.0, order='rc')
+        eigvals = hessian_matrix_eigvals(hessian_mat)
+
+        # Choose one of the eigenvalues to get the Hessian result
+        hessian_output  = eigvals[1]  # For instance, using the second eigenvalue
+
+        # Display the Hessian result (optional)
+        plt.imshow(hessian_output, cmap='gray')
+        plt.axis('off')
+        plt.show()
 
     def sato_filter(self, image_path, bins=40, cmap="jet"):
         image = cv2.imread(image_path, cv2.IMREAD_GRAYSCALE)
@@ -238,6 +260,8 @@ if __name__ == "__main__":
 
     # Apply Hessian filter_ cv2
     # obj.hessian_filter_cv2(image_path)
+
+    obj.hessian_filter_skimage(image_path)
 
     # Apply Sato filter
     # sato_features = obj.sato_filter(image_path)
