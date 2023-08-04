@@ -216,13 +216,6 @@ class SuperviseLearning:
         sobel_edges = sobel(image)
 
         # Display the original image and Sobel edges side by side (optional)
-        plt.figure(figsize=(10, 5))
-        # plt.subplot(1, 2, 1)
-        plt.imshow(cv2.cvtColor(image, cv2.COLOR_BGR2RGB))
-        plt.title('Original Image')
-        plt.axis('off')
-
-        # plt.subplot(1, 2, 2)
         plt.imshow(sobel_edges, cmap='jet')
         plt.title('Sobel Edges')
         plt.axis('off')
@@ -237,11 +230,18 @@ class SuperviseLearning:
         # Compute the histogram of the Sobel edges image
         hist, bins = np.histogram(sobel_edges_uint8, bins=bins, range=(0, 255))
 
+        plt.subplot(1, 2, 1)
+        plt.imshow(sobel_edges, cmap='jet')
+        plt.title('Sobel Edges')
+        plt.axis('off')
+
         # Display the histogram (optional)
+        plt.subplot(1, 2, 2)
         plt.bar(bins[:-1], hist, width=5)
         plt.xlabel('Pixel Value')
         plt.ylabel('Counts')
         plt.title('Histogram of Sobel Edges')
+        plt.tight_layout()
         plt.show()
 
         # Store the histogram counts per bin as features
@@ -268,10 +268,10 @@ if __name__ == "__main__":
     # lbp_result = obj.lbp_filter(image_path)
     # print(lbp_result)
     #
-    # Apply Multi-Otsu thresholding
-    multi_otsu_features = obj.multi_otsu_threshold(image_path)
-    print(multi_otsu_features)
+    # # Apply Multi-Otsu thresholding
+    # multi_otsu_features = obj.multi_otsu_threshold(image_path)
+    # print(multi_otsu_features)
 
-    # # Apply Sobel edge detector
-    # sobel_features = obj.sobel_edge_detection_sk(image_path)
-    # print(sobel_features)
+    # Apply Sobel edge detector
+    sobel_features = obj.sobel_edge_detection_sk(image_path)
+    print(sobel_features)
