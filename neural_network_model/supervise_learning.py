@@ -53,7 +53,7 @@ class SuperviseLearning:
         plt.axis("off")
         plt.show()
 
-    def lbp_filter(self, image_path, radius=3, bins=40):
+    def lbp_filter(self, image_path, radius=3, bins=40, cmap="jet"):
         image = cv2.imread(image_path)
         # Define LBP parameters
         n_points = 8 * radius
@@ -67,9 +67,14 @@ class SuperviseLearning:
         hist, bins = np.histogram(lbp_result.ravel(), bins=bins, range=(0, n_points + 2))
 
         # Display the result (optional)
-        plt.subplot(1, 2, 1)
-        plt.imshow(lbp_result, cmap="jet")
+        plt.imshow(lbp_result, cmap=cmap)
+        plt.axis("off")
         plt.show()
+
+        # Display the result (optional)
+        plt.subplot(1, 2, 1)
+        plt.imshow(lbp_result, cmap=cmap)
+        plt.axis("off")
 
         # Plot the histogram
         plt.subplot(1, 2, 2)
@@ -201,10 +206,11 @@ if __name__ == "__main__":
     # obj.sato_filter(image_path)
 
     # Apply LBP filter
-    # lbp_result = obj.lbp_filter(image_path)
+    lbp_result = obj.lbp_filter(image_path)
+    print(len(lbp_result))
 
     # Apply Multi-Otsu thresholding
-    multi_otsu_features = obj.multi_otsu_threshold(image_path)
+    # multi_otsu_features = obj.multi_otsu_threshold(image_path)
     # print(multi_otsu_features)
 
     # Apply Sobel edge detector
