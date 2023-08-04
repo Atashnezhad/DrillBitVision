@@ -327,6 +327,7 @@ class SuperviseLearning:
             if plt_log:
                 plt.yscale("log")
             plt.grid(True)
+
             plt.subplot(3, 1, 2)
             plt.bar(bins_g[:-1], hist_g, width=width, color="g")
             plt.xlabel("LBP Value")
@@ -335,6 +336,7 @@ class SuperviseLearning:
             if plt_log:
                 plt.yscale("log")
             plt.grid(True)
+
             plt.subplot(3, 1, 3)
             plt.bar(bins_b[:-1], hist_b, width=width, color="b")
             plt.xlabel("LBP Value")
@@ -343,6 +345,7 @@ class SuperviseLearning:
             if plt_log:
                 plt.yscale("log")
             plt.grid(True)
+
             plt.tight_layout()
             plt.show()
 
@@ -579,22 +582,22 @@ if __name__ == "__main__":
     )
     print(hessian_features)
 
-    # # # # Apply Sato filter
-    # sato_features = obj.frangi_feature_extraction(image_path, plt_show=True, plt_log=True)
-    # print(sato_features)
-    #
-    # # Apply LBP filter
-    # lbp_result = obj.lbp_feature_extraction(image_path, plt_show=True)
-    # print(lbp_result)
-    #
-    # # # Apply Multi-Otsu thresholding
-    # multi_otsu_features = obj.multiotsu_threshold_sk(
-    #     image_path, plt_show=True, plt_log=True
-    # )
-    # print(multi_otsu_features)
-    #
-    # # Apply Sobel edge detector
-    # sobel_features = obj.sobel_edge_detection_sk(
-    #     image_path, plt_show=True, plt_log=True
-    # )
-    # print(sobel_features)
+    # # # Apply Sato filter
+    sato_features = obj.frangi_feature_extraction(image_path, plt_show=True, plt_log=True)
+    print(sato_features)
+
+    # Apply LBP filter
+    lbp_result = obj.lbp_feature_extraction(image_path, plt_show=True, plt_log=True)
+    print(lbp_result)
+
+    # # Apply Multi-Otsu thresholding
+    multi_otsu_features = obj.multiotsu_threshold_sk(
+        image_path, plt_show=True, plt_log=True
+    )
+    print(multi_otsu_features)
+
+    # Apply Sobel edge detector
+    sobel_features = obj.sobel_edge_detection_sk(
+        image_path, plt_show=True, plt_log=True
+    )
+    print(sobel_features)
