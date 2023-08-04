@@ -33,7 +33,7 @@ class SuperviseLearning:
             "dataset_address", Path(__file__).parent / ".." / "dataset"
         )
 
-    def hessian_filter_skimage(self, image_path):
+    def hessian_filter_skimage(self, image_path, plt_show=False):
 
         image = cv2.imread(image_path)
         # Convert the image to grayscale if it's in color
@@ -47,12 +47,13 @@ class SuperviseLearning:
         # Choose one of the eigenvalues to get the Hessian result
         hessian_output = eigvals[1]  # For instance, using the second eigenvalue
 
-        # Display the Hessian result (optional)
-        plt.imshow(hessian_output, cmap='gray')
-        # set title
-        plt.title("Hessian Filter Result")
-        plt.axis('off')
-        plt.show()
+        if plt_show:
+            # Display the Hessian result (optional)
+            plt.imshow(hessian_output, cmap='gray')
+            # set title
+            plt.title("Hessian Filter Result")
+            plt.axis('off')
+            plt.show()
 
         # Normalize the Hessian-filtered image to [0, 1]
         hessian_output = (hessian_output - np.min(hessian_output)) / (np.max(hessian_output) - np.min(hessian_output))
@@ -63,36 +64,39 @@ class SuperviseLearning:
         # Compute the histogram of the Hessian-filtered image
         hist, bins = np.histogram(hessian_output_uint8, bins=40, range=(0, 255))
 
-        # Display the Hessian-filtered image and its histogram side by side
-        plt.figure(figsize=(10, 5))
-        plt.subplot(1, 2, 1)
-        plt.imshow(hessian_output_uint8, cmap='gray')
-        plt.title('Hessian Filtered Image')
-        plt.axis('off')
+        if plt_show:
+            # Display the Hessian-filtered image and its histogram side by side
+            plt.figure(figsize=(10, 5))
+            plt.subplot(1, 2, 1)
+            plt.imshow(hessian_output_uint8, cmap='gray')
+            plt.title('Hessian Filtered Image')
+            plt.axis('off')
 
-        plt.subplot(1, 2, 2)
-        plt.bar(bins[:-1], hist, width=5)
-        plt.xlabel('Pixel Value')
-        plt.ylabel('Counts')
-        plt.title('Histogram of Hessian Filtered Image')
-        plt.show()
+            plt.subplot(1, 2, 2)
+            plt.bar(bins[:-1], hist, width=5)
+            plt.xlabel('Pixel Value')
+            plt.ylabel('Counts')
+            plt.title('Histogram of Hessian Filtered Image')
+            plt.show()
+
         Hessian_features = hist.tolist()
 
         # Return the histogram counts as features
         return Hessian_features
 
-    def sato_filter(self, image_path, bins=40, cmap="jet"):
+    def sato_filter(self, image_path, bins=40, cmap="jet", plt_show=False):
         image = cv2.imread(image_path, cv2.IMREAD_GRAYSCALE)
 
         # Apply Sato filter
         sato_result = frangi(image)
 
-        # Display the result (optional)
-        plt.imshow(sato_result, cmap=cmap)
-        # set title
-        plt.title("Sato Filter Result")
-        plt.axis("off")
-        plt.show()
+        if plt_show:
+            # Display the result (optional)
+            plt.imshow(sato_result, cmap=cmap)
+            # set title
+            plt.title("Sato Filter Result")
+            plt.axis("off")
+            plt.show()
 
         # Normalize the Sato-filtered image to [0, 1]
         sato_result = (sato_result - np.min(sato_result)) / (np.max(sato_result) - np.min(sato_result))
@@ -103,20 +107,21 @@ class SuperviseLearning:
         # Compute the histogram of the Sato-filtered image
         hist, bins = np.histogram(sato_result_uint8, bins=bins, range=(0, 255))
 
-        # Display the result (optional)
-        plt.subplot(1, 2, 1)
-        plt.imshow(sato_result, cmap=cmap)
-        plt.title("Sato Filter Result")
-        plt.axis("off")
+        if plt_show:
+            # Display the result (optional)
+            plt.subplot(1, 2, 1)
+            plt.imshow(sato_result, cmap=cmap)
+            plt.title("Sato Filter Result")
+            plt.axis("off")
 
-        # Plot the histogram
-        plt.subplot(1, 2, 2)
-        plt.bar(bins[:-1], hist, width=0.5, align='center')
-        plt.xlabel('Pixel Value (Binary)')
-        plt.ylabel('Counts')
-        plt.title('Histogram of sato_filter\nThresholded Image')
-        plt.tight_layout()
-        plt.show()
+            # Plot the histogram
+            plt.subplot(1, 2, 2)
+            plt.bar(bins[:-1], hist, width=0.5, align='center')
+            plt.xlabel('Pixel Value (Binary)')
+            plt.ylabel('Counts')
+            plt.title('Histogram of sato_filter\nThresholded Image')
+            plt.tight_layout()
+            plt.show()
 
         # Store the histogram counts per bin as features
         sato_features = hist.tolist()
@@ -124,7 +129,7 @@ class SuperviseLearning:
         # Now you can use the sato_features list as the feature representation for the Sato-filtered image.
         return sato_features
 
-    def lbp_filter(self, image_path, radius=3, bins=40, cmap="jet"):
+    def lbp_filter(self, image_path, radius=3, bins=40, cmap="jet", plt_show=False):
         image = cv2.imread(image_path)
         # Define LBP parameters
         n_points = 8 * radius
@@ -134,31 +139,33 @@ class SuperviseLearning:
         # Apply LBP filter
         lbp_result = local_binary_pattern(image, n_points, radius, method="uniform")
 
-        # Display the result (optional)
-        plt.imshow(lbp_result, cmap=cmap)
-        # set title
-        plt.title("lbp_filter Result")
-        plt.axis("off")
-        plt.show()
+        if plt_show:
+            # Display the result (optional)
+            plt.imshow(lbp_result, cmap=cmap)
+            # set title
+            plt.title("lbp_filter Result")
+            plt.axis("off")
+            plt.show()
 
         # Compute the histogram of the LBP result
         hist, bins = np.histogram(lbp_result.ravel(), bins=bins, range=(0, n_points + 2))
 
-        # Display the result (optional)
-        plt.subplot(1, 2, 1)
-        # set title
-        plt.title("lbp_filter Result")
-        plt.imshow(lbp_result, cmap=cmap)
-        plt.axis("off")
+        if plt_show:
+            # Display the result (optional)
+            plt.subplot(1, 2, 1)
+            # set title
+            plt.title("lbp_filter Result")
+            plt.imshow(lbp_result, cmap=cmap)
+            plt.axis("off")
 
-        # Plot the histogram
-        plt.subplot(1, 2, 2)
-        plt.bar(bins[:-1], hist, width=0.5, align='center')
-        plt.xlabel('Pixel Value (Binary)')
-        plt.ylabel('Counts')
-        plt.title('Histogram of lbp_filter\nThresholded Image')
-        plt.tight_layout()
-        plt.show()
+            # Plot the histogram
+            plt.subplot(1, 2, 2)
+            plt.bar(bins[:-1], hist, width=0.5, align='center')
+            plt.xlabel('Pixel Value (Binary)')
+            plt.ylabel('Counts')
+            plt.title('Histogram of lbp_filter\nThresholded Image')
+            plt.tight_layout()
+            plt.show()
 
         # Store the histogram counts per bin as features
         lbp_features = hist.tolist()
@@ -166,7 +173,7 @@ class SuperviseLearning:
         # Now you can use the lbp_features list as the feature representation for the LBP-filtered image.
         return lbp_features
 
-    def multi_otsu_threshold(self, image_path, classes=2, bins=40, cmap="gray"):
+    def multi_otsu_threshold(self, image_path, classes=2, bins=40, cmap="gray", plt_show=False):
         image = cv2.imread(image_path)
 
         # Convert the image to grayscale if it's in color
@@ -177,36 +184,38 @@ class SuperviseLearning:
         thresholds = threshold_multiotsu(image, classes=classes)
         multi_otsu_output = image >= thresholds
 
-        # Display the result (optional)
-        plt.imshow(multi_otsu_output, cmap=cmap)
-        # set title
-        plt.title("multi_otsu_threshold Result")
-        plt.axis("off")
-        plt.show()
+        if plt_show:
+            # Display the result (optional)
+            plt.imshow(multi_otsu_output, cmap=cmap)
+            # set title
+            plt.title("multi_otsu_threshold Result")
+            plt.axis("off")
+            plt.show()
 
         # extract features, Compute the histogram of the Multi-Otsu thresholded image
         hist, bins = np.histogram(multi_otsu_output, bins=bins)
 
-        # Display the result (optional)
-        plt.subplot(1, 2, 1)
-        plt.imshow(multi_otsu_output, cmap=cmap)
-        plt.title("multi_otsu_threshold Result")
-        plt.axis("off")
+        if plt_show:
+            # Display the result (optional)
+            plt.subplot(1, 2, 1)
+            plt.imshow(multi_otsu_output, cmap=cmap)
+            plt.title("multi_otsu_threshold Result")
+            plt.axis("off")
 
-        # Plot the histogram
-        plt.subplot(1, 2, 2)
-        plt.bar(bins[:-1], hist, width=0.5, align='center')
-        plt.xlabel('Pixel Value (Binary)')
-        plt.ylabel('Counts')
-        plt.title('Histogram of Multi-Otsu\nThresholded Image')
-        plt.tight_layout()
-        plt.show()
+            # Plot the histogram
+            plt.subplot(1, 2, 2)
+            plt.bar(bins[:-1], hist, width=0.5, align='center')
+            plt.xlabel('Pixel Value (Binary)')
+            plt.ylabel('Counts')
+            plt.title('Histogram of Multi-Otsu\nThresholded Image')
+            plt.tight_layout()
+            plt.show()
 
         # Store the histogram counts per bin as features
         multi_otsu_features = hist.tolist()
         return multi_otsu_features
 
-    def sobel_edge_detection_sk(self, image_path, bins=40):
+    def sobel_edge_detection_sk(self, image_path, bins=40, plt_show=False):
         image = cv2.imread(image_path)
         # Convert the image to grayscale if it's in color
         if len(image.shape) == 2:
@@ -215,11 +224,12 @@ class SuperviseLearning:
         # Apply Sobel edge detector
         sobel_edges = sobel(image)
 
-        # Display the original image and Sobel edges side by side (optional)
-        plt.imshow(sobel_edges, cmap='jet')
-        plt.title('Sobel Edges')
-        plt.axis('off')
-        plt.show()
+        if plt_show:
+            # Display the original image and Sobel edges side by side (optional)
+            plt.imshow(sobel_edges, cmap='jet')
+            plt.title('Sobel Edges')
+            plt.axis('off')
+            plt.show()
 
         # Normalize the Sobel edges image to [0, 1]
         sobel_edges = (sobel_edges - np.min(sobel_edges)) / (np.max(sobel_edges) - np.min(sobel_edges))
@@ -230,19 +240,20 @@ class SuperviseLearning:
         # Compute the histogram of the Sobel edges image
         hist, bins = np.histogram(sobel_edges_uint8, bins=bins, range=(0, 255))
 
-        plt.subplot(1, 2, 1)
-        plt.imshow(sobel_edges, cmap='jet')
-        plt.title('Sobel Edges')
-        plt.axis('off')
+        if plt_show:
+            plt.subplot(1, 2, 1)
+            plt.imshow(sobel_edges, cmap='jet')
+            plt.title('Sobel Edges')
+            plt.axis('off')
 
-        # Display the histogram (optional)
-        plt.subplot(1, 2, 2)
-        plt.bar(bins[:-1], hist, width=5)
-        plt.xlabel('Pixel Value')
-        plt.ylabel('Counts')
-        plt.title('Histogram of Sobel Edges')
-        plt.tight_layout()
-        plt.show()
+            # Display the histogram (optional)
+            plt.subplot(1, 2, 2)
+            plt.bar(bins[:-1], hist, width=5)
+            plt.xlabel('Pixel Value')
+            plt.ylabel('Counts')
+            plt.title('Histogram of Sobel Edges')
+            plt.tight_layout()
+            plt.show()
 
         # Store the histogram counts per bin as features
         _sobel_features = hist.tolist()
@@ -257,11 +268,11 @@ if __name__ == "__main__":
     image_path = str((Path(__file__).parent / ".." / "dataset" / "pdc_bit" / "Image_1.png"))
 
     # # Apply hessian filter
-    # hessian_features = obj.hessian_filter_skimage(image_path)
+    # hessian_features = obj.hessian_filter_skimage(image_path, plt_show=False)
     # print(hessian_features)
-    #
-    # # Apply Sato filter
-    # sato_features = obj.sato_filter(image_path)
+
+    # # # Apply Sato filter
+    # sato_features = obj.sato_filter(image_path, plt_show=False)
     # print(sato_features)
     #
     # # Apply LBP filter
