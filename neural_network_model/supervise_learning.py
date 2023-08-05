@@ -1,13 +1,15 @@
+import os
 import warnings
 from pathlib import Path
 
 import cv2
 import matplotlib.pyplot as plt
 import numpy as np
+import pandas as pd
 from skimage.feature import hessian_matrix, hessian_matrix_eigvals, local_binary_pattern
 from skimage.filters import frangi, sobel, threshold_multiotsu
 
-from neural_network_model.model import SUPERVISE_LEARNING_SETTING
+from neural_network_model.model import SUPERVISE_LEARNING_SETTING, TRANSFER_LEARNING_SETTING
 
 # ignore warnings
 warnings.filterwarnings("ignore")
@@ -27,6 +29,26 @@ class SuperviseLearning:
         self.dataset_address = kwargs.get(
             "dataset_address", Path(__file__).parent / ".." / "dataset"
         )
+
+    @property
+    def image_df(self):
+        image_dir = self.dataset_address
+        # Get filepaths and labels
+        filepaths = list(image_dir.glob(r"**/*.png"))
+        # add those with jpg extension
+        filepaths.extend(list(image_dir.glob(r"**/*.jpg")))
+        labels = list(map(lambda x: os.path.split(os.path.split(x)[0])[1], filepaths))
+
+        filepaths = pd.Series(filepaths, name=TRANSFER_LEARNING_SETTING.DF_X_COL_NAME).astype(str)
+        labels = pd.Series(labels, name=TRANSFER_LEARNING_SETTING.DF_Y_COL_NAME)
+
+        # Concatenate filepaths and labels
+        image_df = pd.concat([filepaths, labels], axis=1)
+
+        # Shuffle the DataFrame and reset index
+        image_df = image_df.sample(frac=1).reset_index(drop=True)
+
+        return image_df
 
     def hessian_filter_feature_extraction(
         self,
@@ -576,35 +598,39 @@ class SuperviseLearning:
 if __name__ == "__main__":
     obj = SuperviseLearning()
 
+    print(obj.image_df.head())
+
     # Load the image
     image_path = str(
         (Path(__file__).parent / ".." / "dataset" / "pdc_bit" / "Image_1.png")
     )
 
-    # Apply hessian filter
-    hessian_features = obj.hessian_filter_feature_extraction(
-        image_path, plt_show=True, plt_log=True
-    )
-    print(hessian_features)
 
-    # # # Apply Sato filter
-    sato_features = obj.frangi_feature_extraction(
-        image_path, plt_show=True, plt_log=True
-    )
-    print(sato_features)
 
-    # Apply LBP filter
-    lbp_result = obj.lbp_feature_extraction(image_path, plt_show=True, plt_log=True)
-    print(lbp_result)
-
-    # # Apply Multi-Otsu thresholding
-    multi_otsu_features = obj.multiotsu_threshold_sk(
-        image_path, plt_show=True, plt_log=True
-    )
-    print(multi_otsu_features)
-
-    # Apply Sobel edge detector
-    sobel_features = obj.sobel_edge_detection_sk(
-        image_path, plt_show=True, plt_log=True
-    )
-    print(sobel_features)
+    # # Apply hessian filter
+    # hessian_features = obj.hessian_filter_feature_extraction(
+    #     image_path, plt_show=True, plt_log=True
+    # )
+    # print(hessian_features)
+    #
+    # # # # Apply Sato filter
+    # sato_features = obj.frangi_feature_extraction(
+    #     image_path, plt_show=True, plt_log=True
+    # )
+    # print(sato_features)
+    #
+    # # Apply LBP filter
+    # lbp_result = obj.lbp_feature_extraction(image_path, plt_show=True, plt_log=True)
+    # print(lbp_result)
+    #
+    # # # Apply Multi-Otsu thresholding
+    # multi_otsu_features = obj.multiotsu_threshold_sk(
+    #     image_path, plt_show=True, plt_log=True
+    # )
+    # print(multi_otsu_features)
+    #
+    # # Apply Sobel edge detector
+    # sobel_features = obj.sobel_edge_detection_sk(
+    #     image_path, plt_show=True, plt_log=True
+    # )
+    # print(sobel_features)
