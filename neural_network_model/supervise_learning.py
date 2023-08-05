@@ -568,8 +568,6 @@ class SuperviseLearning:
         return _sobel_features
 
 
-
-
 if __name__ == "__main__":
     obj = SuperviseLearning()
 
