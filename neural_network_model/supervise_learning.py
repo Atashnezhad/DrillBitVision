@@ -1,21 +1,15 @@
-import logging
-import os
-import random
-import shutil
+from pathlib import Path
+
+import cv2
+import matplotlib.pyplot as plt
+import numpy as np
+from skimage.feature import hessian_matrix, hessian_matrix_eigvals, local_binary_pattern
+from skimage.filters import frangi, sobel, threshold_multiotsu
+
 import warnings
 
 # ignore warnings
 warnings.filterwarnings("ignore")
-from pathlib import Path
-import cv2
-import numpy as np
-from skimage.filters import frangi
-import matplotlib.pyplot as plt
-from skimage.feature import local_binary_pattern
-from skimage.filters import threshold_multiotsu
-
-from skimage.filters import sobel
-from skimage.feature import hessian_matrix, hessian_matrix_eigvals
 
 
 class SuperviseLearning:
@@ -69,8 +63,8 @@ class SuperviseLearning:
         eigenvals = hessian_matrix_eigvals(h)
         if plt_show:
             plt.imshow(eigenvals[0], cmap=cmap)
-            plt.title('Hessian Filter')
-            plt.axis('off')
+            plt.title("Hessian Filter")
+            plt.axis("off")
             plt.show()
 
         if plt_show:
@@ -380,9 +374,6 @@ class SuperviseLearning:
         binary_g = g > thresholds_g[1]
         binary_b = b > thresholds_b[1]
 
-        # Combine the binary images from each channel using max (you can use other methods as well)
-        binary_combined = np.maximum.reduce([binary_r, binary_g, binary_b])
-
         if plt_show:
             # Display the original image and binary thresholded images side by side (optional)
             plt.subplot(2, 2, 1)
@@ -471,11 +462,6 @@ class SuperviseLearning:
         sobel_edges_r = sobel(r)
         sobel_edges_g = sobel(g)
         sobel_edges_b = sobel(b)
-
-        # Combine the Sobel edges from each channel using max (you can use other methods as well)
-        sobel_edges_combined = np.maximum.reduce(
-            [sobel_edges_r, sobel_edges_g, sobel_edges_b]
-        )
 
         if plt_show:
             # Display the original image and Sobel edges side by side (optional)
@@ -583,7 +569,9 @@ if __name__ == "__main__":
     print(hessian_features)
 
     # # # Apply Sato filter
-    sato_features = obj.frangi_feature_extraction(image_path, plt_show=True, plt_log=True)
+    sato_features = obj.frangi_feature_extraction(
+        image_path, plt_show=True, plt_log=True
+    )
     print(sato_features)
 
     # Apply LBP filter
