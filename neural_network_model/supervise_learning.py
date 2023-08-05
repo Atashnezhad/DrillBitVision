@@ -365,6 +365,15 @@ class SuperviseLearning:
     ):
         image = cv2.imread(image_path)
 
+        # also apply on whole image
+        thresholds = threshold_multiotsu(image, classes=classes)
+        # plt the threshold for whole image
+        # Applying multi-Otsu threshold for the default value, generating
+        # Using the threshold values, we generate the three regions.
+        regions = np.digitize(image, bins=thresholds)
+        plt.imshow(regions)
+        plt.show()
+
         # Convert the image to RGB if it's in BGR
         if len(image.shape) == 3:  # Check if the image is color (has 3 channels)
             image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
@@ -381,6 +390,8 @@ class SuperviseLearning:
         binary_r = r > thresholds_r[1]
         binary_g = g > thresholds_g[1]
         binary_b = b > thresholds_b[1]
+
+
 
         if plt_show:
             # Display the original image and binary threshold images side by side (optional)
