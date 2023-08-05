@@ -1,3 +1,4 @@
+import warnings
 from pathlib import Path
 
 import cv2
@@ -6,7 +7,7 @@ import numpy as np
 from skimage.feature import hessian_matrix, hessian_matrix_eigvals, local_binary_pattern
 from skimage.filters import frangi, sobel, threshold_multiotsu
 
-import warnings
+from neural_network_model.model import SUPERVISE_LEARNING_SETTING
 
 # ignore warnings
 warnings.filterwarnings("ignore")
@@ -260,13 +261,14 @@ class SuperviseLearning:
     def lbp_feature_extraction(
         self,
         image_path,
-        radius=3,
-        n_points=8,
+        radius=SUPERVISE_LEARNING_SETTING.FILTERS.LOCAl_BINARY_PATTERN.RADIUS,
+        n_points=SUPERVISE_LEARNING_SETTING.FILTERS.LOCAl_BINARY_PATTERN.NUM_POINTS,
         bins=40,
         plt_show=False,
         plt_log=False,
         figsize=(10, 10),
         width=0.5,
+        method=SUPERVISE_LEARNING_SETTING.FILTERS.LOCAl_BINARY_PATTERN.METHOD,
     ):
         image = cv2.imread(image_path)
 
@@ -278,9 +280,9 @@ class SuperviseLearning:
         r, g, b = image[:, :, 0], image[:, :, 1], image[:, :, 2]
 
         # Compute LBP for each channel
-        lbp_r = local_binary_pattern(r, n_points, radius, method="uniform")
-        lbp_g = local_binary_pattern(g, n_points, radius, method="uniform")
-        lbp_b = local_binary_pattern(b, n_points, radius, method="uniform")
+        lbp_r = local_binary_pattern(r, n_points, radius, method=method)
+        lbp_g = local_binary_pattern(g, n_points, radius, method=method)
+        lbp_b = local_binary_pattern(b, n_points, radius, method=method)
 
         # Compute histograms for each LBP image
         hist_r, bins_r = np.histogram(lbp_r.ravel(), bins=bins, range=(0, n_points + 2))
@@ -353,7 +355,13 @@ class SuperviseLearning:
         return _lbp_features
 
     def multiotsu_threshold_sk(
-        self, image_path, bins=40, plt_show=False, plt_log=False, figsize=(10, 10)
+        self,
+        image_path,
+        bins=40,
+        plt_show=False,
+        plt_log=False,
+        figsize=(10, 10),
+        classes=SUPERVISE_LEARNING_SETTING.FILTERS.MULTIOTSU_THRESHOLD.CLASSES,
     ):
         image = cv2.imread(image_path)
 
@@ -365,9 +373,9 @@ class SuperviseLearning:
         r, g, b = image[:, :, 0], image[:, :, 1], image[:, :, 2]
 
         # Apply multi-Otsu thresholding to each channel
-        thresholds_r = threshold_multiotsu(r, classes=3)
-        thresholds_g = threshold_multiotsu(g, classes=3)
-        thresholds_b = threshold_multiotsu(b, classes=3)
+        thresholds_r = threshold_multiotsu(r, classes=classes)
+        thresholds_g = threshold_multiotsu(g, classes=classes)
+        thresholds_b = threshold_multiotsu(b, classes=classes)
 
         # Convert the thresholded images to binary
         binary_r = r > thresholds_r[1]
@@ -375,7 +383,7 @@ class SuperviseLearning:
         binary_b = b > thresholds_b[1]
 
         if plt_show:
-            # Display the original image and binary thresholded images side by side (optional)
+            # Display the original image and binary threshold images side by side (optional)
             plt.subplot(2, 2, 1)
             plt.imshow(image)
             plt.title("Original Image")
@@ -399,7 +407,7 @@ class SuperviseLearning:
             plt.tight_layout()
             plt.show()
 
-        # Compute the histograms of the binary thresholded images
+        # Compute the histograms of the binary threshold images
         hist_r, bins_r = np.histogram(binary_r, bins=bins, range=(0, 1))
         hist_g, bins_g = np.histogram(binary_g, bins=bins, range=(0, 1))
         hist_b, bins_b = np.histogram(binary_b, bins=bins, range=(0, 1))
