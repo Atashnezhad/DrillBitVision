@@ -121,11 +121,18 @@ class TransferModel(Preprocessing, BitVision):
         plt.figure(figsize=figsize)
         sns.barplot(x=names[idx], y=counts[idx], palette=palette)
         plt.xticks(rotation=x_rotation)
-        plt.title("How many images per classes are given in the data?")
+        # set y axis label
+        plt.ylabel("Number of images")
+        plt.title("Number of images per classes")
         plt.tight_layout()
         # save the plot in the figures folder
         plt.savefig(figure_folder_path / "classes_number.png")
         plt.show()
+
+        # print the number of images for each class
+        for i in range(len(names)):
+            # print(f"number of images belong to {names[i]}: {counts[i]}")
+            logger.info(f"number of images belong to {names[i]}: {counts[i]}")
 
     def analyze_image_names(
             self,
@@ -185,7 +192,7 @@ class TransferModel(Preprocessing, BitVision):
 
         image_df.width = image_df.width.astype(np.int)
         image_df.height = image_df.height.astype(np.int)
-        print(image_df.head())
+        logger.info(image_df.head())
 
         fig, ax = plt.subplots(3, 1, figsize=figsize)
         ax[0].scatter(image_df.width.values, image_df.height.values, s=size)
@@ -194,14 +201,12 @@ class TransferModel(Preprocessing, BitVision):
         ax[0].set_title("Is image width always equal to image height?")
 
         for single in image_df.classes.unique():
-            # sns.kdeplot(
-            #     image_df[image_df.classes == single].width, ax=ax[1], label=single
-            # )
             # Filter the data based on the 'classes' column
             filtered_data = image_df[image_df.classes == single].width
             plt.hist(filtered_data, density=True, alpha=0.5, label=single)
             # show the legend
             plt.legend()
+
         ax[1].legend()
         ax[1].set_title("KDE-Plot of image width given classes")
         ax[1].set_xlabel("Image width")
@@ -232,15 +237,25 @@ class TransferModel(Preprocessing, BitVision):
         # check if there is sort of cluster with respect to the image width
         scaler = StandardScaler()
 
-        X = np.log(image_df.width.values).reshape(-1, 1)
+        X = np.log(image_df[["width", "height"]].values)
         X = scaler.fit_transform(X)
 
-        km = KMeans(n_clusters=num_cluster)
+        km = KMeans(n_clusters=num_cluster, random_state=TRANSFER_LEARNING_SETTING.RANDOM_STATE)
         image_df["cluster_number"] = km.fit_predict(X)
 
-        mean_states = image_df.groupby("cluster_number").width.mean().values
-        cluster_number_order = np.argsort(mean_states)
+        mean_width_height = image_df.groupby("cluster_number")[["width", "height"]].mean().values
+        # Sort the clusters based on the mean width (you can do the same for height if needed)
+        cluster_number_order = np.argsort(mean_width_height[:, 0])
+        # log for mean_states
+        logger.info("Mean states: {}".format(mean_width_height))
         logger.info("Cluster number order: {}".format(cluster_number_order))
+
+        # Create a dictionary to store the information
+        cluster_info_dict = {
+            "mean_width_height": mean_width_height.tolist(),
+            "cluster_number_order": cluster_number_order.tolist()
+        }
+        logger.info(f"cluster_info_dict\n {cluster_info_dict}")
 
         target_leakage = (
             image_df.groupby(["cluster_number", "classes"]).size().unstack().fillna(0)
@@ -251,8 +266,8 @@ class TransferModel(Preprocessing, BitVision):
         plt.figure(figsize=figsize_2)
         sns.heatmap(target_leakage, cmap=cmap_2, annot=True)
         plt.title(
-            "The cluster_number is related to the classes!\nThis is based on the images width and defined "
-            "number of clusters"
+            "The cluster_number is related to the classes!\nThis is based on the images width and height and defined "
+            "number of clusters = {}".format(num_cluster)
         )
         plt.tight_layout()
         # save the plot in the figures folder
@@ -317,7 +332,7 @@ class TransferModel(Preprocessing, BitVision):
         plt.savefig(figure_folder_path / "images.png")
         plt.show()
 
-    def train_test_split(self, *args, **kwargs):
+    def _train_test_split(self, *args, **kwargs):
         """
         Split the data into train and test data
         :param args: arguments for the train_test_split function
@@ -337,6 +352,7 @@ class TransferModel(Preprocessing, BitVision):
             train_size=train_size,
             shuffle=shuffle,
             random_state=random_state,
+            stratify=self.image_df[TRANSFER_LEARNING_SETTING.DF_Y_COL_NAME],  # Add stratify option
         )
         return train_df, test_df
 
@@ -345,7 +361,7 @@ class TransferModel(Preprocessing, BitVision):
         Create the generator for the model
         :return: train_images, val_images, test_images
         """
-        train_df, test_df = self.train_test_split()
+        train_df, test_df = self._train_test_split()
         # Load the Images with a generator and Data Augmentation
         train_generator = tf.keras.preprocessing.image.ImageDataGenerator(
             preprocessing_function=tf.keras.applications.mobilenet_v2.preprocess_input,
@@ -473,6 +489,10 @@ class TransferModel(Preprocessing, BitVision):
         :param batch_size: batch size
         kwargs:
             model_save_location: location to save the model default is self.model_save_location
+            model_name: name of the model default is tf_model.h5
+            loss: loss function default is categorical_crossentropy
+            metrics:
+        :return: None
         """
         if kwargs.get("model_save_path"):
             # check if the path exists if not create it
@@ -516,8 +536,9 @@ class TransferModel(Preprocessing, BitVision):
         model = tf.keras.Model(inputs=inputs, outputs=outputs)
 
         optimizer = TRANSFER_LEARNING_SETTING.OPTIMIZER
-        loss = TRANSFER_LEARNING_SETTING.LOSS
-        metrics = TRANSFER_LEARNING_SETTING.METRICS
+
+        loss = kwargs.get("loss", TRANSFER_LEARNING_SETTING.LOSS)
+        metrics = kwargs.get("metrics", TRANSFER_LEARNING_SETTING.METRICS)
 
         model.compile(optimizer=optimizer, loss=loss, metrics=metrics)
 
@@ -548,31 +569,40 @@ class TransferModel(Preprocessing, BitVision):
         figure_folder_path = kwargs.get(
             "figure_folder_path", Path(__file__).parent / ".." / "figures"
         )
+
+        figsize = kwargs.get("figsize", (10, 6))
         # check if the folder exists if not create it
         if not figure_folder_path.exists():
             os.makedirs(figure_folder_path)
 
-        # Create subplots with 1 row and 2 columns
-        fig, axes = plt.subplots(nrows=1, ncols=2, figsize=(12, 6))
+        # Define the metric names to plot (using the keys present in self.model_history.history)
+        metrics_to_plot = {
+            key: key.replace("val_", "").capitalize()
+            for key in self.model_history.history.keys()
+            if key.startswith('val_')  # Only plot if there is a corresponding 'val_' metric
+        }
 
-        # Plot Accuracy
-        axes[0].plot(self.model_history.history["accuracy"])
-        axes[0].plot(self.model_history.history["val_accuracy"])
-        axes[0].set_title("Accuracy")
-        axes[0].set_xlabel("Epoch")
-        axes[0].set_ylabel("Accuracy")
-        axes[0].legend(["Train", "Validation"])
+        for metric, title in metrics_to_plot.items():
+            logger.info(f"Plotting metric: {metric} and title: {title}")
+            plt.figure(figsize=figsize)
+            train_metric = self.model_history.history[metric.replace("val_", "")]
+            val_metric = self.model_history.history[metric]
+            plt.plot(train_metric)
+            plt.plot(val_metric)
+            plt.title("History of {}".format(title))
+            plt.xlabel("Epoch")
+            plt.ylabel(title)
+            plt.legend(["Train", "Validation"])
 
-        # Plot Loss
-        axes[1].plot(self.model_history.history["loss"])
-        axes[1].plot(self.model_history.history["val_loss"])
-        axes[1].set_title("Loss")
-        axes[1].set_xlabel("Epoch")
-        axes[1].set_ylabel("Loss")
-        axes[1].legend(["Train", "Validation"])
+            plt.tight_layout()
+            # if val is in the metric name then strip it out
+            if "val" in metric:
+                metric = metric.replace("val_", "")
 
-        plt.tight_layout()
-        plt.savefig(figure_folder_path / "metrics.png")
+            plt.savefig(figure_folder_path / f"{metric}.png")
+            plt.show()
+            plt.close()  # Close the figure after saving to avoid overlapping plots
+
         plt.show()
 
     @staticmethod
@@ -598,7 +628,8 @@ class TransferModel(Preprocessing, BitVision):
         print(" ## Test Loss: {:.5f}".format(results[0]))
         print("## Accuracy on the test set: {:.2f}%".format(results[1] * 100))
 
-    def predcit_test(self, model_path: str = None, **kwargs):
+    def predict_test(self, model_path: Path = None, **kwargs):
+
         (
             train_generator,
             test_generator,
@@ -610,6 +641,7 @@ class TransferModel(Preprocessing, BitVision):
         figure_folder_path = kwargs.get(
             "figure_folder_path", Path(__file__).parent / ".." / "figures"
         )
+        conf_matx_normalize = kwargs.get("normalize", None)
 
         # Load the model
         # here we check if the model_path path is provided and load it otherwise we use the self.model
@@ -631,13 +663,13 @@ class TransferModel(Preprocessing, BitVision):
         pred = [labels[k] for k in pred]
 
         # Display the result
-        print(f"The first ... predictions: {pred[:5]}")
+        print(f"The first ... predictions: {pred[:5]}\n\n")
 
-        train_df, test_df = self.train_test_split()
+        train_df, test_df = self._train_test_split()
         y_test = list(test_df.Label)
         print(classification_report(y_test, pred))
 
-        cf_matrix = confusion_matrix(y_test, pred, normalize="true")
+        cf_matrix = confusion_matrix(y_test, pred, normalize=conf_matx_normalize)
         plt.figure(figsize=(10, 6))
         sns.heatmap(
             cf_matrix,
@@ -771,12 +803,13 @@ class TransferModel(Preprocessing, BitVision):
         img_size = kwargs.get("img_size", (224, 224))
         gard_cam_image_name = kwargs.get("gard_cam_image_name", "transf_cam.jpg")
         figsize = kwargs.get("figsize", (8, 6))
+        title_lable_size = kwargs.get("title_lable_size", 8)
 
         # Remove last layer's softmax
         self.model.layers[-1].activation = None
 
         # Display the part of the pictures used by the neural network to classify the pictures
-        _, test_df = self.train_test_split()
+        _, test_df = self._train_test_split()
 
         if not num_rows and not num_cols:
             # Get the number of rows and columns for subplots
@@ -790,23 +823,44 @@ class TransferModel(Preprocessing, BitVision):
 
         for i, ax in enumerate(axes.flat):
             if i < num_images:
-                img_path = test_df.Filepath.iloc[i]
+                # generate a random number between 0 and len(test_df)
+                j = np.random.randint(0, len(test_df))
+                img_path = test_df.Filepath.iloc[j]
                 img_array = preprocess_input(
                     self._get_img_array(img_path, size=img_size)
                 )
                 heatmap = self._make_gradcam_heatmap(
                     img_array, self.model, last_conv_layer_name
                 )
-                cam_path = self._save_and_display_gradcam(img_path, heatmap)
-                ax.imshow(plt.imread(cam_path / f"{gard_cam_image_name}"))
-                ax.set_title(
-                    f"True: {test_df.Label.iloc[i]}\nPredicted: {self.pred[i]}"
+                cam_path = self._save_and_display_gradcam(
+                    img_path,
+                    heatmap,
+                    # cam_name=f"gard_cam_image_name_{i}.jpg"
                 )
+                ax.imshow(plt.imread(cam_path / f"{gard_cam_image_name}"))
+                true_label = test_df.Label.iloc[i]
+                predicted_label = self.pred[i]
+                title = f"True: {true_label}\nPredicted: {predicted_label}"
+                # Set the color of the title based on the prediction
+                if true_label == predicted_label:
+                    ax.set_title(title, color='green')
+                else:
+                    ax.set_title(title, color='red')
+                # title label size
+                ax.title.set_size(title_lable_size)
+                # set grid on
+                ax.grid(True)
+
             else:
                 # Remove unused subplots
                 fig.delaxes(ax)
 
         plt.tight_layout()
+        # save the figure
+        plt.savefig(
+            Path(__file__).parent / ".." / "figures" / "grad_cam.png",
+            bbox_inches="tight",
+        )
         plt.show()
 
 
@@ -824,11 +878,15 @@ if __name__ == "__main__":
     transfer_model.plot_classes_number()
     transfer_model.analyze_image_names()
     transfer_model.plot_data_images(num_rows=3, num_cols=3)
-    transfer_model.train_model(epochs=3,
-                               model_save_path=(Path(__file__).parent / ".." / "deep_model").resolve(),
-                               model_name="tf_model_2.h5")
+    transfer_model.train_model(
+        epochs=3,
+        model_save_path=(Path(__file__).parent / ".." / "deep_model").resolve(),
+        model_name="tf_model_2.h5"
+    )
     transfer_model.plot_metrics_results()
     transfer_model.results()
     # one can pass the model address to the predict_test method
-    transfer_model.predcit_test()
+    transfer_model.predict_test(
+        model_path=(Path(__file__).parent / ".." / "deep_model" / "tf_model.h5").resolve()
+    )
     transfer_model.grad_cam_viz(num_rows=3, num_cols=2)

@@ -14,7 +14,7 @@ def main():
         number_of_images_tobe_gen=10,
         augment_data_address=parent_dir / "dataset_augmented",
     )
-    obj.train_test_split(
+    obj._train_test_split(
         augmented_data_address=parent_dir / "dataset_augmented",
         train_test_val_split_dir_address=parent_dir / "dataset_train_test_val",
     )

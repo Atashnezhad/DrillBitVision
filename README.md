@@ -79,10 +79,10 @@ The TransferModel class uses the MobileNetV2 architecture for transfer learning.
 [//]: # (```)
 
 ## Grad Cam Heatmap - Rollercone Bit
-![alt text](figures/grad_cam_rc_1.png "Logo Title Text 1")
+![alt text](assets/grad_cam_rc_1.png "Logo Title Text 1")
 
 ## Grad Cam Heatmap - PDC Bit
-![alt text](figures/grad_cam_pdc_1.png "Logo Title Text 1")
+![alt text](assets/grad_cam_pdc_1.png "Logo Title Text 1")
 
 
 # How to use the Drill Bit Classifier Example
@@ -91,11 +91,11 @@ The TransferModel class uses the MobileNetV2 architecture for transfer learning.
 pip install drillvision
 ```
 ## Usage
+
 ```python
 from pathlib import Path
 from neural_network_model.process_data import Preprocessing
 from neural_network_model.bit_vision import BitVision
-
 
 if __name__ == "__main__":
     # download the images
@@ -106,7 +106,7 @@ if __name__ == "__main__":
         number_of_images_tobe_gen=10,
         augment_data_address=Path(__file__).parent / "augmented_dataset"
     )
-    obj.train_test_split(
+    obj._train_test_split(
         augmented_data_address=Path(__file__).parent / "augmented_dataset",
         train_test_val_split_dir_address=Path(__file__).parent / "dataset_train_test_val"
     )
@@ -140,20 +140,21 @@ if __name__ == "__main__":
     obj.grad_cam_viz(
         model_path=Path(__file__).parent / "deep_model" / best_model,
         fig_to_save_address=Path(__file__).parent / "figures",
-        img_to_be_applied_path=Path(__file__).parent / "dataset_train_test_val" / "test" / "pdc_bit" / list_of_images[0],
+        img_to_be_applied_path=Path(__file__).parent / "dataset_train_test_val" / "test" / "pdc_bit" / list_of_images[
+            0],
         output_gradcam_fig_name="gradcam.png"
     )
 ```
 
 ## Using TransferLearning Module
+
 ```python
 from neural_network_model.transfer_learning import TransferModel
 from pathlib import Path
 
-
 transfer_model = TransferModel(
-        dataset_address=Path(__file__).parent / "dataset"
-    )
+    dataset_address=Path(__file__).parent / "dataset"
+)
 
 transfer_model.plot_classes_number()
 transfer_model.analyze_image_names()
@@ -164,7 +165,7 @@ transfer_model.train_model(epochs=3,
 transfer_model.plot_metrics_results()
 transfer_model.results()
 # one can pass the model address to the predict_test method
-transfer_model.predcit_test()
+transfer_model.predict_test()
 transfer_model.grad_cam_viz(num_rows=3, num_cols=2)
 ```
 

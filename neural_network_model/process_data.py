@@ -231,7 +231,7 @@ class Preprocessing:
                 ):
                     break
 
-    def train_test_split(self, *args, **kwargs):
+    def _train_test_split(self, *args, **kwargs):
         """
         This function is used to split the data into train, test and validation.
         And save them into the dataset_train_test_split folder.
@@ -372,5 +372,5 @@ if __name__ == "__main__":
 
     print(obj.image_dict)
     obj.augment_data(number_of_images_tobe_gen=10)
-    obj.train_test_split()
+    obj._train_test_split()
     obj.print_deepnet_project_metadata()
