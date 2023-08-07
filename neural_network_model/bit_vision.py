@@ -192,15 +192,19 @@ class BitVision:
         self.model = model
         return self.model
 
-    def compile_model(self, *args, **kwargs) -> None:
+    def compile_model(self, **kwargs) -> None:
         """
         This function is used to compile the model.
         :return:
         """
+
+        loss = kwargs.get("loss", SETTING.MODEL_SETTING.LOSS)
+        metrics = kwargs.get("metrics", SETTING.MODEL_SETTING.METRICS)
+
         self.model.compile(
             optimizer=keras.optimizers.Adam(1e-3),
-            loss=SETTING.MODEL_SETTING.LOSS,
-            metrics=SETTING.MODEL_SETTING.METRICS,
+            loss=loss,
+            metrics=metrics,
         )
 
         self.model.summary()
