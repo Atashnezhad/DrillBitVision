@@ -602,9 +602,6 @@ class TransferModel(Preprocessing, BitVision):
             plt.ylabel(title, fontweight='bold')
             plt.gca().xaxis.set_major_locator(plt.MaxNLocator(integer=True))  # Set x-axis ticks to integers
             plt.tight_layout()
-            # if val is in the metric name then strip it out
-            # if "val" in metric:
-            #     metric = metric.replace("val_", "")
 
         plt.savefig(figure_folder_path / "metric.png")
         plt.show()
