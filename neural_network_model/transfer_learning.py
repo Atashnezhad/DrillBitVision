@@ -570,7 +570,7 @@ class TransferModel(Preprocessing, BitVision):
             "figure_folder_path", Path(__file__).parent / ".." / "figures"
         )
 
-        figsize = kwargs.get("figsize", (10, 6))
+        figsize = kwargs.get("figsize", (12, 4))
         # check if the folder exists if not create it
         if not figure_folder_path.exists():
             os.makedirs(figure_folder_path)
@@ -582,28 +582,33 @@ class TransferModel(Preprocessing, BitVision):
             if key.startswith('val_')  # Only plot if there is a corresponding 'val_' metric
         }
 
-        for metric, title in metrics_to_plot.items():
+        plt.figure(figsize=figsize)
+        for i, (metric, title) in enumerate(metrics_to_plot.items()):
             logger.info(f"Plotting metric: {metric} and title: {title}")
-            plt.figure(figsize=figsize)
+
+            plt.subplot(1, 2, i + 1)
             train_metric = self.model_history.history[metric.replace("val_", "")]
             val_metric = self.model_history.history[metric]
-            plt.plot(train_metric)
-            plt.plot(val_metric)
-            plt.title("History of {}".format(title))
-            plt.xlabel("Epoch")
-            plt.ylabel(title)
-            plt.legend(["Train", "Validation"])
+            plt.plot(train_metric, label="Training", color='red', linestyle='--', linewidth=2)
+            plt.plot(val_metric, label="Validation", color='blue', linewidth=2)
+            # if there is string categorical_accuracy in the metric name remove it.
+            if "Categorical_accuracy" in title:
+                title = title.replace("Categorical_accuracy", "accuracy")
 
+            plt.title("History of {}".format(title), fontweight='bold')
+            plt.legend()
+            plt.grid()
+            plt.xlabel("Epoch", fontweight='bold')
+            plt.ylabel(title, fontweight='bold')
+            plt.gca().xaxis.set_major_locator(plt.MaxNLocator(integer=True))  # Set x-axis ticks to integers
             plt.tight_layout()
             # if val is in the metric name then strip it out
-            if "val" in metric:
-                metric = metric.replace("val_", "")
+            # if "val" in metric:
+            #     metric = metric.replace("val_", "")
 
-            plt.savefig(figure_folder_path / f"{metric}.png")
-            plt.show()
-            plt.close()  # Close the figure after saving to avoid overlapping plots
-
+        plt.savefig(figure_folder_path / "metric.png")
         plt.show()
+        plt.close()
 
     @staticmethod
     def printmd(string):
