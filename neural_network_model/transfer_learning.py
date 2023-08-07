@@ -598,7 +598,7 @@ class TransferModel(Preprocessing, BitVision):
         print(" ## Test Loss: {:.5f}".format(results[0]))
         print("## Accuracy on the test set: {:.2f}%".format(results[1] * 100))
 
-    def predcit_test(self, model_path: str = None, **kwargs):
+    def predict_test(self, model_path: str = None, **kwargs):
         (
             train_generator,
             test_generator,
@@ -635,7 +635,7 @@ class TransferModel(Preprocessing, BitVision):
 
         train_df, test_df = self.train_test_split()
         y_test = list(test_df.Label)
-        print(classification_report(y_test, pred))
+        print("classification_report\n", classification_report(y_test, pred))
 
         cf_matrix = confusion_matrix(y_test, pred, normalize="true")
         plt.figure(figsize=(10, 6))
@@ -832,5 +832,5 @@ if __name__ == "__main__":
     transfer_model.plot_metrics_results()
     transfer_model.results()
     # one can pass the model address to the predict_test method
-    transfer_model.predcit_test()
+    transfer_model.predict_test()
     transfer_model.grad_cam_viz(num_rows=3, num_cols=2)
