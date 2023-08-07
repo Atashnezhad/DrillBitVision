@@ -1,8 +1,8 @@
 build/
 .coverage/
 .coverage.*
-.dist/
-.drillvision.egg-info/
+dist/
+drillvision.egg-info/
 .env
 .idea
 .mypy_cache/
@@ -16,7 +16,7 @@ build/
 .deep_model/
 .ec2_key/
 .google_drive_credential/
-.htmlcov
+htmlcov/
 .s3_dataset/
 .test_resources/
 .tox/
