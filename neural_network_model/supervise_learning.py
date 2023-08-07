@@ -605,8 +605,6 @@ if __name__ == "__main__":
         (Path(__file__).parent / ".." / "dataset" / "pdc_bit" / "Image_1.png")
     )
 
-
-
     # # Apply hessian filter
     # hessian_features = obj.hessian_filter_feature_extraction(
     #     image_path, plt_show=True, plt_log=True
