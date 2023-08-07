@@ -264,7 +264,7 @@ class TransferLearnignSetting(Setting):
     CAT_ACC: tf.keras.metrics.CategoricalAccuracy = CategoricalAccuracy()
 
     METRICS: list = [
-        AUC_MTC,
+        # AUC_MTC,
         CAT_ACC
     ]
 
