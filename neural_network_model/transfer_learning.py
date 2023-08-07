@@ -45,10 +45,10 @@ class TransferModel(Preprocessing, BitVision):
         self.pred: np.ndarray = None
 
     def _prepare_data(
-            self,
-            print_data_head=False,
-            x_col=TRANSFER_LEARNING_SETTING.DF_X_COL_NAME,
-            y_col=TRANSFER_LEARNING_SETTING.DF_Y_COL_NAME,
+        self,
+        print_data_head=False,
+        x_col=TRANSFER_LEARNING_SETTING.DF_X_COL_NAME,
+        y_col=TRANSFER_LEARNING_SETTING.DF_Y_COL_NAME,
     ):
         """
         Prepare the data for the model
@@ -80,11 +80,11 @@ class TransferModel(Preprocessing, BitVision):
         logging.info("Data was prepared")
 
     def plot_classes_number(
-            self,
-            figsize=(10, 5),
-            x_rotation=0,
-            palette="Greens_r",
-            **kwargs,
+        self,
+        figsize=(10, 5),
+        x_rotation=0,
+        palette="Greens_r",
+        **kwargs,
     ) -> None:
         """
         Plot the number of images per species
@@ -135,14 +135,14 @@ class TransferModel(Preprocessing, BitVision):
             logger.info(f"number of images belong to {names[i]}: {counts[i]}")
 
     def analyze_image_names(
-            self,
-            figsize=(20, 22),
-            figsize_2=(10, 7),
-            cmap_2="YlGnBu",
-            size=15,
-            label_size=25,
-            num_cluster=5,
-            **kwargs,
+        self,
+        figsize=(20, 22),
+        figsize_2=(10, 7),
+        cmap_2="YlGnBu",
+        size=15,
+        label_size=25,
+        num_cluster=5,
+        **kwargs,
     ) -> None:
         """
         Analyze the image names if there is any pattern in the names
@@ -275,7 +275,7 @@ class TransferModel(Preprocessing, BitVision):
         plt.show()
 
     def plot_data_images(
-            self, num_rows=None, num_cols=None, figsize=(15, 10), **kwargs
+        self, num_rows=None, num_cols=None, figsize=(15, 10), **kwargs
     ):
         """
         Plot the images in a grid
@@ -629,7 +629,6 @@ class TransferModel(Preprocessing, BitVision):
         print("## Accuracy on the test set: {:.2f}%".format(results[1] * 100))
 
     def predict_test(self, model_path: Path = None, **kwargs):
-
         (
             train_generator,
             test_generator,
@@ -667,7 +666,7 @@ class TransferModel(Preprocessing, BitVision):
 
         train_df, test_df = self._train_test_split()
         y_test = list(test_df.Label)
-        print(classification_report(y_test, pred))
+        print("classification_report\n", classification_report(y_test, pred))
 
         cf_matrix = confusion_matrix(y_test, pred, normalize=conf_matx_normalize)
         plt.figure(figsize=(10, 6))
@@ -692,7 +691,7 @@ class TransferModel(Preprocessing, BitVision):
         return array
 
     def _make_gradcam_heatmap(
-            self, img_array, model, last_conv_layer_name, pred_index=None
+        self, img_array, model, last_conv_layer_name, pred_index=None
     ):
         # First, we create a model that maps the input image to the activations
         # of the last conv layer as well as the output predictions
@@ -728,12 +727,12 @@ class TransferModel(Preprocessing, BitVision):
         return heatmap.numpy()
 
     def _save_and_display_gradcam(
-            self,
-            img_path,
-            heatmap,
-            cam_name="transf_cam.jpg",
-            alpha=0.4,
-            **kwargs,
+        self,
+        img_path,
+        heatmap,
+        cam_name="transf_cam.jpg",
+        alpha=0.4,
+        **kwargs,
     ):
         """
         Args:

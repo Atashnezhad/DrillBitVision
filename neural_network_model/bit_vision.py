@@ -13,22 +13,11 @@ import tensorflow
 import tensorflow as tf
 from keras import Sequential
 from keras.callbacks import ModelCheckpoint
-from keras.layers import (
-    BatchNormalization,
-    Conv2D,
-    Dense,
-    Dropout,
-    Flatten,
-    MaxPooling2D,
-)
+from keras.layers import BatchNormalization, Conv2D, Dense, Dropout, Flatten, MaxPooling2D
 from tensorflow import keras
 from tensorflow.keras.applications.resnet50 import decode_predictions, preprocess_input
 from tensorflow.keras.preprocessing import image
-from tensorflow.keras.preprocessing.image import (
-    ImageDataGenerator,
-    img_to_array,
-    load_img,
-)
+from tensorflow.keras.preprocessing.image import ImageDataGenerator, img_to_array, load_img
 
 from neural_network_model.model import SETTING
 

@@ -219,7 +219,7 @@ class Setting(BaseModel):
         return Setting(**data)
 
 
-class TransferLearnignSetting(Setting):
+class TransferLearningSetting(Setting):
     # prepare data frame in pandas
     DF_X_COL_NAME: str = "Filepath"
     DF_Y_COL_NAME: str = "Label"
@@ -279,8 +279,29 @@ class TransferLearnignSetting(Setting):
         extra = Extra.allow
 
 
+class localBinaryPatterns(BaseModel):
+    NUM_POINTS: int = 8
+    RADIUS: int = 3
+    METHOD: str = "uniform"
+
+
+class MultiOtsuThreshold(BaseModel):
+    CLASSES: int = 3
+
+
+class Filter(BaseModel):
+    LOCAl_BINARY_PATTERN: localBinaryPatterns = localBinaryPatterns()
+    MULTIOTSU_THRESHOLD: MultiOtsuThreshold = MultiOtsuThreshold()
+
+
+class SuperviselearningSetting(BaseModel):
+    FILTERS: Filter = Filter()
+
+
 SETTING = Setting()
-TRANSFER_LEARNING_SETTING = TransferLearnignSetting()
+TRANSFER_LEARNING_SETTING = TransferLearningSetting()
+SUPERVISE_LEARNING_SETTING = SuperviselearningSetting()
+
 
 if __name__ == "__main__":
     # print(SETTING.EC2_SETTING.SECURITY_GROUP_ID)
