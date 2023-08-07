@@ -4,10 +4,10 @@ from pathlib import Path
 from pprint import pprint
 from typing import List
 
-from dotenv import load_dotenv
-from pydantic import BaseModel, Extra
 import tensorflow as tf
+from dotenv import load_dotenv
 from keras.metrics import AUC, CategoricalAccuracy
+from pydantic import BaseModel, Extra
 from tensorflow import keras
 
 # Load environment variables from .env file
