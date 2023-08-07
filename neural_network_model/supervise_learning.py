@@ -413,8 +413,6 @@ class SuperviseLearning:
         binary_g = g > thresholds_g[1]
         binary_b = b > thresholds_b[1]
 
-
-
         if plt_show:
             # Display the original image and binary threshold images side by side (optional)
             plt.subplot(2, 2, 1)
