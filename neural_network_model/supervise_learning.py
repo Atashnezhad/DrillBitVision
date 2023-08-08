@@ -642,7 +642,7 @@ class SuperviseLearning:
                 if not replace_existing:
                     filtered_image_path = Path(filtered_dataset_path) / relative_path
                     # If the filtered image already exists and we're not replacing, modify the filename
-                    filename_parts = filtered_image_path.stem.split("_")
+                    filename_parts = filtered_image_path.stem
 
                     # Determine the original extension
                     orig_extension = Path(image_path).suffix.lower()
@@ -705,4 +705,5 @@ if __name__ == "__main__":
         dataset_path=dataset_path,
         filtered_dataset_path=Path(__file__).parent / ".." / "filtered_dataset_ad",
         replace_existing=False,
+        cmap="seismic",
     )
