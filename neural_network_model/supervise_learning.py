@@ -593,6 +593,16 @@ class SuperviseLearning:
 
         return _sobel_features
 
+    def hessian(self, image):
+        if len(image.shape) == 3:
+            image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+
+        # Compute Hessian matrix for the grayscale image
+        grayscale_image = cv2.cvtColor(image, cv2.COLOR_RGB2GRAY)
+        h = hessian_matrix(grayscale_image)
+        eigenvals = hessian_matrix_eigvals(h)
+        return eigenvals
+
     def filter_images(
             self,
             **kwargs,
@@ -608,18 +618,13 @@ class SuperviseLearning:
             Path(filtered_dataset_path).mkdir(parents=True, exist_ok=True)
 
         if filter_name == "hessian":
-            for index, row in tqdm(self.image_df.iterrows(), total=self.image_df.shape[0], desc="Filtering images > hessian"):
+            for index, row in tqdm(self.image_df.iterrows(), total=self.image_df.shape[0], desc="Filtering images > "
+                                                                                                "hessian"):
                 image_path = row["Filepath"]
                 label = row["Label"]
 
                 image = cv2.imread(image_path)
-                if len(image.shape) == 3:
-                    image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-
-                # Compute Hessian matrix for the grayscale image
-                grayscale_image = cv2.cvtColor(image, cv2.COLOR_RGB2GRAY)
-                h = hessian_matrix(grayscale_image)
-                eigenvals = hessian_matrix_eigvals(h)
+                eigenvals = self.hessian(image)
 
                 # Get the suborder structure from the original image path
                 relative_path = Path(image_path).relative_to(dataset_path)
