@@ -619,6 +619,7 @@ class SuperviseLearning:
         filter_name = kwargs.get("filter_name", "hessian")
         dataset_path = kwargs.get("dataset_path", None)
         filtered_dataset_path = kwargs.get("filtered_dataset_path", None)
+        replace_existing = kwargs.get("replace_existing", False)  # New parameter
 
         if filtered_dataset_path is None:
             filtered_dataset_path = str(Path(__file__).parent / ".." / "filtered_dataset")
@@ -632,7 +633,7 @@ class SuperviseLearning:
                 image = cv2.imread(image_path)
                 eigenvals = self.hessian(image)
 
-                # Get the suborder structure from the original image path
+                # Get the subfolder structure from the original image path
                 relative_path = Path(image_path).relative_to(dataset_path)
                 filtered_image_path = Path(filtered_dataset_path) / relative_path
                 filtered_image_path.parent.mkdir(parents=True, exist_ok=True)
@@ -640,10 +641,17 @@ class SuperviseLearning:
                 plt.imshow(eigenvals[0], cmap=cmap)
                 plt.axis("off")
 
+                if not replace_existing and filtered_image_path.exists():
+                    # If the filtered image already exists and we're not replacing, modify the filename
+                    filename_parts = filtered_image_path.stem.split("_")
+                    new_filename = f"{filename_parts[0]}_{filename_parts[1]}_filtered.png"
+                    filtered_image_path = filtered_image_path.parent / new_filename
+
                 # Save the filtered image
-                filtered_image_path = Path(filtered_dataset_path) / relative_path
                 plt.savefig(filtered_image_path, bbox_inches="tight", pad_inches=0)
                 plt.close()
+
+        return filtered_dataset_path
 
 
 if __name__ == "__main__":
@@ -663,7 +671,7 @@ if __name__ == "__main__":
     # print(hessian_features)
 
     dataset_path = Path(__file__).parent / ".." / "dataset"
-    obj.filter_images(dataset_path=dataset_path)
+    obj.filter_images(dataset_path=dataset_path, replace_existing=True)
 
 
 
