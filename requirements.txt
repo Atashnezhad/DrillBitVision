@@ -18,5 +18,6 @@ seaborn~=0.11.2
 scikit-learn==1.2.2
 imageio==2.31.0
 opencv-python==4.8.0.74
+scikit-image==0.21.0
 
 

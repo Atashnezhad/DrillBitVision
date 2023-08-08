@@ -603,12 +603,12 @@ if __name__ == "__main__":
         (Path(__file__).parent / ".." / "dataset" / "pdc_bit" / "Image_1.png")
     )
 
-    # # Apply hessian filter
-    # hessian_features = obj.hessian_filter_feature_extraction(
-    #     image_path, plt_show=True, plt_log=True
-    # )
-    # print(hessian_features)
-    #
+    # Apply hessian filter
+    hessian_features = obj.hessian_filter_feature_extraction(
+        image_path, plt_show=True, plt_log=True, cmap="seismic",
+    )
+    print(hessian_features)
+
     # # # # Apply Sato filter
     # sato_features = obj.frangi_feature_extraction(
     #     image_path, plt_show=True, plt_log=True
