@@ -8,6 +8,7 @@ import numpy as np
 import pandas as pd
 from skimage.feature import hessian_matrix, hessian_matrix_eigvals, local_binary_pattern
 from skimage.filters import frangi, sobel, threshold_multiotsu
+from tqdm import tqdm
 
 from neural_network_model.model import SUPERVISE_LEARNING_SETTING, TRANSFER_LEARNING_SETTING
 
@@ -51,13 +52,13 @@ class SuperviseLearning:
         return image_df
 
     def hessian_filter_feature_extraction(
-        self,
-        image_path,
-        bins=40,
-        cmap="jet",
-        plt_show=False,
-        plt_log=False,
-        figsize=(10, 10),
+            self,
+            image_path,
+            bins=40,
+            cmap="jet",
+            plt_show=False,
+            plt_log=False,
+            figsize=(10, 10),
     ):
         image = cv2.imread(image_path)
 
@@ -188,7 +189,7 @@ class SuperviseLearning:
         return _hessian_features
 
     def frangi_feature_extraction(
-        self, image_path, plt_show=True, plt_log=False, figsize=(10, 10), bins=40
+            self, image_path, plt_show=True, plt_log=False, figsize=(10, 10), bins=40
     ):
         image = cv2.imread(image_path)
 
@@ -281,16 +282,16 @@ class SuperviseLearning:
         return _frangi_features
 
     def lbp_feature_extraction(
-        self,
-        image_path,
-        radius=SUPERVISE_LEARNING_SETTING.FILTERS.LOCAl_BINARY_PATTERN.RADIUS,
-        n_points=SUPERVISE_LEARNING_SETTING.FILTERS.LOCAl_BINARY_PATTERN.NUM_POINTS,
-        bins=40,
-        plt_show=False,
-        plt_log=False,
-        figsize=(10, 10),
-        width=0.5,
-        method=SUPERVISE_LEARNING_SETTING.FILTERS.LOCAl_BINARY_PATTERN.METHOD,
+            self,
+            image_path,
+            radius=SUPERVISE_LEARNING_SETTING.FILTERS.LOCAl_BINARY_PATTERN.RADIUS,
+            n_points=SUPERVISE_LEARNING_SETTING.FILTERS.LOCAl_BINARY_PATTERN.NUM_POINTS,
+            bins=40,
+            plt_show=False,
+            plt_log=False,
+            figsize=(10, 10),
+            width=0.5,
+            method=SUPERVISE_LEARNING_SETTING.FILTERS.LOCAl_BINARY_PATTERN.METHOD,
     ):
         image = cv2.imread(image_path)
 
@@ -377,13 +378,13 @@ class SuperviseLearning:
         return _lbp_features
 
     def multiotsu_threshold_sk(
-        self,
-        image_path,
-        bins=40,
-        plt_show=False,
-        plt_log=False,
-        figsize=(10, 10),
-        classes=SUPERVISE_LEARNING_SETTING.FILTERS.MULTIOTSU_THRESHOLD.CLASSES,
+            self,
+            image_path,
+            bins=40,
+            plt_show=False,
+            plt_log=False,
+            figsize=(10, 10),
+            classes=SUPERVISE_LEARNING_SETTING.FILTERS.MULTIOTSU_THRESHOLD.CLASSES,
     ):
         image = cv2.imread(image_path)
 
@@ -486,7 +487,7 @@ class SuperviseLearning:
         return _threshold_features
 
     def sobel_edge_detection_sk(
-        self, image_path, bins=40, plt_show=False, plt_log=False, figsize=(10, 10)
+            self, image_path, bins=40, plt_show=False, plt_log=False, figsize=(10, 10)
     ):
         image = cv2.imread(image_path)
 
@@ -528,13 +529,13 @@ class SuperviseLearning:
 
         # Normalize the Sobel edges image to [0, 1]
         sobel_edges_r = (sobel_edges_r - np.min(sobel_edges_r)) / (
-            np.max(sobel_edges_r) - np.min(sobel_edges_r)
+                np.max(sobel_edges_r) - np.min(sobel_edges_r)
         )
         sobel_edges_g = (sobel_edges_g - np.min(sobel_edges_g)) / (
-            np.max(sobel_edges_g) - np.min(sobel_edges_g)
+                np.max(sobel_edges_g) - np.min(sobel_edges_g)
         )
         sobel_edges_b = (sobel_edges_b - np.min(sobel_edges_b)) / (
-            np.max(sobel_edges_b) - np.min(sobel_edges_b)
+                np.max(sobel_edges_b) - np.min(sobel_edges_b)
         )
 
         # Convert the Sobel edges images to uint8
@@ -592,8 +593,51 @@ class SuperviseLearning:
 
         return _sobel_features
 
-    def filter_images(self):
-        ...
+    def filter_images(
+            self,
+            **kwargs,
+    ):
+
+        cmap = kwargs.get("cmap", "jet")
+        filter_name = kwargs.get("filter_name", "hessian")
+        dataset_path = kwargs.get("dataset_path", None)
+        filtered_dataset_path = kwargs.get("filtered_dataset_path", None)
+
+        if filtered_dataset_path is None:
+            filtered_dataset_path = str(Path(__file__).parent / ".." / "filtered_dataset")
+            Path(filtered_dataset_path).mkdir(parents=True, exist_ok=True)
+
+        if filter_name == "hessian":
+            for index, row in tqdm(self.image_df.iterrows()):
+                image_path = row["Filepath"]
+                label = row["Label"]
+
+                image = cv2.imread(image_path)
+                if len(image.shape) == 3:
+                    image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+
+                # Compute Hessian matrix for the grayscale image
+                grayscale_image = cv2.cvtColor(image, cv2.COLOR_RGB2GRAY)
+                h = hessian_matrix(grayscale_image)
+                eigenvals = hessian_matrix_eigvals(h)
+
+                # Get the subfolder structure from the original image path
+                relative_path = Path(image_path).relative_to(dataset_path)
+                filtered_image_path = Path(filtered_dataset_path) / relative_path
+                filtered_image_path.parent.mkdir(parents=True, exist_ok=True)
+
+                # plt.imshow(eigenvals[0], cmap=cmap)
+                # plt.title("Hessian Filter")
+                # plt.axis("off")
+                # plt.show()
+
+                # Save the filtered image
+                filtered_image_path = Path(filtered_dataset_path) / relative_path
+                plt.savefig(filtered_image_path, bbox_inches="tight", pad_inches=0)
+                plt.close()
+
+
+        return filtered_dataset_path
 
 
 if __name__ == "__main__":
@@ -607,10 +651,15 @@ if __name__ == "__main__":
     )
 
     # Apply hessian filter
-    hessian_features = obj.hessian_filter_feature_extraction(
-        image_path, plt_show=True, plt_log=True, cmap="seismic",
-    )
-    print(hessian_features)
+    # hessian_features = obj.hessian_filter_feature_extraction(
+    #     image_path, plt_show=True, plt_log=True, cmap="seismic",
+    # )
+    # print(hessian_features)
+
+    dataset_path = Path(__file__).parent / ".." / "dataset"
+    obj.filter_images(dataset_path=dataset_path)
+
+
 
     # # # # Apply Sato filter
     # sato_features = obj.frangi_feature_extraction(
