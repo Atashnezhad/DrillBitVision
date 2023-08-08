@@ -34,3 +34,4 @@ __pycache__/
 /tests/dataset/
 /s3_dataset/
 /neural_network_model/settings.json
+/filtered_dataset/
