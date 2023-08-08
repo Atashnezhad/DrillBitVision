@@ -35,3 +35,6 @@ __pycache__/
 /s3_dataset/
 /neural_network_model/settings.json
 /filtered_dataset/
+/dataset - Copy/
+/dataset_ad/
+/filtered_dataset_ad/
