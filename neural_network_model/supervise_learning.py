@@ -643,7 +643,11 @@ class SuperviseLearning:
                     filtered_image_path = Path(filtered_dataset_path) / relative_path
                     # If the filtered image already exists and we're not replacing, modify the filename
                     filename_parts = filtered_image_path.stem.split("_")
-                    new_filename = f"{filename_parts[0]}_{filename_parts[1]}_filtered.png"
+
+                    # Determine the original extension
+                    orig_extension = Path(image_path).suffix.lower()
+
+                    new_filename = f"{filename_parts}_filtered{orig_extension}"
                     filtered_image_path = filtered_image_path.parent / new_filename
 
                 # Create necessary directories
@@ -695,5 +699,10 @@ if __name__ == "__main__":
     # )
     # print(sobel_features)
 
-    dataset_path = Path(__file__).parent / ".." / "dataset"
-    obj.filter_images(dataset_path=dataset_path, replace_existing=False)
+    dataset_path = Path(__file__).parent / ".." / "dataset_ad"
+    obj = SuperviseLearning(dataset_address=dataset_path)
+    obj.filter_images(
+        dataset_path=dataset_path,
+        filtered_dataset_path=Path(__file__).parent / ".." / "filtered_dataset_ad",
+        replace_existing=False,
+    )

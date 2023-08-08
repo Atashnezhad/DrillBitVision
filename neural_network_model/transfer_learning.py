@@ -885,23 +885,23 @@ if __name__ == "__main__":
     # obj.download_images(limit=30)
 
     transfer_model = TransferModel(
-        dataset_address=Path(__file__).parent / ".." / "dataset"
+        dataset_address=Path(__file__).parent / ".." / "filtered_dataset_ad"
     )
 
     transfer_model.plot_classes_number()
     transfer_model.analyze_image_names()
     transfer_model.plot_data_images(num_rows=3, num_cols=3)
     transfer_model.train_model(
-        epochs=3,
+        epochs=50,
         model_save_path=(Path(__file__).parent / ".." / "deep_model").resolve(),
-        model_name="tf_model_2.h5",
+        model_name="tf_model_ad_1.h5",
     )
     transfer_model.plot_metrics_results()
     transfer_model.results()
     # one can pass the model address to the predict_test method
     transfer_model.predict_test(
         model_path=(
-            Path(__file__).parent / ".." / "deep_model" / "tf_model.h5"
+            Path(__file__).parent / ".." / "deep_model" / "tf_model_ad_1.h5"
         ).resolve()
     )
     transfer_model.grad_cam_viz(num_rows=3, num_cols=2)
