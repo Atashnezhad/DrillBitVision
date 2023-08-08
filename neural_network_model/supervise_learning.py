@@ -592,6 +592,9 @@ class SuperviseLearning:
 
         return _sobel_features
 
+    def filter_images(self):
+        ...
+
 
 if __name__ == "__main__":
     obj = SuperviseLearning()
