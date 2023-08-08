@@ -608,7 +608,7 @@ class SuperviseLearning:
             Path(filtered_dataset_path).mkdir(parents=True, exist_ok=True)
 
         if filter_name == "hessian":
-            for index, row in tqdm(self.image_df.iterrows()):
+            for index, row in tqdm(self.image_df.iterrows(), total=self.image_df.shape[0], desc="Filtering images > hessian"):
                 image_path = row["Filepath"]
                 label = row["Label"]
 
@@ -621,23 +621,19 @@ class SuperviseLearning:
                 h = hessian_matrix(grayscale_image)
                 eigenvals = hessian_matrix_eigvals(h)
 
-                # Get the subfolder structure from the original image path
+                # Get the suborder structure from the original image path
                 relative_path = Path(image_path).relative_to(dataset_path)
                 filtered_image_path = Path(filtered_dataset_path) / relative_path
                 filtered_image_path.parent.mkdir(parents=True, exist_ok=True)
 
-                # plt.imshow(eigenvals[0], cmap=cmap)
-                # plt.title("Hessian Filter")
-                # plt.axis("off")
-                # plt.show()
+                plt.imshow(eigenvals[0], cmap=cmap)
+                plt.title("Hessian Filter")
+                plt.axis("off")
 
                 # Save the filtered image
                 filtered_image_path = Path(filtered_dataset_path) / relative_path
                 plt.savefig(filtered_image_path, bbox_inches="tight", pad_inches=0)
                 plt.close()
-
-
-        return filtered_dataset_path
 
 
 if __name__ == "__main__":
