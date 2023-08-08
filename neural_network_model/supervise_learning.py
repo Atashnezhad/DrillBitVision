@@ -607,6 +607,13 @@ class SuperviseLearning:
             self,
             **kwargs,
     ):
+        """
+        Filter images based on the eigenvalues of the Hessian matrix
+        :param kwargs:  filter_name: str, name of the filter to use
+                        dataset_path: str, path to the dataset
+                        filtered_dataset_path: str, path to the filtered dataset
+        :return:
+        """
 
         cmap = kwargs.get("cmap", "jet")
         filter_name = kwargs.get("filter_name", "hessian")
@@ -621,7 +628,6 @@ class SuperviseLearning:
             for index, row in tqdm(self.image_df.iterrows(), total=self.image_df.shape[0], desc="Filtering images > "
                                                                                                 "hessian"):
                 image_path = row["Filepath"]
-                label = row["Label"]
 
                 image = cv2.imread(image_path)
                 eigenvals = self.hessian(image)
@@ -632,7 +638,6 @@ class SuperviseLearning:
                 filtered_image_path.parent.mkdir(parents=True, exist_ok=True)
 
                 plt.imshow(eigenvals[0], cmap=cmap)
-                plt.title("Hessian Filter")
                 plt.axis("off")
 
                 # Save the filtered image
