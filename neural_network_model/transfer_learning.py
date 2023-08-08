@@ -240,10 +240,14 @@ class TransferModel(Preprocessing, BitVision):
         X = np.log(image_df[["width", "height"]].values)
         X = scaler.fit_transform(X)
 
-        km = KMeans(n_clusters=num_cluster, random_state=TRANSFER_LEARNING_SETTING.RANDOM_STATE)
+        km = KMeans(
+            n_clusters=num_cluster, random_state=TRANSFER_LEARNING_SETTING.RANDOM_STATE
+        )
         image_df["cluster_number"] = km.fit_predict(X)
 
-        mean_width_height = image_df.groupby("cluster_number")[["width", "height"]].mean().values
+        mean_width_height = (
+            image_df.groupby("cluster_number")[["width", "height"]].mean().values
+        )
         # Sort the clusters based on the mean width (you can do the same for height if needed)
         cluster_number_order = np.argsort(mean_width_height[:, 0])
         # log for mean_states
@@ -253,7 +257,7 @@ class TransferModel(Preprocessing, BitVision):
         # Create a dictionary to store the information
         cluster_info_dict = {
             "mean_width_height": mean_width_height.tolist(),
-            "cluster_number_order": cluster_number_order.tolist()
+            "cluster_number_order": cluster_number_order.tolist(),
         }
         logger.info(f"cluster_info_dict\n {cluster_info_dict}")
 
@@ -352,7 +356,9 @@ class TransferModel(Preprocessing, BitVision):
             train_size=train_size,
             shuffle=shuffle,
             random_state=random_state,
-            stratify=self.image_df[TRANSFER_LEARNING_SETTING.DF_Y_COL_NAME],  # Add stratify option
+            stratify=self.image_df[
+                TRANSFER_LEARNING_SETTING.DF_Y_COL_NAME
+            ],  # Add stratify option
         )
         return train_df, test_df
 
@@ -579,7 +585,9 @@ class TransferModel(Preprocessing, BitVision):
         metrics_to_plot = {
             key: key.replace("val_", "").capitalize()
             for key in self.model_history.history.keys()
-            if key.startswith('val_')  # Only plot if there is a corresponding 'val_' metric
+            if key.startswith(
+                "val_"
+            )  # Only plot if there is a corresponding 'val_' metric
         }
 
         plt.figure(figsize=figsize)
@@ -589,18 +597,22 @@ class TransferModel(Preprocessing, BitVision):
             plt.subplot(1, 2, i + 1)
             train_metric = self.model_history.history[metric.replace("val_", "")]
             val_metric = self.model_history.history[metric]
-            plt.plot(train_metric, label="Training", color='red', linestyle='--', linewidth=2)
-            plt.plot(val_metric, label="Validation", color='blue', linewidth=2)
+            plt.plot(
+                train_metric, label="Training", color="red", linestyle="--", linewidth=2
+            )
+            plt.plot(val_metric, label="Validation", color="blue", linewidth=2)
             # if there is string categorical_accuracy in the metric name remove it.
             if "Categorical_accuracy" in title:
                 title = title.replace("Categorical_accuracy", "accuracy")
 
-            plt.title("History of {}".format(title), fontweight='bold')
+            plt.title("History of {}".format(title), fontweight="bold")
             plt.legend()
             plt.grid()
-            plt.xlabel("Epoch", fontweight='bold')
-            plt.ylabel(title, fontweight='bold')
-            plt.gca().xaxis.set_major_locator(plt.MaxNLocator(integer=True))  # Set x-axis ticks to integers
+            plt.xlabel("Epoch", fontweight="bold")
+            plt.ylabel(title, fontweight="bold")
+            plt.gca().xaxis.set_major_locator(
+                plt.MaxNLocator(integer=True)
+            )  # Set x-axis ticks to integers
             plt.tight_layout()
 
         plt.savefig(figure_folder_path / "metric.png")
@@ -844,9 +856,9 @@ class TransferModel(Preprocessing, BitVision):
                 title = f"True: {true_label}\nPredicted: {predicted_label}"
                 # Set the color of the title based on the prediction
                 if true_label == predicted_label:
-                    ax.set_title(title, color='green')
+                    ax.set_title(title, color="green")
                 else:
-                    ax.set_title(title, color='red')
+                    ax.set_title(title, color="red")
                 # title label size
                 ax.title.set_size(title_lable_size)
                 # set grid on
@@ -882,12 +894,14 @@ if __name__ == "__main__":
     transfer_model.train_model(
         epochs=3,
         model_save_path=(Path(__file__).parent / ".." / "deep_model").resolve(),
-        model_name="tf_model_2.h5"
+        model_name="tf_model_2.h5",
     )
     transfer_model.plot_metrics_results()
     transfer_model.results()
     # one can pass the model address to the predict_test method
     transfer_model.predict_test(
-        model_path=(Path(__file__).parent / ".." / "deep_model" / "tf_model.h5").resolve()
+        model_path=(
+            Path(__file__).parent / ".." / "deep_model" / "tf_model.h5"
+        ).resolve()
     )
     transfer_model.grad_cam_viz(num_rows=3, num_cols=2)

@@ -40,7 +40,9 @@ class SuperviseLearning:
         filepaths.extend(list(image_dir.glob(r"**/*.jpg")))
         labels = list(map(lambda x: os.path.split(os.path.split(x)[0])[1], filepaths))
 
-        filepaths = pd.Series(filepaths, name=TRANSFER_LEARNING_SETTING.DF_X_COL_NAME).astype(str)
+        filepaths = pd.Series(
+            filepaths, name=TRANSFER_LEARNING_SETTING.DF_X_COL_NAME
+        ).astype(str)
         labels = pd.Series(labels, name=TRANSFER_LEARNING_SETTING.DF_Y_COL_NAME)
 
         # Concatenate filepaths and labels
@@ -52,13 +54,13 @@ class SuperviseLearning:
         return image_df
 
     def hessian_filter_feature_extraction(
-            self,
-            image_path,
-            bins=40,
-            cmap="jet",
-            plt_show=False,
-            plt_log=False,
-            figsize=(10, 10),
+        self,
+        image_path,
+        bins=40,
+        cmap="jet",
+        plt_show=False,
+        plt_log=False,
+        figsize=(10, 10),
     ):
         image = cv2.imread(image_path)
 
@@ -189,7 +191,7 @@ class SuperviseLearning:
         return _hessian_features
 
     def frangi_feature_extraction(
-            self, image_path, plt_show=True, plt_log=False, figsize=(10, 10), bins=40
+        self, image_path, plt_show=True, plt_log=False, figsize=(10, 10), bins=40
     ):
         image = cv2.imread(image_path)
 
@@ -282,16 +284,16 @@ class SuperviseLearning:
         return _frangi_features
 
     def lbp_feature_extraction(
-            self,
-            image_path,
-            radius=SUPERVISE_LEARNING_SETTING.FILTERS.LOCAl_BINARY_PATTERN.RADIUS,
-            n_points=SUPERVISE_LEARNING_SETTING.FILTERS.LOCAl_BINARY_PATTERN.NUM_POINTS,
-            bins=40,
-            plt_show=False,
-            plt_log=False,
-            figsize=(10, 10),
-            width=0.5,
-            method=SUPERVISE_LEARNING_SETTING.FILTERS.LOCAl_BINARY_PATTERN.METHOD,
+        self,
+        image_path,
+        radius=SUPERVISE_LEARNING_SETTING.FILTERS.LOCAl_BINARY_PATTERN.RADIUS,
+        n_points=SUPERVISE_LEARNING_SETTING.FILTERS.LOCAl_BINARY_PATTERN.NUM_POINTS,
+        bins=40,
+        plt_show=False,
+        plt_log=False,
+        figsize=(10, 10),
+        width=0.5,
+        method=SUPERVISE_LEARNING_SETTING.FILTERS.LOCAl_BINARY_PATTERN.METHOD,
     ):
         image = cv2.imread(image_path)
 
@@ -378,13 +380,13 @@ class SuperviseLearning:
         return _lbp_features
 
     def multiotsu_threshold_sk(
-            self,
-            image_path,
-            bins=40,
-            plt_show=False,
-            plt_log=False,
-            figsize=(10, 10),
-            classes=SUPERVISE_LEARNING_SETTING.FILTERS.MULTIOTSU_THRESHOLD.CLASSES,
+        self,
+        image_path,
+        bins=40,
+        plt_show=False,
+        plt_log=False,
+        figsize=(10, 10),
+        classes=SUPERVISE_LEARNING_SETTING.FILTERS.MULTIOTSU_THRESHOLD.CLASSES,
     ):
         image = cv2.imread(image_path)
 
@@ -487,7 +489,7 @@ class SuperviseLearning:
         return _threshold_features
 
     def sobel_edge_detection_sk(
-            self, image_path, bins=40, plt_show=False, plt_log=False, figsize=(10, 10)
+        self, image_path, bins=40, plt_show=False, plt_log=False, figsize=(10, 10)
     ):
         image = cv2.imread(image_path)
 
@@ -529,13 +531,13 @@ class SuperviseLearning:
 
         # Normalize the Sobel edges image to [0, 1]
         sobel_edges_r = (sobel_edges_r - np.min(sobel_edges_r)) / (
-                np.max(sobel_edges_r) - np.min(sobel_edges_r)
+            np.max(sobel_edges_r) - np.min(sobel_edges_r)
         )
         sobel_edges_g = (sobel_edges_g - np.min(sobel_edges_g)) / (
-                np.max(sobel_edges_g) - np.min(sobel_edges_g)
+            np.max(sobel_edges_g) - np.min(sobel_edges_g)
         )
         sobel_edges_b = (sobel_edges_b - np.min(sobel_edges_b)) / (
-                np.max(sobel_edges_b) - np.min(sobel_edges_b)
+            np.max(sobel_edges_b) - np.min(sobel_edges_b)
         )
 
         # Convert the Sobel edges images to uint8
@@ -604,8 +606,8 @@ class SuperviseLearning:
         return eigenvals
 
     def filter_images(
-            self,
-            **kwargs,
+        self,
+        **kwargs,
     ):
         """
         Filter images based on the eigenvalues of the Hessian matrix
@@ -635,23 +637,24 @@ class SuperviseLearning:
 
                 # Get the subfolder structure from the original image path
                 relative_path = Path(image_path).relative_to(dataset_path)
-                filtered_image_path = Path(filtered_dataset_path) / relative_path
-                filtered_image_path.parent.mkdir(parents=True, exist_ok=True)
-
-                plt.imshow(eigenvals[0], cmap=cmap)
-                plt.axis("off")
-
-                if not replace_existing and filtered_image_path.exists():
+                filtered_image_path = Path(dataset_path) / relative_path
+                # Handle replacing existing images
+                if not replace_existing:
+                    filtered_image_path = Path(filtered_dataset_path) / relative_path
                     # If the filtered image already exists and we're not replacing, modify the filename
                     filename_parts = filtered_image_path.stem.split("_")
                     new_filename = f"{filename_parts[0]}_{filename_parts[1]}_filtered.png"
                     filtered_image_path = filtered_image_path.parent / new_filename
 
+                # Create necessary directories
+                filtered_image_path.parent.mkdir(parents=True, exist_ok=True)
+
+                plt.imshow(eigenvals[0], cmap=cmap)
+                plt.axis("off")
+
                 # Save the filtered image
                 plt.savefig(filtered_image_path, bbox_inches="tight", pad_inches=0)
                 plt.close()
-
-        return filtered_dataset_path
 
 
 if __name__ == "__main__":
@@ -669,11 +672,6 @@ if __name__ == "__main__":
     #     image_path, plt_show=True, plt_log=True, cmap="seismic",
     # )
     # print(hessian_features)
-
-    dataset_path = Path(__file__).parent / ".." / "dataset"
-    obj.filter_images(dataset_path=dataset_path, replace_existing=True)
-
-
 
     # # # # Apply Sato filter
     # sato_features = obj.frangi_feature_extraction(
@@ -696,3 +694,6 @@ if __name__ == "__main__":
     #     image_path, plt_show=True, plt_log=True
     # )
     # print(sobel_features)
+
+    dataset_path = Path(__file__).parent / ".." / "dataset"
+    obj.filter_images(dataset_path=dataset_path, replace_existing=False)
