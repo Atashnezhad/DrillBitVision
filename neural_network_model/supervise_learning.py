@@ -8,6 +8,8 @@ import numpy as np
 import pandas as pd
 from skimage.feature import hessian_matrix, hessian_matrix_eigvals, local_binary_pattern
 from skimage.filters import frangi, sobel, threshold_multiotsu
+from skimage import color
+from skimage.filters import meijering, sato, frangi, hessian
 from tqdm import tqdm
 
 from neural_network_model.model import SUPERVISE_LEARNING_SETTING, TRANSFER_LEARNING_SETTING
@@ -53,8 +55,52 @@ class SuperviseLearning:
 
         return image_df
 
-    def hessian(self, image):
-        h = hessian_matrix(image)
+    # reference: https://scikit-image.org/docs/stable/auto_examples/edges/
+    # plot_ridge_filter.html#sphx-glr-auto-examples-edges-plot-ridge-filter-py
+    def original(self, image, **kwargs):
+        """Return the original image, ignoring any kwargs."""
+        return image
+
+    def scikit_image_example(self, image_path, **kwargs):
+        image = cv2.imread(image_path)
+        image = color.rgb2gray(image)#[300:700, 700:900]
+        cmap = plt.cm.gray
+
+        plt.rcParams["axes.titlesize"] = "medium"
+        axes = plt.figure(figsize=(10, 4)).subplots(2, 9)
+        for i, black_ridges in enumerate([True, False]):
+            for j, (func, sigmas) in enumerate([
+                (self.original, None),
+                (meijering, [1]),
+                (meijering, range(1, 5)),
+                (sato, [1]),
+                (sato, range(1, 5)),
+                (frangi, [1]),
+                (frangi, range(1, 5)),
+                (hessian, [1]),
+                (hessian, range(1, 5)),
+            ]):
+                result = func(image, black_ridges=black_ridges, sigmas=sigmas)
+                axes[i, j].imshow(result, cmap=cmap)
+                if i == 0:
+                    title = func.__name__
+                    if sigmas:
+                        title += f"\n\N{GREEK SMALL LETTER SIGMA} = {list(sigmas)}"
+                    axes[i, j].set_title(title)
+                if j == 0:
+                    axes[i, j].set_ylabel(f'{black_ridges = }')
+                axes[i, j].set_xticks([])
+                axes[i, j].set_yticks([])
+
+        plt.tight_layout()
+        plt.show()
+
+
+
+
+
+    def hessian(self, image, **kwargs):
+        h = hessian_matrix(image, **kwargs)
         eigenvals = hessian_matrix_eigvals(h)
         return eigenvals
 
@@ -64,7 +110,8 @@ class SuperviseLearning:
         plt.title(title, color=color)
         plt.axis("off")
 
-    def plot_histogram_subplot(self, subplot_idx, bins, hist, eigenvals, channel_color, plt_log=True):
+    def plot_histogram_subplot(self, subplot_idx, bins, hist, eigenvals, channel_color,
+                               plt_log=True):
         plt.subplot(3, 1, subplot_idx)
         plt.bar(
             bins[:-1],
@@ -87,6 +134,7 @@ class SuperviseLearning:
         plt_show=False,
         plt_log=False,
         figsize=(10, 10),
+        **kwargs,
     ):
         image = cv2.imread(image_path)
 
@@ -98,9 +146,9 @@ class SuperviseLearning:
         r, g, b = image[:, :, 0], image[:, :, 1], image[:, :, 2]
 
         # Compute Hessian matrix for each channel and eigenvalues
-        eigenvals_r = self.hessian(r)
-        eigenvals_g = self.hessian(g)
-        eigenvals_b = self.hessian(b)
+        eigenvals_r = self.hessian(r, **kwargs)
+        eigenvals_g = self.hessian(g, **kwargs)
+        eigenvals_b = self.hessian(b, **kwargs)
 
         # Convert the image to grayscale
         image_gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
@@ -151,7 +199,8 @@ class SuperviseLearning:
             hist_data = [(hist_r, eigenvals_r, "red"), (hist_g, eigenvals_g, "green"), (hist_b, eigenvals_b, "blue")]
 
             for idx, (hist, eigenvals, channel_color) in enumerate(hist_data, start=1):
-                self.plot_histogram_subplot(idx, bins_r, hist, eigenvals, channel_color)
+                self.plot_histogram_subplot(idx, bins_r, hist, eigenvals, channel_color,
+                                            plt_log=plt_log)
 
             plt.tight_layout()
             plt.show()
@@ -165,8 +214,13 @@ class SuperviseLearning:
 
         return _hessian_features
 
+    def frangi(self, image, **kwargs):
+        _frangi = frangi(image, **kwargs)
+        return _frangi
+
     def frangi_feature_extraction(
-        self, image_path, plt_show=True, plt_log=False, figsize=(10, 10), bins=40
+        self, image_path, plt_show=True, plt_log=False, figsize=(10, 10), bins=40,
+            cmap="gray", **kwargs
     ):
         image = cv2.imread(image_path)
 
@@ -178,9 +232,17 @@ class SuperviseLearning:
         r, g, b = image[:, :, 0], image[:, :, 1], image[:, :, 2]
 
         # Apply Frangi filter to each channel
-        frangi_r = frangi(r)
-        frangi_g = frangi(g)
-        frangi_b = frangi(b)
+        frangi_r = self.frangi(r, **kwargs)
+        frangi_g = self.frangi(g, **kwargs)
+        frangi_b = self.frangi(b, **kwargs)
+
+        frangi_whole = self.frangi(image, **kwargs)
+
+        if plt_show:
+            plt.imshow(frangi_whole, cmap=cmap)
+            plt.title("Frangi Filter")
+            plt.axis("off")
+            plt.show()
 
         if plt_show:
             # Display the original image and Frangi filtered images side by side (optional)
@@ -637,22 +699,27 @@ if __name__ == "__main__":
     # print(obj.image_df.head())
 
     # Load the image
+    # image_path = str(
+    #     (Path(__file__).parent / ".." / "dataset" / "pdc_bit" / "Image_1.jpg")
+    # )
+
     image_path = str(
-        (Path(__file__).parent / ".." / "dataset" / "pdc_bit" / "Image_1.jpg")
+        (Path(__file__).parent / ".." / "dataset_ad" / "MildDemented" / "mildDem0.jpg")
     )
+
 
     # Apply hessian filter
-    hessian_features = obj.hessian_filter_feature_extraction(
-        image_path, plt_show=True, plt_log=True, cmap="jet",
-    )
-    print(hessian_features)
+    # hessian_features = obj.hessian_filter_feature_extraction(
+    #     image_path, plt_show=True, plt_log=True,
+    # )
+    # print(hessian_features)
 
-    # # # # Apply Sato filter
-    # sato_features = obj.frangi_feature_extraction(
+    # Apply frangi filter
+    # frangifeatures = obj.frangi_feature_extraction(
     #     image_path, plt_show=True, plt_log=True
     # )
-    # print(sato_features)
-    #
+    # print(frangifeatures)
+
     # # Apply LBP filter
     # lbp_result = obj.lbp_feature_extraction(image_path, plt_show=True, plt_log=True)
     # print(lbp_result)
@@ -682,3 +749,5 @@ if __name__ == "__main__":
     #     replace_existing=False,
     #     cmap="seismic",
     # )
+
+    obj.scikit_image_example(image_path)
