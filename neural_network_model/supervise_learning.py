@@ -489,7 +489,7 @@ class SuperviseLearning:
         return _threshold_features
 
     def sobel_edge_detection_sk(
-        self, image_path, bins=40, plt_show=False, plt_log=False, figsize=(10, 10)
+        self, image_path, bins=40, plt_show=False, plt_log=False, figsize=(10, 10), cmap="Greys"
     ):
         image = cv2.imread(image_path)
 
@@ -513,17 +513,17 @@ class SuperviseLearning:
             plt.axis("off")
 
             plt.subplot(2, 2, 2)
-            plt.imshow(sobel_edges_r, cmap="jet")
+            plt.imshow(sobel_edges_r, cmap=cmap)
             plt.title("Sobel Edges (R channel)", color="r")
             plt.axis("off")
 
             plt.subplot(2, 2, 3)
-            plt.imshow(sobel_edges_g, cmap="jet")
+            plt.imshow(sobel_edges_g, cmap=cmap)
             plt.title("Sobel Edges (G channel)", color="g")
             plt.axis("off")
 
             plt.subplot(2, 2, 4)
-            plt.imshow(sobel_edges_b, cmap="jet")
+            plt.imshow(sobel_edges_b, cmap=cmap)
             plt.title("Sobel Edges (B channel)", color="b")
             plt.axis("off")
             plt.tight_layout()
@@ -628,20 +628,23 @@ class SuperviseLearning:
             Path(filtered_dataset_path).mkdir(parents=True, exist_ok=True)
 
         if filter_name == "hessian":
-            for index, row in tqdm(self.image_df.iterrows(), total=self.image_df.shape[0], desc="Filtering images > "
-                                                                                                "hessian"):
+            for index, row in tqdm(
+                    self.image_df.iterrows(),
+                    total=self.image_df.shape[0],
+                    desc="Filtering images > hessian"
+            ):
                 image_path = row["Filepath"]
 
                 image = cv2.imread(image_path)
                 eigenvals = self.hessian(image)
 
-                # Get the subfolder structure from the original image path
+                # Get the sub-folder structure from the original image path
                 relative_path = Path(image_path).relative_to(dataset_path)
                 filtered_image_path = Path(dataset_path) / relative_path
                 # Handle replacing existing images
                 if not replace_existing:
                     filtered_image_path = Path(filtered_dataset_path) / relative_path
-                    # If the filtered image already exists and we're not replacing, modify the filename
+                    # If the filtered image already exists, and we're not replacing, modify the filename
                     filename_parts = filtered_image_path.stem
 
                     # Determine the original extension
@@ -664,19 +667,19 @@ class SuperviseLearning:
 if __name__ == "__main__":
     obj = SuperviseLearning()
 
-    print(obj.image_df.head())
+    # print(obj.image_df.head())
 
     # Load the image
     image_path = str(
-        (Path(__file__).parent / ".." / "dataset" / "pdc_bit" / "Image_1.png")
+        (Path(__file__).parent / ".." / "filtered_dataset_ad" / "MildDemented" / "mildDem0_filtered.jpg")
     )
 
-    # Apply hessian filter
+    # # Apply hessian filter
     # hessian_features = obj.hessian_filter_feature_extraction(
-    #     image_path, plt_show=True, plt_log=True, cmap="seismic",
+    #     image_path, plt_show=True, plt_log=True, cmap="jet",
     # )
     # print(hessian_features)
-
+    #
     # # # # Apply Sato filter
     # sato_features = obj.frangi_feature_extraction(
     #     image_path, plt_show=True, plt_log=True
@@ -692,18 +695,21 @@ if __name__ == "__main__":
     #     image_path, plt_show=True, plt_log=True
     # )
     # print(multi_otsu_features)
-    #
-    # # Apply Sobel edge detector
-    # sobel_features = obj.sobel_edge_detection_sk(
-    #     image_path, plt_show=True, plt_log=True
-    # )
-    # print(sobel_features)
 
-    dataset_path = Path(__file__).parent / ".." / "dataset_ad"
-    obj = SuperviseLearning(dataset_address=dataset_path)
-    obj.filter_images(
-        dataset_path=dataset_path,
-        filtered_dataset_path=Path(__file__).parent / ".." / "filtered_dataset_ad",
-        replace_existing=False,
-        cmap="seismic",
+    # Apply Sobel edge detector
+    sobel_features = obj.sobel_edge_detection_sk(
+        image_path, plt_show=True, plt_log=True, cmap="jet"
     )
+    print(sobel_features)
+
+
+
+
+    # dataset_path = Path(__file__).parent / ".." / "dataset_ad"
+    # obj = SuperviseLearning(dataset_address=dataset_path)
+    # obj.filter_images(
+    #     dataset_path=dataset_path,
+    #     filtered_dataset_path=Path(__file__).parent / ".." / "filtered_dataset_ad",
+    #     replace_existing=False,
+    #     cmap="seismic",
+    # )
