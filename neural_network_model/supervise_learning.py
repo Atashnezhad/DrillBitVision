@@ -53,11 +53,37 @@ class SuperviseLearning:
 
         return image_df
 
+    def hessian(self, image):
+        h = hessian_matrix(image)
+        eigenvals = hessian_matrix_eigvals(h)
+        return eigenvals
+
+    def plot_image_subplot(self, subplot_idx, img, title, color=None, cmap="gray"):
+        plt.subplot(2, 2, subplot_idx)
+        plt.imshow(img, cmap=cmap)
+        plt.title(title, color=color)
+        plt.axis("off")
+
+    def plot_histogram_subplot(self, subplot_idx, bins, hist, eigenvals, channel_color, plt_log=True):
+        plt.subplot(3, 1, subplot_idx)
+        plt.bar(
+            bins[:-1],
+            hist,
+            width=(np.max(eigenvals[0]) - np.min(eigenvals[0])) / len(bins[:-1]),
+            color=channel_color,
+        )
+        plt.xlabel("Hessian Value")
+        plt.ylabel("Counts")
+        plt.title(f"Histogram of Hessian Filter ({channel_color} channel)", color=channel_color.lower())
+        if plt_log:
+            plt.yscale("log")
+        plt.grid(True)
+
     def hessian_filter_feature_extraction(
         self,
         image_path,
         bins=40,
-        cmap="jet",
+        cmap="gray",
         plt_show=False,
         plt_log=False,
         figsize=(10, 10),
@@ -71,22 +97,16 @@ class SuperviseLearning:
         # Split the image into R, G, and B channels
         r, g, b = image[:, :, 0], image[:, :, 1], image[:, :, 2]
 
-        # Compute Hessian matrix for each channel
-        h_r = hessian_matrix(r)
-        h_g = hessian_matrix(g)
-        h_b = hessian_matrix(b)
-
-        # Compute eigenvalues of Hessian matrix for each channel
-        eigenvals_r = hessian_matrix_eigvals(h_r)
-        eigenvals_g = hessian_matrix_eigvals(h_g)
-        eigenvals_b = hessian_matrix_eigvals(h_b)
+        # Compute Hessian matrix for each channel and eigenvalues
+        eigenvals_r = self.hessian(r)
+        eigenvals_g = self.hessian(g)
+        eigenvals_b = self.hessian(b)
 
         # Convert the image to grayscale
         image_gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-        # Compute Hessian matrix for the grayscale image
-        h = hessian_matrix(image_gray)
         # Compute eigenvalues of Hessian matrix
-        eigenvals = hessian_matrix_eigvals(h)
+        eigenvals = self.hessian(image_gray)
+
         if plt_show:
             plt.imshow(eigenvals[0], cmap=cmap)
             plt.title("Hessian Filter")
@@ -94,26 +114,17 @@ class SuperviseLearning:
             plt.show()
 
         if plt_show:
-            # Display the original image and Hessian filtered images side by side (optional)
+            channel_titles = ["R", "G", "B"]
+            eigenvals = [eigenvals_r, eigenvals_g, eigenvals_b]
+
             plt.subplot(2, 2, 1)
             plt.imshow(image)
             plt.title("Original Image")
             plt.axis("off")
 
-            plt.subplot(2, 2, 2)
-            plt.imshow(eigenvals_r[0], cmap=cmap)
-            plt.title("Hessian Filter (R channel)", color="red")
-            plt.axis("off")
+            for idx, (title, eigenval) in enumerate(zip(channel_titles, eigenvals), start=2):
+                self.plot_image_subplot(idx, eigenval[0], f"Hessian Filter ({title} channel)", color=title.lower())
 
-            plt.subplot(2, 2, 3)
-            plt.imshow(eigenvals_g[0], cmap=cmap)
-            plt.title("Hessian Filter (G channel)", color="green")
-            plt.axis("off")
-
-            plt.subplot(2, 2, 4)
-            plt.imshow(eigenvals_b[0], cmap=cmap)
-            plt.title("Hessian Filter (B channel)", color="blue")
-            plt.axis("off")
             plt.show()
 
         # Compute histograms for each Hessian filtered image
@@ -135,48 +146,12 @@ class SuperviseLearning:
 
         if plt_show:
             plt.figure(figsize=figsize)
-            # Display the histograms (optional)
-            plt.subplot(3, 1, 1)
-            plt.bar(
-                bins_r[:-1],
-                hist_r,
-                width=(np.max(eigenvals_r[0]) - np.min(eigenvals_r[0])) / bins,
-                color="red",
-            )
-            plt.xlabel("Hessian Value")
-            plt.ylabel("Counts")
-            plt.title("Histogram of Hessian Filter (R channel)", color="red")
-            if plt_log:
-                plt.yscale("log")
-            plt.grid(True)
 
-            plt.subplot(3, 1, 2)
-            plt.bar(
-                bins_g[:-1],
-                hist_g,
-                width=(np.max(eigenvals_g[0]) - np.min(eigenvals_g[0])) / bins,
-                color="green",
-            )
-            plt.xlabel("Hessian Value")
-            plt.ylabel("Counts")
-            plt.title("Histogram of Hessian Filter (G channel)", color="green")
-            if plt_log:
-                plt.yscale("log")
-            plt.grid(True)
+            channels = ["R", "G", "B"]
+            hist_data = [(hist_r, eigenvals_r, "red"), (hist_g, eigenvals_g, "green"), (hist_b, eigenvals_b, "blue")]
 
-            plt.subplot(3, 1, 3)
-            plt.bar(
-                bins_b[:-1],
-                hist_b,
-                width=(np.max(eigenvals_b[0]) - np.min(eigenvals_b[0])) / bins,
-                color="blue",
-            )
-            plt.xlabel("Hessian Value")
-            plt.ylabel("Counts")
-            plt.title("Histogram of Hessian Filter (B channel)", color="blue")
-            if plt_log:
-                plt.yscale("log")
-            plt.grid(True)
+            for idx, (hist, eigenvals, channel_color) in enumerate(hist_data, start=1):
+                self.plot_histogram_subplot(idx, bins_r, hist, eigenvals, channel_color)
 
             plt.tight_layout()
             plt.show()
@@ -595,15 +570,7 @@ class SuperviseLearning:
 
         return _sobel_features
 
-    def hessian(self, image):
-        if len(image.shape) == 3:
-            image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
 
-        # Compute Hessian matrix for the grayscale image
-        grayscale_image = cv2.cvtColor(image, cv2.COLOR_RGB2GRAY)
-        h = hessian_matrix(grayscale_image)
-        eigenvals = hessian_matrix_eigvals(h)
-        return eigenvals
 
     def filter_images(
         self,
@@ -671,15 +638,15 @@ if __name__ == "__main__":
 
     # Load the image
     image_path = str(
-        (Path(__file__).parent / ".." / "filtered_dataset_ad" / "MildDemented" / "mildDem0_filtered.jpg")
+        (Path(__file__).parent / ".." / "dataset" / "pdc_bit" / "Image_1.jpg")
     )
 
-    # # Apply hessian filter
-    # hessian_features = obj.hessian_filter_feature_extraction(
-    #     image_path, plt_show=True, plt_log=True, cmap="jet",
-    # )
-    # print(hessian_features)
-    #
+    # Apply hessian filter
+    hessian_features = obj.hessian_filter_feature_extraction(
+        image_path, plt_show=True, plt_log=True, cmap="jet",
+    )
+    print(hessian_features)
+
     # # # # Apply Sato filter
     # sato_features = obj.frangi_feature_extraction(
     #     image_path, plt_show=True, plt_log=True
@@ -696,11 +663,13 @@ if __name__ == "__main__":
     # )
     # print(multi_otsu_features)
 
-    # Apply Sobel edge detector
-    sobel_features = obj.sobel_edge_detection_sk(
-        image_path, plt_show=True, plt_log=True, cmap="jet"
-    )
-    print(sobel_features)
+
+
+    # # Apply Sobel edge detector
+    # sobel_features = obj.sobel_edge_detection_sk(
+    #     image_path, plt_show=True, plt_log=True, cmap="jet"
+    # )
+    # print(sobel_features)
 
 
 
