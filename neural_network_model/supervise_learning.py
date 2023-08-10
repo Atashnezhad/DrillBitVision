@@ -815,9 +815,46 @@ class Filters:
                 plt.savefig(filtered_image_path, bbox_inches="tight", pad_inches=0)
                 plt.close()
 
+        if filter_name == "frangi":
+            for index, row in tqdm(
+                self.image_df.iterrows(),
+                total=self.image_df.shape[0],
+                desc="Filtering images > frangifrangi",
+            ):
+                image_path = row["Filepath"]
+
+                image = cv2.imread(image_path)
+                frangi = self.frangi(image)
+
+                # Get the sub-folder structure from the original image path
+                relative_path = Path(image_path).relative_to(dataset_path)
+                filtered_image_path = Path(dataset_path) / relative_path
+                # Handle replacing existing images
+                if not replace_existing:
+                    filtered_image_path = Path(filtered_dataset_path) / relative_path
+                    # If the filtered image already exists, and we're not replacing, modify the filename
+                    filename_parts = filtered_image_path.stem
+
+                    # Determine the original extension
+                    orig_extension = Path(image_path).suffix.lower()
+
+                    new_filename = f"{filename_parts}_filtered{orig_extension}"
+                    filtered_image_path = filtered_image_path.parent / new_filename
+
+                # Create necessary directories
+                filtered_image_path.parent.mkdir(parents=True, exist_ok=True)
+
+                plt.imshow(frangi[0], cmap=cmap)
+                plt.axis("off")
+
+                # Save the filtered image
+                plt.savefig(filtered_image_path, bbox_inches="tight", pad_inches=0)
+                plt.close()
+                break
+
 
 if __name__ == "__main__":
-    obj = Filters()
+    # obj = Filters()
 
     # print(obj.image_df.head())
 
@@ -853,19 +890,26 @@ if __name__ == "__main__":
     # print(multi_otsu_features)
 
     # # Apply Sobel edge detector
-    sobel_features = obj.sobel_edge_detection_sk(
-        image_path, plt_show=True, plt_log=True, cmap="gray"
-    )
-    print(sobel_features)
+    # sobel_features = obj.sobel_edge_detection_sk(
+    #     image_path, plt_show=True, plt_log=True, cmap="gray"
+    # )
+    # print(sobel_features)
 
-    # dataset_path = Path(__file__).parent / ".." / "dataset_ad"
-    # obj = SuperviseLearning(dataset_address=dataset_path)
+    dataset_path = Path(__file__).parent / ".." / "dataset"
+    obj = Filters(dataset_address=dataset_path)
     # obj.filter_images(
     #     dataset_path=dataset_path,
     #     filtered_dataset_path=Path(__file__).parent / ".." / "filtered_dataset_ad",
     #     replace_existing=False,
     #     cmap="seismic",
     # )
+    obj.filter_images(
+        dataset_path=dataset_path,
+        filtered_dataset_path=Path(__file__).parent / ".." / "filtered_dataset_ad_frangi",
+        replace_existing=False,
+        cmap="seismic",
+        filter_name="frangi"
+    )
 
     # obj.scikit_image_example(image_path)
 
