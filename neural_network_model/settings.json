@@ -1,0 +1,141 @@
+{
+    "AUGMENTATION_SETTING": {
+        "ROTATION_RANGE": 25,
+        "WIDTH_SHIFT_RANGE": 0.0,
+        "HEIGHT_SHIFT_RANGE": 0.0,
+        "SHEAR_RANGE": 0.2,
+        "ZOOM_RANGE": 0.5,
+        "HORIZONTAL_FLIP": true,
+        "FILL_MODE": "nearest",
+        "BATCH_SIZE": 1,
+        "AUGMENTED_IMAGES_DIR_ADDRESS": "/Users/amin/Downloads/DrillBitVision/neural_network_model/../dataset_augmented",
+        "AUGMENTED_IMAGES_SAVE_PREFIX": "augmented_image",
+        "AUGMENTED_IMAGES_SAVE_FORMAT": "jpeg",
+        "NUMBER_OF_IMAGES_TOBE_GENERATED": 200
+    },
+    "PREPROCESSING_SETTING": {
+        "TRAIN_TEST_VAL_SPLIT_DIR_ADDRESS": "/Users/amin/Downloads/DrillBitVision/dataset_train_test_val",
+        "TRAIN_TEST_SPLIT_DIR_NAMES": [
+            "train",
+            "test",
+            "val"
+        ],
+        "TRAIN_FRACTION": 0.7,
+        "TEST_FRACTION": 0.2,
+        "VAL_FRACTION": 0.1
+    },
+    "CATEGORY_SETTING": {
+        "CATEGORIES": [
+            "pdc_bit",
+            "rollercone_bit"
+        ]
+    },
+    "MODEL_SETTING": {
+        "MODEL_PATH": "/Users/amin/Downloads/DrillBitVision/deep_model",
+        "MODEL_NAME": "model_.h5",
+        "LOSS": "categorical_crossentropy",
+        "METRICS": [
+            "accuracy"
+        ],
+        "EPOCHS": 3,
+        "FIT_GEN_VERBOSE": 0,
+        "VALIDATION_STEPS": 4,
+        "CLASS_WEIGHT": null,
+        "MAX_QUEUE_SIZE": 10,
+        "WORKERS": 1,
+        "SHUFFLE": true,
+        "INITIAL_EPOCH": 1,
+        "USE_MULTIPROCESSING": false,
+        "PERIOD": 1,
+        "MONITOR": "val_accuracy",
+        "CHECK_POINT_VERBOSE": 1,
+        "SAVE_BEST_ONLY": true,
+        "MODE": "max",
+        "NUMBER_OF_TEST_TO_PRED": 35
+    },
+    "RANDOM_SEED_SETTING": {
+        "SEED": 1
+    },
+    "FLOW_FROM_DIRECTORY_SETTING": {
+        "IMAGE_SIZE": 224,
+        "TARGET_SIZE": [
+            224,
+            224
+        ],
+        "COLOR_MODE": "rgb",
+        "CLASS_MODE": "categorical",
+        "BATCH_SIZE": 32,
+        "SHUFFLE": true,
+        "SEED": 1234
+    },
+    "FIGURE_SETTING": {
+        "FIGURE_SIZE_IN_PRED_MODEL": [
+            20,
+            15
+        ],
+        "NUM_ROWS_IN_PRED_MODEL": 5,
+        "NUM_COLS_IN_PRED_MODEL": 7,
+        "FIG_PRED_OUT_DIR_ADDRESS": "/Users/amin/Downloads/DrillBitVision/figures",
+        "FIGURE_SIZE_IN_PLOT_HIST": [
+            17,
+            10
+        ],
+        "NUM_ROWS_IN_PLOT_HIST": 1,
+        "NUM_COLS_IN_PLOT_HIST": 2
+    },
+    "IGNORE_SETTING": {
+        "IGNORE_LIST": [
+            ".DS_Store",
+            ".pytest_cache",
+            "__pycache__"
+        ]
+    },
+    "DATA_ADDRESS_SETTING": {
+        "MAIN_DATA_DIR_ADDRESS": "/Users/amin/Downloads/DrillBitVision/dataset",
+        "TEST_DIR_ADDRESS": "/Users/amin/Downloads/DrillBitVision/neural_network_model/../dataset_train_test_val"
+    },
+    "DATA_GEN_SETTING": {
+        "RESCALE": 0.00392156862745098
+    },
+    "DOWNLOAD_IMAGE_SETTING": {
+        "LIMIT": 5
+    },
+    "GRAD_CAM_SETTING": {
+        "IMG_PATH": "/Users/amin/Downloads/DrillBitVision/neural_network_model/../dataset/pdc_bit/Image_1.png",
+        "LAST_CONV_LAYER_NAME": "conv2d_2",
+        "IMAGE_NEW_NAME": "/Users/amin/Downloads/DrillBitVision/figures",
+        "GRAD_CAM_FIG_NAME": "grad_cam_pdc_Image_1.png",
+        "ALPHA": 0.7
+    },
+    "S3_BUCKET_SETTING": {
+        "BUCKET_NAME": "bitimages123",
+        "PARENT_FOLDER_NAME": "dataset",
+        "SUBFOLDER_NAME": [
+            "dataset/pdc_bit",
+            "dataset/rollercone_bit"
+        ],
+        "DOWNLOAD_LOCATION": "/Users/amin/Downloads/DrillBitVision/s3_dataset",
+        "REGION_NAME": "us-east-2",
+        "AWS_S3_SECRET_KEY": "zCP1JqiYdUUXVfdevp3uLpKUVti9ET1tj3gZXCK9",
+        "AWS_S3_ACCESS_KEY": "AKIA33OJLZR733DMP5MA"
+    },
+    "EC2_SETTING": {
+        "ACCESS_KEY": "AKIA33OJLZR73KDKN2FK",
+        "SECRET_KEY": "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",
+        "AMI_ID": "ami-08333bccc35d71140",
+        "INSTANCE_TYPE": "t2.micro",
+        "REGION_NAME": "us-east-2",
+        "KEY_NAME": "bitvision_ec2",
+        "PEM_FILE_ADDRESS": "/Users/amin/Downloads/DrillBitVision/neural_network_model/ec2_key/bitvision_ec2.pem",
+        "SSH_USER": "ec2-user",
+        "SECURITY_GROUP_ID": null,
+        "SECURITY_GROUP_DESCRIPTION": "bitvision_security_group",
+        "SECURITY_GROUP_NAME": "bitvision_security_group",
+        "VPC_ID": "vpc-020d4d0022fbc35b3"
+    },
+    "GITHUB_SETTING": {
+        "REPO_URL": "https://github.com/Atashnezhad/DrillBitVision.git",
+        "BRANCH_NAME": "main",
+        "FOLDER_NAME": "myproject"
+    }
+}

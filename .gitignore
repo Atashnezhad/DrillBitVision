@@ -27,7 +27,9 @@ drillvision.egg-info/
 /dataset*/
 /s3_dataset/
 /deep_model/
+/htmlcov/
 
 # Files to Ignore
 .coverage*
 .neural_network_model/settings.json
+/ec2_key/
