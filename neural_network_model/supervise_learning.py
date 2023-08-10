@@ -775,7 +775,7 @@ class Filters:
 
         if filtered_dataset_path is None:
             filtered_dataset_path = str(
-                Path(__file__).parent / ".." / "filtered_dataset"
+                Path(__file__).parent / ".." / f"{filtered_dataset_path}"
             )
             Path(filtered_dataset_path).mkdir(parents=True, exist_ok=True)
 
@@ -844,13 +844,12 @@ class Filters:
                 # Create necessary directories
                 filtered_image_path.parent.mkdir(parents=True, exist_ok=True)
 
-                plt.imshow(frangi[0], cmap=cmap)
+                plt.imshow(frangi, cmap=cmap)
                 plt.axis("off")
 
                 # Save the filtered image
                 plt.savefig(filtered_image_path, bbox_inches="tight", pad_inches=0)
                 plt.close()
-                break
 
 
 if __name__ == "__main__":
