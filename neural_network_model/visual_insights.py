@@ -20,7 +20,7 @@ from neural_network_model.model import SUPERVISE_LEARNING_SETTING, TRANSFER_LEAR
 warnings.filterwarnings("ignore")
 
 
-class Filters:
+class ImageNumeric:
     """
     This is a class for Supervise Learning approach
     for image classification.
@@ -1076,7 +1076,7 @@ if __name__ == "__main__":
     # print(sobel_features)
 
     dataset_path = Path(__file__).parent / ".." / "dataset_ad"
-    obj = Filters(dataset_address=dataset_path)
+    obj = ImageNumeric(dataset_address=dataset_path)
     # obj.filter_images(
     #     dataset_path=dataset_path,
     #     filtered_dataset_path=Path(__file__).parent / ".." / "filtered_dataset_ad_hessian",
@@ -1109,8 +1109,3 @@ if __name__ == "__main__":
         num_clusters=3,
         cmap="viridis",
     )
-
-
-
-
-
