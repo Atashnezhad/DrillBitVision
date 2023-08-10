@@ -835,16 +835,16 @@ if __name__ == "__main__":
     # print(lbp_result)
 
     # Apply Multi-Otsu thresholding
-    multi_otsu_features = obj.multiotsu_threshold_feature_extraction(
-        image_path, plt_show=True, plt_log=True
-    )
-    print(multi_otsu_features)
+    # multi_otsu_features = obj.multiotsu_threshold_feature_extraction(
+    #     image_path, plt_show=True, plt_log=True
+    # )
+    # print(multi_otsu_features)
 
     # # Apply Sobel edge detector
-    # sobel_features = obj.sobel_edge_detection_sk(
-    #     image_path, plt_show=True, plt_log=True, cmap="jet"
-    # )
-    # print(sobel_features)
+    sobel_features = obj.sobel_edge_detection_sk(
+        image_path, plt_show=True, plt_log=True, cmap="gray"
+    )
+    print(sobel_features)
 
     # dataset_path = Path(__file__).parent / ".." / "dataset_ad"
     # obj = SuperviseLearning(dataset_address=dataset_path)
