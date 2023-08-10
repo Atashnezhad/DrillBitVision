@@ -1,3 +1,4 @@
+import multiprocessing
 import os
 import warnings
 from pathlib import Path
@@ -944,6 +945,51 @@ class Filters:
 
         return colored_image
 
+    def process_image(
+            self,
+            row,
+            cmap,
+            dataset_path,
+            segmentation_dataset_path,
+            replace_existing,
+            num_clusters=5
+    ):
+        image_path = row["Filepath"]
+        # Get the sub-folder structure from the original image path
+        relative_path = Path(image_path).relative_to(dataset_path)
+        segmented_image_dir = Path(segmentation_dataset_path) / relative_path.parent  # Create subdirectory
+        segmented_image_path = segmented_image_dir / f"{relative_path.stem}_filtered{relative_path.suffix}"
+        # Handle replacing existing images
+        if not replace_existing:
+            segmented_image_path = Path(segmentation_dataset_path) / relative_path
+            # If the filtered image already exists, and we're not replacing, modify the filename
+            filename_parts = segmented_image_path.stem
+
+            # Determine the original extension
+            orig_extension = Path(image_path).suffix.lower()
+
+            new_filename = f"{filename_parts}_filtered{orig_extension}"
+            segmented_image_path = segmented_image_path.parent / new_filename
+
+        # Create necessary directories
+        segmented_image_path.parent.mkdir(parents=True, exist_ok=True)
+
+        colored_image = self.image_segmentation_knn(
+            image_path,
+            num_clusters=num_clusters,
+            plt_show=False
+        )
+
+        # Create a separate figure for each process to avoid conflicts
+        fig = plt.figure(figsize=(6, 6))
+        plt.imshow(colored_image, cmap=cmap)
+        plt.xticks([])  # Remove x-axis ticks and labels
+        plt.yticks([])  # Remove y-axis ticks and labels
+
+        # Save the filtered image
+        plt.savefig(segmented_image_path, bbox_inches="tight", pad_inches=0)
+        plt.close(fig)
+
     def image_segmentation(
             self,
             num_clusters=5,
@@ -953,53 +999,38 @@ class Filters:
         cmap = kwargs.get("cmap", "seismic")
         img_segmentation = kwargs.get("clustering_method", "kmean")
         dataset_path = kwargs.get("dataset_path", None)
-        segmentation_dataset_path = kwargs.get("segmentation_dataset_path", None)
+        segmentation_dataset_path = kwargs.get("segmentation_dataset_path")
         replace_existing = kwargs.get("replace_existing", False)  # New parameter
 
-        if segmentation_dataset_path is None:
+        # if segmentation_dataset_path does not exist, create it
+        if not Path(segmentation_dataset_path).exists():
             segmentation_dataset_path = str(
                 Path(__file__).parent / ".." / f"{segmentation_dataset_path}"
             )
             Path(segmentation_dataset_path).mkdir(parents=True, exist_ok=True)
 
         if img_segmentation == "kmean":
-            for index, row in tqdm(
-                    self.image_df.iterrows(),
-                    total=self.image_df.shape[0],
-                    desc="Segmentation images > kmean",
-            ):
-                image_path = row["Filepath"]
+            # Use multiprocessing.Pool to parallelize image segmentation
+            with multiprocessing.Pool(processes=multiprocessing.cpu_count()) as pool:
+                results = []
+                for index, row in tqdm(
+                        self.image_df.iterrows(),
+                        total=self.image_df.shape[0],
+                        desc="Segmentation images > kmean",
+                ):
+                    result = pool.apply_async(
+                        self.process_image,
+                        args=(
+                            row, cmap, dataset_path,
+                            segmentation_dataset_path,
+                            replace_existing, num_clusters
+                        ),
+                    )
+                    results.append(result)
 
-                # Get the sub-folder structure from the original image path
-                relative_path = Path(image_path).relative_to(dataset_path)
-                segmented_image_path = Path(dataset_path) / relative_path
-                # Handle replacing existing images
-                if not replace_existing:
-                    segmented_image_path = Path(segmentation_dataset_path) / relative_path
-                    # If the filtered image already exists, and we're not replacing, modify the filename
-                    filename_parts = segmented_image_path.stem
-
-                    # Determine the original extension
-                    orig_extension = Path(image_path).suffix.lower()
-
-                    new_filename = f"{filename_parts}_filtered{orig_extension}"
-                    segmented_image_path = segmented_image_path.parent / new_filename
-
-                # Create necessary directories
-                segmented_image_path.parent.mkdir(parents=True, exist_ok=True)
-
-                colored_image = self.image_segmentation_knn(
-                    image_path,
-                    num_clusters=num_clusters,
-                    plt_show=False
-                )
-                plt.imshow(colored_image, cmap=cmap)
-                # no x and y axis number
-                plt.xticks([])  # Remove x-axis ticks and labels
-                plt.yticks([])  # Remove y-axis ticks and labels
-                # Save the filtered image
-                plt.savefig(segmented_image_path, bbox_inches="tight", pad_inches=0)
-                plt.close()
+                # Wait for all processes to complete
+                for result in results:
+                    result.wait()
 
 
 if __name__ == "__main__":
@@ -1074,7 +1105,9 @@ if __name__ == "__main__":
     obj.image_segmentation(
         clustering_method="kmean",
         dataset_path=dataset_path,
-        segmentation_dataset_path=Path(__file__).parent / ".." / "segmentation_dataset_ad_kmean",
+        segmentation_dataset_path=Path(__file__).parent / ".." / "segmentation_dataset_ad_kmean_3",
+        num_clusters=3,
+        cmap="viridis",
     )
 
 

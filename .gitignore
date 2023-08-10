@@ -33,3 +33,4 @@ drillvision.egg-info/
 .coverage*
 .neural_network_model/settings.json
 /ec2_key/
+/segmentation_dataset_ad_kmean/

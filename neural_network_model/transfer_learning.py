@@ -289,7 +289,7 @@ class TransferModel(Preprocessing, BitVision):
         :param kwargs: figure_folder_path
         :return: None
         """
-
+        cmap = kwargs.get("cmap", "gray")
         figure_folder_path = kwargs.get(
             "figure_folder_path", Path(__file__).parent / ".." / "figures"
         )
@@ -320,7 +320,7 @@ class TransferModel(Preprocessing, BitVision):
                 if file_extension in [".png", ".jpg"]:
                     try:
                         image = plt.imread(filepath)
-                        ax.imshow(image)
+                        ax.imshow(image, cmap=cmap)
                         ax.set_title(self.image_df.Label[i])
                     except (IOError, SyntaxError):
                         print(f"Error loading image at {filepath}")
@@ -886,12 +886,12 @@ if __name__ == "__main__":
     # obj.download_images(limit=30)
 
     transfer_model = TransferModel(
-        dataset_address=Path(__file__).parent / ".." / "filtered_dataset_ad_hessian"
+        dataset_address=Path(__file__).parent / ".." / "dataset_ad"
     )
 
     transfer_model.plot_classes_number()
     transfer_model.analyze_image_names()
-    transfer_model.plot_data_images(num_rows=3, num_cols=3)
+    transfer_model.plot_data_images(num_rows=3, num_cols=3, cmap="jet")
     transfer_model.train_model(
         epochs=50,
         model_save_path=(Path(__file__).parent / ".." / "deep_model").resolve(),
