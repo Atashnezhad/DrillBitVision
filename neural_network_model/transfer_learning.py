@@ -886,7 +886,7 @@ if __name__ == "__main__":
     # obj.download_images(limit=30)
 
     transfer_model = TransferModel(
-        dataset_address=Path(__file__).parent / ".." / "filtered_dataset_ad"
+        dataset_address=Path(__file__).parent / ".." / "filtered_dataset_ad_hessian"
     )
 
     transfer_model.plot_classes_number()

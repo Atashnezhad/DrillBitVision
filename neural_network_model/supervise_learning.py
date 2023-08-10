@@ -9,6 +9,8 @@ import pandas as pd
 from skimage import color
 from skimage.feature import hessian_matrix, hessian_matrix_eigvals, local_binary_pattern
 from skimage.filters import frangi, hessian, meijering, sato, sobel, threshold_multiotsu
+from PIL import Image
+from sklearn.cluster import KMeans
 from tqdm import tqdm
 
 from neural_network_model.model import SUPERVISE_LEARNING_SETTING, TRANSFER_LEARNING_SETTING
@@ -356,8 +358,8 @@ class Filters:
     def local_binary_pattern(
             self,
             image,
-            n_points,
-            radius,
+            n_points: int,
+            radius: int,
             method=SUPERVISE_LEARNING_SETTING.FILTERS.LOCAl_BINARY_PATTERN.METHOD
     ):
         lbp = local_binary_pattern(image, n_points, radius, method)
@@ -851,6 +853,154 @@ class Filters:
                 plt.savefig(filtered_image_path, bbox_inches="tight", pad_inches=0)
                 plt.close()
 
+        if filter_name == "lbp":
+            for index, row in tqdm(
+                    self.image_df.iterrows(),
+                    total=self.image_df.shape[0],
+                    desc="Filtering images > lbp",
+            ):
+                image_path = row["Filepath"]
+
+                image = cv2.imread(image_path)
+                # make image gray
+                image_gray = cv2.cvtColor(image, cv2.COLOR_RGB2GRAY)
+                lbp = self.local_binary_pattern(
+                    image_gray,
+                    n_points=SUPERVISE_LEARNING_SETTING.FILTERS.LOCAl_BINARY_PATTERN.NUM_POINTS,
+                    radius=SUPERVISE_LEARNING_SETTING.FILTERS.LOCAl_BINARY_PATTERN.RADIUS,
+                    method=SUPERVISE_LEARNING_SETTING.FILTERS.LOCAl_BINARY_PATTERN.METHOD
+                )
+
+                # Get the sub-folder structure from the original image path
+                relative_path = Path(image_path).relative_to(dataset_path)
+                filtered_image_path = Path(dataset_path) / relative_path
+                # Handle replacing existing images
+                if not replace_existing:
+                    filtered_image_path = Path(filtered_dataset_path) / relative_path
+                    # If the filtered image already exists, and we're not replacing, modify the filename
+                    filename_parts = filtered_image_path.stem
+
+                    # Determine the original extension
+                    orig_extension = Path(image_path).suffix.lower()
+
+                    new_filename = f"{filename_parts}_filtered{orig_extension}"
+                    filtered_image_path = filtered_image_path.parent / new_filename
+
+                # Create necessary directories
+                filtered_image_path.parent.mkdir(parents=True, exist_ok=True)
+
+                plt.imshow(lbp, cmap=cmap)
+                plt.axis("off")
+
+                # Save the filtered image
+                plt.savefig(filtered_image_path, bbox_inches="tight", pad_inches=0)
+                plt.close()
+
+    def image_segmentation_knn(
+            self,
+            image_path,
+            num_clusters=5,
+            plt_show=False
+    ):
+
+        # Load the grayscale image
+        gray_image = Image.open(image_path).convert('L')
+
+        # Convert the grayscale image to a numpy array
+        gray_array = np.array(gray_image)
+
+        # Reshape the array to a flat 1D array
+        flat_array = gray_array.reshape((-1, 1))
+
+        # Number of clusters (colors) to segment the image into
+        num_clusters = num_clusters
+
+        # Apply K-Means clustering
+        kmeans = KMeans(n_clusters=num_clusters, random_state=0)
+        kmeans.fit(flat_array)
+        labels = kmeans.labels_
+
+        # Reshape the labels back to the original image shape
+        segmented_labels = labels.reshape(gray_array.shape)
+
+        # Create a colored version of the grayscale image
+        colored_image = np.zeros_like(gray_array, dtype=np.uint8)
+        for i in range(num_clusters):
+            colored_image[segmented_labels == i] = int(255 * (i + 1) / num_clusters)
+
+        if plt_show:
+            # Plot the original grayscale image
+            plt.subplot(1, 2, 1)
+            plt.imshow(gray_array, cmap='gray')
+            plt.title('Grayscale Image')
+
+            # Plot the segmented and colored image
+            plt.subplot(1, 2, 2)
+            plt.imshow(colored_image, cmap='seismic')  # You can choose a colormap you like
+            plt.title('Segmented and Colored Image')
+
+            plt.tight_layout()
+            plt.show()
+
+        return colored_image
+
+    def image_segmentation(
+            self,
+            num_clusters=5,
+            **kwargs
+    ):
+
+        cmap = kwargs.get("cmap", "seismic")
+        img_segmentation = kwargs.get("clustering_method", "kmean")
+        dataset_path = kwargs.get("dataset_path", None)
+        segmentation_dataset_path = kwargs.get("segmentation_dataset_path", None)
+        replace_existing = kwargs.get("replace_existing", False)  # New parameter
+
+        if segmentation_dataset_path is None:
+            segmentation_dataset_path = str(
+                Path(__file__).parent / ".." / f"{segmentation_dataset_path}"
+            )
+            Path(segmentation_dataset_path).mkdir(parents=True, exist_ok=True)
+
+        if img_segmentation == "kmean":
+            for index, row in tqdm(
+                    self.image_df.iterrows(),
+                    total=self.image_df.shape[0],
+                    desc="Segmentation images > kmean",
+            ):
+                image_path = row["Filepath"]
+
+                # Get the sub-folder structure from the original image path
+                relative_path = Path(image_path).relative_to(dataset_path)
+                segmented_image_path = Path(dataset_path) / relative_path
+                # Handle replacing existing images
+                if not replace_existing:
+                    segmented_image_path = Path(segmentation_dataset_path) / relative_path
+                    # If the filtered image already exists, and we're not replacing, modify the filename
+                    filename_parts = segmented_image_path.stem
+
+                    # Determine the original extension
+                    orig_extension = Path(image_path).suffix.lower()
+
+                    new_filename = f"{filename_parts}_filtered{orig_extension}"
+                    segmented_image_path = segmented_image_path.parent / new_filename
+
+                # Create necessary directories
+                segmented_image_path.parent.mkdir(parents=True, exist_ok=True)
+
+                colored_image = self.image_segmentation_knn(
+                    image_path,
+                    num_clusters=num_clusters,
+                    plt_show=False
+                )
+                plt.imshow(colored_image, cmap=cmap)
+                # no x and y axis number
+                plt.xticks([])  # Remove x-axis ticks and labels
+                plt.yticks([])  # Remove y-axis ticks and labels
+                # Save the filtered image
+                plt.savefig(segmented_image_path, bbox_inches="tight", pad_inches=0)
+                plt.close()
+
 
 if __name__ == "__main__":
     # obj = Filters()
@@ -894,20 +1044,40 @@ if __name__ == "__main__":
     # )
     # print(sobel_features)
 
-    dataset_path = Path(__file__).parent / ".." / "dataset"
+    dataset_path = Path(__file__).parent / ".." / "dataset_ad"
     obj = Filters(dataset_address=dataset_path)
     # obj.filter_images(
     #     dataset_path=dataset_path,
-    #     filtered_dataset_path=Path(__file__).parent / ".." / "filtered_dataset_ad",
+    #     filtered_dataset_path=Path(__file__).parent / ".." / "filtered_dataset_ad_hessian",
     #     replace_existing=False,
     #     cmap="seismic",
     # )
-    obj.filter_images(
-        dataset_path=dataset_path,
-        filtered_dataset_path=Path(__file__).parent / ".." / "filtered_dataset_ad_frangi",
-        replace_existing=False,
-        cmap="seismic",
-        filter_name="frangi"
-    )
+    # obj.filter_images(
+    #     dataset_path=dataset_path,
+    #     filtered_dataset_path=Path(__file__).parent / ".." / "filtered_dataset_ad_frangi",
+    #     replace_existing=False,
+    #     cmap="seismic",
+    #     filter_name="frangi"
+    # )
+    # obj.filter_images(
+    #     dataset_path=dataset_path,
+    #     filtered_dataset_path=Path(__file__).parent / ".." / "filtered_dataset_ad_lbp",
+    #     replace_existing=False,
+    #     cmap="seismic",
+    #     filter_name="lbp"
+    # )
 
     # obj.scikit_image_example(image_path)
+
+    # obj.image_segmentation_knn(image_path, num_clusters=5)
+
+    obj.image_segmentation(
+        clustering_method="kmean",
+        dataset_path=dataset_path,
+        segmentation_dataset_path=Path(__file__).parent / ".." / "segmentation_dataset_ad_kmean",
+    )
+
+
+
+
+
