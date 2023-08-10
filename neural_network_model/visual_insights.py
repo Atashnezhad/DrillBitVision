@@ -37,6 +37,12 @@ class ImageNumeric:
 
     @property
     def image_df(self):
+        """
+        Generate a pandas DataFrame containing filepaths and labels of images within the specified directory.
+
+        Returns:
+            pd.DataFrame: A DataFrame containing filepaths and labels.
+        """
         image_dir = self.dataset_address
         # Get filepaths and labels
         filepaths = list(image_dir.glob(r"**/*.png"))
@@ -64,6 +70,17 @@ class ImageNumeric:
         return image
 
     def scikit_image_example(self, image_path, **kwargs):
+        """
+        Generate a grid of subplots to showcase the effects of different filters from the scikit-image library
+        on a given image.
+
+        Parameters:
+            image_path (str): Path to the input image.
+            **kwargs: Additional keyword arguments.
+
+        Returns:
+            None
+        """
         image = cv2.imread(image_path)
         image = color.rgb2gray(image)  # [300:700, 700:900]
         cmap = plt.cm.gray
@@ -100,6 +117,16 @@ class ImageNumeric:
         plt.show()
 
     def hessian(self, image, **kwargs):
+        """
+        Plot an image subplot.
+
+        Parameters:
+            subplot_idx (int): Index of the subplot in the overall figure.
+            img (numpy.ndarray): Image data to be displayed.
+            title (str): Title of the subplot.
+            color (str, optional): Color for the title text. Default is None.
+            cmap (str, optional): Colormap for displaying the image. Default is "gray".
+        """
         h = hessian_matrix(image, **kwargs)
         eigenvals = hessian_matrix_eigvals(h)
         return eigenvals
@@ -113,6 +140,17 @@ class ImageNumeric:
     def plot_histogram_subplot(
         self, subplot_idx, bins, hist, eigenvals, channel_color, plt_log=True
     ):
+        """
+        Plot a histogram subplot for the Hessian filter feature extraction.
+
+        Parameters:
+            subplot_idx (int): Index of the subplot in the overall figure.
+            bins (numpy.ndarray): Bin edges for histogram computation.
+            hist (numpy.ndarray): Histogram values.
+            eigenvals (numpy.ndarray): Eigenvalues of the Hessian matrix for the channel.
+            channel_color (str): Color of the channel (e.g., "R", "G", "B").
+            plt_log (bool, optional): Whether to use a logarithmic y-scale for the histogram. Default is True.
+        """
         plt.subplot(3, 1, subplot_idx)
         plt.bar(
             bins[:-1],
@@ -140,6 +178,23 @@ class ImageNumeric:
         figsize=(10, 10),
         **kwargs,
     ):
+        """
+        Extract features using the Hessian filter on an input image.
+
+        The Hessian filter is a powerful tool for detecting structures at various scales in images.
+
+        Parameters:
+            image_path (str): Path to the image to be processed.
+            bins (int, optional): Number of bins for histogram computation. Default is SUPERVISE_LEARNING_SETTING.BINS.
+            cmap (str, optional): Colormap for displaying images. Default is "gray".
+            plt_show (bool, optional): Whether to display plots. Default is False.
+            plt_log (bool, optional): Whether to use a logarithmic y-scale in histograms. Default is False.
+            figsize (tuple, optional): Size of the figure for plotting. Default is (10, 10).
+            **kwargs: Additional keyword arguments to be passed to the hessian filter function.
+
+        Returns:
+            dict: Dictionary containing the histogram counts for each channel after Hessian filtering.
+        """
         image = cv2.imread(image_path)
 
         # Convert the image to RGB if it's in BGR
@@ -232,16 +287,16 @@ class ImageNumeric:
 
     def frangi(self, image, **kwargs):
         """
-        Frangi filter
+        Apply the Frangi filter to an input image.
 
-        Parameters
-        ----------
-        image : ndarray
-            Input image.
-        kwargs : dict
-            Keyword arguments for `skimage.filters.frangi`.
-        return : ndarray
-            Filtered image.
+        The Frangi filter enhances vessel-like structures in medical images.
+
+        Parameters:
+            image (numpy.ndarray): Input image to which the Frangi filter will be applied.
+            **kwargs: Additional keyword arguments to be passed to the frangi filter function.
+
+        Returns:
+            numpy.ndarray: Image with Frangi filter applied.
         """
         _frangi = frangi(image, **kwargs)
         return _frangi
@@ -256,6 +311,23 @@ class ImageNumeric:
         cmap="gray",
         **kwargs,
     ):
+        """
+        Apply Frangi filter to an input image and extract histogram features from the filtered results.
+
+        Frangi filter is used to enhance vessel-like structures in medical images.
+
+        Parameters:
+            image_path (str): Path to the image to be processed.
+            plt_show (bool, optional): Whether to show the plots, by default True.
+            plt_log (bool, optional): Whether to use log scale for y-axis in histograms, by default False.
+            figsize (tuple, optional): Size of the figure, by default (10, 10).
+            bins (int, optional): Number of bins to be used for histograms, by default SUPERVISE_LEARNING_SETTING.BINS.
+            cmap (str, optional): Colormap for displaying images, by default "gray".
+            **kwargs: Additional keyword arguments to be passed to the frangi filter function.
+
+        Returns:
+            dict: Dictionary containing the histogram counts for each channel.
+        """
         image = cv2.imread(image_path)
 
         # Convert the image to RGB if it's in BGR
@@ -363,6 +435,21 @@ class ImageNumeric:
             radius: int,
             method=SUPERVISE_LEARNING_SETTING.FILTERS.LOCAl_BINARY_PATTERN.METHOD
     ):
+        """
+        Compute the Local Binary Pattern (LBP) representation of an input grayscale image.
+
+        Local Binary Pattern is a texture operator that labels the pixels of an image by thresholding the neighborhood
+        of each pixel and considers the result as a binary number.
+
+        Parameters:
+            image (numpy.ndarray): Grayscale image for which LBP is computed.
+            n_points (int): Number of points to be used for LBP.
+            radius (int): Radius of the circle to be used for LBP.
+            method (str, optional): Method to be used for LBP, by default "uniform".
+
+        Returns:
+            numpy.ndarray: LBP representation of the input grayscale image.
+        """
         lbp = local_binary_pattern(image, n_points, radius, method)
         return lbp
 
@@ -380,34 +467,25 @@ class ImageNumeric:
         cmap="gray",
     ):
         """
-        Local Binary Pattern (LBP) is a simple yet very efficient texture operator which labels
-        the pixels of an image by thresholding the neighborhood of each pixel and considers
-        the result as a binary number.
+        Perform Local Binary Pattern (LBP) feature extraction on an input image.
 
-        Parameters
-        ----------
-        image_path : str
-            Path to the image to be processed.
-        radius : int, optional
-            Radius of circle to be used for LBP, by default 3
-        n_points : int, optional
-            Number of points to be used for LBP, by default 8
-        bins : int, optional
-            Number of bins to be used for histogram, by default 256
-        plt_show : bool, optional
-            Whether to show the plots, by default False
-        plt_log : bool, optional
-            Whether to use log scale for y-axis, by default False
-        figsize : tuple, optional
-            Size of the figure, by default (10, 10)
-        width : float, optional
-            Width of the bars in the histogram, by default 0.5
-        method : str, optional
-            Method to be used for LBP, by default "uniform"
-        Returns
-        -------
-        dict
-            Dictionary containing the histogram counts for each channel.
+        Local Binary Pattern is a texture operator that labels the pixels of an image by thresholding the neighborhood
+        of each pixel and considers the result as a binary number.
+
+        Parameters:
+            image_path (str): Path to the image to be processed.
+            radius (int, optional): Radius of the circle to be used for LBP, by default 3.
+            n_points (int, optional): Number of points to be used for LBP, by default 8.
+            bins (int, optional): Number of bins to be used for histogram, by default 256.
+            plt_show (bool, optional): Whether to show the plots, by default False.
+            plt_log (bool, optional): Whether to use a logarithmic scale for the y-axis of histograms, by default False.
+            figsize (tuple, optional): Size of the figure for plotting, by default (10, 10).
+            width (float, optional): Width of the bars in the histogram, by default 0.5.
+            method (str, optional): Method to be used for LBP, by default "uniform".
+            cmap (str, optional): Colormap to use for displaying images, by default "gray".
+
+        Returns:
+            dict: A dictionary containing the histogram counts for each channel of the LBP-filtered image.
         """
         image = cv2.imread(image_path)
 
@@ -509,6 +587,18 @@ class ImageNumeric:
             self,
             image,
     ):
+        """
+        Compute multi-Otsu threshold values for an input image.
+
+        This method computes multi-Otsu threshold values for an input image, which can be used to segment the image into
+        multiple classes based on the computed thresholds.
+
+        Args:
+            image (numpy.ndarray): Input image as a NumPy array.
+
+        Returns:
+            numpy.ndarray: An array containing the computed multi-Otsu threshold values.
+        """
         filtered_threshold_multiotsu = threshold_multiotsu(image)
         return filtered_threshold_multiotsu
 
@@ -521,6 +611,23 @@ class ImageNumeric:
         figsize=(10, 10),
         classes=SUPERVISE_LEARNING_SETTING.FILTERS.MULTIOTSU_THRESHOLD.CLASSES,
     ):
+        """
+        Apply multi-Otsu thresholding to an image and extract histogram features from the thresholded channels.
+
+        This method applies multi-Otsu thresholding to an image and extracts histogram features from the thresholded
+        channels (R, G, and B) based on the specified number of classes. It then returns the histogram features.
+
+        Args:
+            image_path (str): Path to the input image.
+            bins (int): Number of bins for histogram computation.
+            plt_show (bool): Whether to display plots (default: False).
+            plt_log (bool): Whether to use a logarithmic scale for y-axis in histograms (default: False).
+            figsize (tuple): Size of the displayed figure (default: (10, 10)).
+            classes (int): Number of classes for multi-Otsu thresholding (default: SUPERVISE_LEARNING_SETTING.FILTERS.MULTIOTSU_THRESHOLD.CLASSES).
+
+        Returns:
+            dict: A dictionary containing histogram features for each channel (R, G, and B).
+        """
         image = cv2.imread(image_path)
 
         # also apply on whole image
@@ -628,6 +735,17 @@ class ImageNumeric:
         return _threshold_features
 
     def sobel_edge(self, image):
+        """
+        Apply Sobel edge detection filter to a grayscale image.
+
+        This method applies the Sobel edge detection filter to a grayscale image and returns the filtered image.
+
+        Args:
+            image (np.ndarray): Grayscale image to which Sobel edge detection will be applied.
+
+        Returns:
+            np.ndarray: Filtered image with Sobel edges.
+        """
         filtered_sobel = sobel(image)
         return filtered_sobel
 
@@ -640,6 +758,28 @@ class ImageNumeric:
         figsize=(10, 10),
         cmap="Greys",
     ):
+        """
+        Apply Sobel edge detection to an image and compute histograms of the edges in RGB channels.
+
+        This method applies Sobel edge detection to an image and computes histograms of the Sobel edges
+        in the red (R), green (G), and blue (B) channels. Histogram features are returned for each channel.
+
+        Args:
+            image_path (str): Path to the image for Sobel edge detection.
+            bins (int, optional): Number of bins for histogram computation (default is SUPERVISE_LEARNING_SETTING.BINS).
+            plt_show (bool, optional): Whether to display plots (default is False).
+            plt_log (bool, optional): Whether to use a logarithmic scale for y-axis on histograms (default is False).
+            figsize (tuple, optional): Figure size for plots (default is (10, 10)).
+            cmap (str, optional): Colormap for visualization (default is 'Greys').
+
+        Returns:
+            dict: A dictionary containing histogram features for each channel.
+                {
+                    "R_channel": [histogram values],
+                    "G_channel": [histogram values],
+                    "B_channel": [histogram values]
+                }
+        """
         image = cv2.imread(image_path)
 
         # Convert the image to RGB if it's in BGR
@@ -763,12 +903,22 @@ class ImageNumeric:
         **kwargs,
     ):
         """
-        Filter images based on the eigenvalues of the Hessian matrix
-        :param kwargs:  filter_name: str, name of the filter to use
-                        dataset_path: str, path to the dataset
-                        filtered_dataset_path: str, path to the filtered dataset
-        :return:
-        """
+        Apply image filtering based on specified methods and save the filtered images.
+
+        This method filters images based on the chosen filtering methods such as Hessian matrix,
+        Frangi filter, or Local Binary Pattern (LBP). Filtered images are saved in a new directory.
+
+        Args:
+            **kwargs: Keyword arguments for customization.
+                cmap (str, optional): Name of the colormap for visualization (default is 'jet').
+                filter_name (str): Name of the filtering method to use ('hessian', 'frangi', or 'lbp').
+                dataset_path (str, optional): Path to the directory containing original images.
+                filtered_dataset_path (str): Path to the directory where filtered images will be saved.
+                replace_existing (bool, optional): Whether to replace existing filtered images (default is False).
+
+        Returns:
+        None
+    """
 
         cmap = kwargs.get("cmap", "jet")
         filter_name = kwargs.get("filter_name", "hessian")
@@ -904,6 +1054,21 @@ class ImageNumeric:
             plt_show=False
     ):
 
+        """
+        Apply K-Means clustering for image segmentation and return a colored version of the segmented image.
+
+        This method loads a grayscale image, applies K-Means clustering to segment the image into a specified
+        number of clusters, and returns a colored version of the segmented image.
+
+        Args:
+            image_path (str): Path to the grayscale image to be segmented.
+            num_clusters (int, optional): Number of clusters (colors) for image segmentation (default is 5).
+            plt_show (bool, optional): Whether to show plots of the original grayscale and segmented images (default is False).
+
+        Returns:
+            np.ndarray: Colored version of the segmented image as a NumPy array.
+        """
+
         # Load the grayscale image
         gray_image = Image.open(image_path).convert('L')
 
@@ -954,6 +1119,25 @@ class ImageNumeric:
             replace_existing,
             num_clusters=5
     ):
+        """
+        Process and save an image using image segmentation and colormap.
+
+        This method takes an image, applies image segmentation with a specified number of clusters,
+        and saves the segmented image with a colormap applied.
+
+        Args:
+            row (pandas.Series): Row containing image information from a DataFrame.
+            cmap (str): Name of the colormap for visualization.
+            dataset_path (str): Path to the directory containing original images.
+            segmentation_dataset_path (str): Path to the directory where segmented images will be saved.
+            replace_existing (bool): Whether to replace existing segmented images.
+            num_clusters (int, optional): Number of clusters for image segmentation (default is 5).
+
+        Returns:
+            None
+        """
+
+
         image_path = row["Filepath"]
         # Get the sub-folder structure from the original image path
         relative_path = Path(image_path).relative_to(dataset_path)
@@ -995,6 +1179,21 @@ class ImageNumeric:
             num_clusters=5,
             **kwargs
     ):
+        """
+        Apply image segmentation to a directory of images using a specified clustering method.
+
+        Args:
+            num_clusters (int, optional): Number of clusters for image segmentation (default is 5).
+            **kwargs: Keyword arguments for customization.
+                cmap (str, optional): Name of the colormap for visualization (default is 'seismic').
+                clustering_method (str, optional): Clustering method for image segmentation (default is 'kmean').
+                dataset_path (str, optional): Path to the directory containing images.
+                segmentation_dataset_path (str): Path to the directory where segmented images will be saved.
+                replace_existing (bool, optional): Whether to replace existing segmented images (default is False).
+
+        Returns:
+            None
+        """
 
         cmap = kwargs.get("cmap", "seismic")
         img_segmentation = kwargs.get("clustering_method", "kmean")
@@ -1031,6 +1230,67 @@ class ImageNumeric:
                 # Wait for all processes to complete
                 for result in results:
                     result.wait()
+
+    def apply_colormap_to_directory(
+            self,
+            **kwargs
+    ):
+        """
+        Apply a specified colormap to a directory of images and save the edited images to a new directory.
+
+        Args:
+           **kwargs: Keyword arguments for customization.
+               cmap (str, optional): Name of the colormap to apply (default is 'seismic').
+               dataset_path (str, optional): Path to the original directory containing images.
+               edited_dataset_path (str): Path to the new directory where edited images will be saved.
+               replace_existing (bool, optional): Whether to replace existing edited images (default is False).
+
+        Returns:
+           None
+       """
+
+        cmap = kwargs.get("cmap", "seismic")
+        dataset_path = kwargs.get("dataset_path", None)
+        edited_dataset_path = kwargs.get("edited_dataset_path")
+        replace_existing = kwargs.get("replace_existing", False)  # New parameter
+
+        # if edited_dataset_path does not exist, create it
+        if not Path(edited_dataset_path).exists():
+            edited_dataset_path = str(
+                Path(__file__).parent / ".." / f"{edited_dataset_path}"
+            )
+            Path(edited_dataset_path).mkdir(parents=True, exist_ok=True)
+
+        for index, row in tqdm(
+                self.image_df.iterrows(),
+                total=self.image_df.shape[0],
+                desc="Editing images > cmap",
+        ):
+
+            image_path = row["Filepath"]
+            # Get the sub-folder structure from the original image path
+            relative_path = Path(image_path).relative_to(dataset_path)
+            edited_image_path = Path(dataset_path) / relative_path
+            # Handle replacing existing images
+            if not replace_existing:
+                edited_image_path = Path(edited_dataset_path) / relative_path
+                # If the filtered image already exists, and we're not replacing, modify the filename
+                filename_parts = edited_image_path.stem
+
+                # Determine the original extension
+                orig_extension = Path(image_path).suffix.lower()
+
+                new_filename = f"{filename_parts}_filtered{orig_extension}"
+                edited_image_path = edited_image_path.parent / new_filename
+
+            # Create necessary directories
+            edited_image_path.parent.mkdir(parents=True, exist_ok=True)
+
+            image = plt.imread(image_path)
+            plt.imshow(image, cmap=cmap)
+            plt.axis("off")
+            plt.savefig(edited_image_path, bbox_inches="tight", pad_inches=0)
+            plt.close()
 
 
 if __name__ == "__main__":
@@ -1102,10 +1362,17 @@ if __name__ == "__main__":
 
     # obj.image_segmentation_knn(image_path, num_clusters=5)
 
-    obj.image_segmentation(
-        clustering_method="kmean",
+    # obj.image_segmentation(
+    #     clustering_method="kmean",
+    #     dataset_path=dataset_path,
+    #     segmentation_dataset_path=Path(__file__).parent / ".." / "segmentation_dataset_ad_kmean_3",
+    #     num_clusters=3,
+    #     cmap="viridis",
+    # )
+
+    obj.apply_colormap_to_directory(
+        cmap="seismic",
         dataset_path=dataset_path,
-        segmentation_dataset_path=Path(__file__).parent / ".." / "segmentation_dataset_ad_kmean_3",
-        num_clusters=3,
-        cmap="viridis",
+        edited_dataset_path=Path(__file__).parent / ".." / "edited_dataset_ad",
+        replace_existing=False,
     )

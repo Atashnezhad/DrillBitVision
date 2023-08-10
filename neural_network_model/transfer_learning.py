@@ -893,7 +893,7 @@ if __name__ == "__main__":
     transfer_model.analyze_image_names()
     transfer_model.plot_data_images(num_rows=3, num_cols=3, cmap="jet")
     transfer_model.train_model(
-        epochs=50,
+        epochs=3,
         model_save_path=(Path(__file__).parent / ".." / "deep_model").resolve(),
         model_name="tf_model_ad_1.h5",
     )
