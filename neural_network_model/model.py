@@ -296,6 +296,7 @@ class Filter(BaseModel):
 
 class SuperviselearningSetting(BaseModel):
     FILTERS: Filter = Filter()
+    BINS: int = 40
 
 
 SETTING = Setting()

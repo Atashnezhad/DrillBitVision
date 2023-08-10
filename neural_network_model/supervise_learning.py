@@ -12,13 +12,16 @@ from skimage import color
 from skimage.filters import meijering, sato, frangi, hessian
 from tqdm import tqdm
 
-from neural_network_model.model import SUPERVISE_LEARNING_SETTING, TRANSFER_LEARNING_SETTING
+from neural_network_model.model import (
+    SUPERVISE_LEARNING_SETTING,
+    TRANSFER_LEARNING_SETTING,
+)
 
 # ignore warnings
 warnings.filterwarnings("ignore")
 
 
-class SuperviseLearning:
+class Filters:
     """
     This is a class for Supervise Learning approach
     for image classification.
@@ -26,7 +29,7 @@ class SuperviseLearning:
 
     def __init__(self, *args, **kwargs):
         """
-        The constructor for SuperviseLearning class.
+        The constructor for Filters class.
 
         """
         self.dataset_address = kwargs.get(
@@ -63,23 +66,25 @@ class SuperviseLearning:
 
     def scikit_image_example(self, image_path, **kwargs):
         image = cv2.imread(image_path)
-        image = color.rgb2gray(image)#[300:700, 700:900]
+        image = color.rgb2gray(image)  # [300:700, 700:900]
         cmap = plt.cm.gray
 
         plt.rcParams["axes.titlesize"] = "medium"
         axes = plt.figure(figsize=(10, 4)).subplots(2, 9)
         for i, black_ridges in enumerate([True, False]):
-            for j, (func, sigmas) in enumerate([
-                (self.original, None),
-                (meijering, [1]),
-                (meijering, range(1, 5)),
-                (sato, [1]),
-                (sato, range(1, 5)),
-                (frangi, [1]),
-                (frangi, range(1, 5)),
-                (hessian, [1]),
-                (hessian, range(1, 5)),
-            ]):
+            for j, (func, sigmas) in enumerate(
+                [
+                    (self.original, None),
+                    (meijering, [1]),
+                    (meijering, range(1, 5)),
+                    (sato, [1]),
+                    (sato, range(1, 5)),
+                    (frangi, [1]),
+                    (frangi, range(1, 5)),
+                    (hessian, [1]),
+                    (hessian, range(1, 5)),
+                ]
+            ):
                 result = func(image, black_ridges=black_ridges, sigmas=sigmas)
                 axes[i, j].imshow(result, cmap=cmap)
                 if i == 0:
@@ -88,16 +93,12 @@ class SuperviseLearning:
                         title += f"\n\N{GREEK SMALL LETTER SIGMA} = {list(sigmas)}"
                     axes[i, j].set_title(title)
                 if j == 0:
-                    axes[i, j].set_ylabel(f'{black_ridges = }')
+                    axes[i, j].set_ylabel(f"{black_ridges = }")
                 axes[i, j].set_xticks([])
                 axes[i, j].set_yticks([])
 
         plt.tight_layout()
         plt.show()
-
-
-
-
 
     def hessian(self, image, **kwargs):
         h = hessian_matrix(image, **kwargs)
@@ -110,8 +111,9 @@ class SuperviseLearning:
         plt.title(title, color=color)
         plt.axis("off")
 
-    def plot_histogram_subplot(self, subplot_idx, bins, hist, eigenvals, channel_color,
-                               plt_log=True):
+    def plot_histogram_subplot(
+        self, subplot_idx, bins, hist, eigenvals, channel_color, plt_log=True
+    ):
         plt.subplot(3, 1, subplot_idx)
         plt.bar(
             bins[:-1],
@@ -121,7 +123,10 @@ class SuperviseLearning:
         )
         plt.xlabel("Hessian Value")
         plt.ylabel("Counts")
-        plt.title(f"Histogram of Hessian Filter ({channel_color} channel)", color=channel_color.lower())
+        plt.title(
+            f"Histogram of Hessian Filter ({channel_color} channel)",
+            color=channel_color.lower(),
+        )
         if plt_log:
             plt.yscale("log")
         plt.grid(True)
@@ -129,7 +134,7 @@ class SuperviseLearning:
     def hessian_filter_feature_extraction(
         self,
         image_path,
-        bins=40,
+        bins=SUPERVISE_LEARNING_SETTING.BINS,
         cmap="gray",
         plt_show=False,
         plt_log=False,
@@ -162,6 +167,7 @@ class SuperviseLearning:
             plt.show()
 
         if plt_show:
+            plt.suptitle("Hessian", fontsize=20)
             channel_titles = ["R", "G", "B"]
             eigenvals = [eigenvals_r, eigenvals_g, eigenvals_b]
 
@@ -170,8 +176,15 @@ class SuperviseLearning:
             plt.title("Original Image")
             plt.axis("off")
 
-            for idx, (title, eigenval) in enumerate(zip(channel_titles, eigenvals), start=2):
-                self.plot_image_subplot(idx, eigenval[0], f"Hessian Filter ({title} channel)", color=title.lower())
+            for idx, (title, eigenval) in enumerate(
+                zip(channel_titles, eigenvals), start=2
+            ):
+                self.plot_image_subplot(
+                    idx,
+                    eigenval[0],
+                    f"Hessian Filter ({title} channel)",
+                    color=title.lower(),
+                )
 
             plt.show()
 
@@ -196,11 +209,16 @@ class SuperviseLearning:
             plt.figure(figsize=figsize)
 
             channels = ["R", "G", "B"]
-            hist_data = [(hist_r, eigenvals_r, "red"), (hist_g, eigenvals_g, "green"), (hist_b, eigenvals_b, "blue")]
+            hist_data = [
+                (hist_r, eigenvals_r, "red"),
+                (hist_g, eigenvals_g, "green"),
+                (hist_b, eigenvals_b, "blue"),
+            ]
 
             for idx, (hist, eigenvals, channel_color) in enumerate(hist_data, start=1):
-                self.plot_histogram_subplot(idx, bins_r, hist, eigenvals, channel_color,
-                                            plt_log=plt_log)
+                self.plot_histogram_subplot(
+                    idx, bins_r, hist, eigenvals, channel_color, plt_log=plt_log
+                )
 
             plt.tight_layout()
             plt.show()
@@ -215,12 +233,30 @@ class SuperviseLearning:
         return _hessian_features
 
     def frangi(self, image, **kwargs):
+        """
+        Frangi filter
+
+        Parameters
+        ----------
+        image : ndarray
+            Input image.
+        kwargs : dict
+            Keyword arguments for `skimage.filters.frangi`.
+        return : ndarray
+            Filtered image.
+        """
         _frangi = frangi(image, **kwargs)
         return _frangi
 
     def frangi_feature_extraction(
-        self, image_path, plt_show=True, plt_log=False, figsize=(10, 10), bins=40,
-            cmap="gray", **kwargs
+        self,
+        image_path,
+        plt_show=True,
+        plt_log=False,
+        figsize=(10, 10),
+        bins=SUPERVISE_LEARNING_SETTING.BINS,
+        cmap="gray",
+        **kwargs,
     ):
         image = cv2.imread(image_path)
 
@@ -245,6 +281,8 @@ class SuperviseLearning:
             plt.show()
 
         if plt_show:
+            # fig title
+            plt.suptitle("Frangi", fontsize=20)
             # Display the original image and Frangi filtered images side by side (optional)
             plt.subplot(2, 2, 1)
             plt.imshow(image)
@@ -320,18 +358,59 @@ class SuperviseLearning:
 
         return _frangi_features
 
+    def local_binary_pattern(
+            self,
+            image,
+            n_points,
+            radius,
+            method=SUPERVISE_LEARNING_SETTING.FILTERS.LOCAl_BINARY_PATTERN.METHOD
+    ):
+        lbp = local_binary_pattern(image, n_points, radius, method)
+        return lbp
+
     def lbp_feature_extraction(
         self,
         image_path,
         radius=SUPERVISE_LEARNING_SETTING.FILTERS.LOCAl_BINARY_PATTERN.RADIUS,
         n_points=SUPERVISE_LEARNING_SETTING.FILTERS.LOCAl_BINARY_PATTERN.NUM_POINTS,
-        bins=40,
+        bins=SUPERVISE_LEARNING_SETTING.BINS,
         plt_show=False,
         plt_log=False,
         figsize=(10, 10),
         width=0.5,
         method=SUPERVISE_LEARNING_SETTING.FILTERS.LOCAl_BINARY_PATTERN.METHOD,
+        cmap="gray",
     ):
+        """
+        Local Binary Pattern (LBP) is a simple yet very efficient texture operator which labels
+        the pixels of an image by thresholding the neighborhood of each pixel and considers
+        the result as a binary number.
+
+        Parameters
+        ----------
+        image_path : str
+            Path to the image to be processed.
+        radius : int, optional
+            Radius of circle to be used for LBP, by default 3
+        n_points : int, optional
+            Number of points to be used for LBP, by default 8
+        bins : int, optional
+            Number of bins to be used for histogram, by default 256
+        plt_show : bool, optional
+            Whether to show the plots, by default False
+        plt_log : bool, optional
+            Whether to use log scale for y-axis, by default False
+        figsize : tuple, optional
+            Size of the figure, by default (10, 10)
+        width : float, optional
+            Width of the bars in the histogram, by default 0.5
+        method : str, optional
+            Method to be used for LBP, by default "uniform"
+        Returns
+        -------
+        dict
+            Dictionary containing the histogram counts for each channel.
+        """
         image = cv2.imread(image_path)
 
         # Convert the image to RGB if it's in BGR
@@ -342,9 +421,13 @@ class SuperviseLearning:
         r, g, b = image[:, :, 0], image[:, :, 1], image[:, :, 2]
 
         # Compute LBP for each channel
-        lbp_r = local_binary_pattern(r, n_points, radius, method=method)
-        lbp_g = local_binary_pattern(g, n_points, radius, method=method)
-        lbp_b = local_binary_pattern(b, n_points, radius, method=method)
+        lbp_r = self.local_binary_pattern(r, n_points, radius, method)
+        lbp_g = self.local_binary_pattern(g, n_points, radius, method)
+        lbp_b = self.local_binary_pattern(b, n_points, radius, method)
+
+        # make image gray
+        image_gray = cv2.cvtColor(image, cv2.COLOR_RGB2GRAY)
+        lbp = self.local_binary_pattern(image_gray, n_points, radius, method)
 
         # Compute histograms for each LBP image
         hist_r, bins_r = np.histogram(lbp_r.ravel(), bins=bins, range=(0, n_points + 2))
@@ -352,6 +435,14 @@ class SuperviseLearning:
         hist_b, bins_b = np.histogram(lbp_b.ravel(), bins=bins, range=(0, n_points + 2))
 
         if plt_show:
+            plt.imshow(lbp, cmap=cmap)
+            plt.title("Local Binary Pattern (LBP) Filter")
+            plt.axis("off")
+            plt.show()
+
+        if plt_show:
+            # fig title
+            plt.suptitle("Local Binary Pattern (LBP)", fontsize=20)
             # Display the original image and LBP images side by side (optional)
             plt.subplot(2, 2, 1)
             plt.imshow(image)
@@ -359,17 +450,17 @@ class SuperviseLearning:
             plt.axis("off")
 
             plt.subplot(2, 2, 2)
-            plt.imshow(lbp_r, cmap="gray")
+            plt.imshow(lbp_r, cmap=cmap)
             plt.title("LBP (R channel)", color="r")
             plt.axis("off")
 
             plt.subplot(2, 2, 3)
-            plt.imshow(lbp_g, cmap="gray")
+            plt.imshow(lbp_g, cmap=cmap)
             plt.title("LBP (G channel)", color="g")
             plt.axis("off")
 
             plt.subplot(2, 2, 4)
-            plt.imshow(lbp_b, cmap="gray")
+            plt.imshow(lbp_b, cmap=cmap)
             plt.title("LBP (B channel)", color="b")
             plt.axis("off")
             plt.show()
@@ -416,10 +507,18 @@ class SuperviseLearning:
 
         return _lbp_features
 
-    def multiotsu_threshold_sk(
+    def multiotsu_threshold(
+            self,
+            image,
+            classes
+    ):
+        filtered_threshold_multiotsu = threshold_multiotsu(image)
+        return filtered_threshold_multiotsu
+
+    def multiotsu_threshold_feature_extraction(
         self,
         image_path,
-        bins=40,
+        bins=SUPERVISE_LEARNING_SETTING.BINS,
         plt_show=False,
         plt_log=False,
         figsize=(10, 10),
@@ -428,11 +527,13 @@ class SuperviseLearning:
         image = cv2.imread(image_path)
 
         # also apply on whole image
-        thresholds = threshold_multiotsu(image, classes=classes)
+        thresholds = self.multiotsu_threshold(image, classes=classes)
         # plt the threshold for whole image
         # Applying multi-Otsu threshold for the default value, generating
         # Using the threshold values, we generate the three regions.
         regions = np.digitize(image, bins=thresholds)
+        # fig title
+        plt.suptitle("Multi-Otsu Thresholding", fontsize=20)
         plt.imshow(regions)
         plt.show()
 
@@ -444,9 +545,9 @@ class SuperviseLearning:
         r, g, b = image[:, :, 0], image[:, :, 1], image[:, :, 2]
 
         # Apply multi-Otsu thresholding to each channel
-        thresholds_r = threshold_multiotsu(r, classes=classes)
-        thresholds_g = threshold_multiotsu(g, classes=classes)
-        thresholds_b = threshold_multiotsu(b, classes=classes)
+        thresholds_r = self.multiotsu_threshold(r, classes)
+        thresholds_g = self.multiotsu_threshold(g, classes)
+        thresholds_b = self.multiotsu_threshold(b, classes)
 
         # Convert the thresholded images to binary
         binary_r = r > thresholds_r[1]
@@ -454,6 +555,8 @@ class SuperviseLearning:
         binary_b = b > thresholds_b[1]
 
         if plt_show:
+            # fig title
+            plt.suptitle("Multi-Otsu Thresholding", fontsize=20)
             # Display the original image and binary threshold images side by side (optional)
             plt.subplot(2, 2, 1)
             plt.imshow(image)
@@ -485,6 +588,8 @@ class SuperviseLearning:
 
         if plt_show:
             plt.figure(figsize=figsize)
+            # fig title
+            plt.suptitle("Multi-Otsu Thresholding", fontsize=20)
             # Display the histograms (optional)
             plt.subplot(3, 1, 1)
             plt.bar(bins_r[:-1], hist_r, width=0.01, color="red")
@@ -526,7 +631,13 @@ class SuperviseLearning:
         return _threshold_features
 
     def sobel_edge_detection_sk(
-        self, image_path, bins=40, plt_show=False, plt_log=False, figsize=(10, 10), cmap="Greys"
+        self,
+        image_path,
+        bins=SUPERVISE_LEARNING_SETTING.BINS,
+        plt_show=False,
+        plt_log=False,
+        figsize=(10, 10),
+        cmap="Greys",
     ):
         image = cv2.imread(image_path)
 
@@ -632,8 +743,6 @@ class SuperviseLearning:
 
         return _sobel_features
 
-
-
     def filter_images(
         self,
         **kwargs,
@@ -653,14 +762,16 @@ class SuperviseLearning:
         replace_existing = kwargs.get("replace_existing", False)  # New parameter
 
         if filtered_dataset_path is None:
-            filtered_dataset_path = str(Path(__file__).parent / ".." / "filtered_dataset")
+            filtered_dataset_path = str(
+                Path(__file__).parent / ".." / "filtered_dataset"
+            )
             Path(filtered_dataset_path).mkdir(parents=True, exist_ok=True)
 
         if filter_name == "hessian":
             for index, row in tqdm(
-                    self.image_df.iterrows(),
-                    total=self.image_df.shape[0],
-                    desc="Filtering images > hessian"
+                self.image_df.iterrows(),
+                total=self.image_df.shape[0],
+                desc="Filtering images > hessian",
             ):
                 image_path = row["Filepath"]
 
@@ -694,7 +805,7 @@ class SuperviseLearning:
 
 
 if __name__ == "__main__":
-    obj = SuperviseLearning()
+    obj = Filters()
 
     # print(obj.image_df.head())
 
@@ -706,7 +817,6 @@ if __name__ == "__main__":
     image_path = str(
         (Path(__file__).parent / ".." / "dataset_ad" / "MildDemented" / "mildDem0.jpg")
     )
-
 
     # Apply hessian filter
     # hessian_features = obj.hessian_filter_feature_extraction(
@@ -723,23 +833,18 @@ if __name__ == "__main__":
     # # Apply LBP filter
     # lbp_result = obj.lbp_feature_extraction(image_path, plt_show=True, plt_log=True)
     # print(lbp_result)
-    #
-    # # # Apply Multi-Otsu thresholding
-    # multi_otsu_features = obj.multiotsu_threshold_sk(
-    #     image_path, plt_show=True, plt_log=True
-    # )
-    # print(multi_otsu_features)
 
-
+    # Apply Multi-Otsu thresholding
+    multi_otsu_features = obj.multiotsu_threshold_feature_extraction(
+        image_path, plt_show=True, plt_log=True
+    )
+    print(multi_otsu_features)
 
     # # Apply Sobel edge detector
     # sobel_features = obj.sobel_edge_detection_sk(
     #     image_path, plt_show=True, plt_log=True, cmap="jet"
     # )
     # print(sobel_features)
-
-
-
 
     # dataset_path = Path(__file__).parent / ".." / "dataset_ad"
     # obj = SuperviseLearning(dataset_address=dataset_path)
@@ -750,4 +855,4 @@ if __name__ == "__main__":
     #     cmap="seismic",
     # )
 
-    obj.scikit_image_example(image_path)
+    # obj.scikit_image_example(image_path)
