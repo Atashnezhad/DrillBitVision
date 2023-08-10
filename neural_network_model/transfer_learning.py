@@ -608,7 +608,9 @@ class TransferModel(Preprocessing, BitVision):
             plt.title("History of {}".format(title), fontweight="bold")
             plt.legend()
             plt.grid()
-            plt.ylim(0,)
+            plt.ylim(
+                0,
+            )
             plt.xlabel("Epoch", fontweight="bold")
             plt.ylabel(title, fontweight="bold")
             plt.gca().xaxis.set_major_locator(

@@ -7,10 +7,10 @@ import cv2
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+from PIL import Image
 from skimage import color
 from skimage.feature import hessian_matrix, hessian_matrix_eigvals, local_binary_pattern
 from skimage.filters import frangi, hessian, meijering, sato, sobel, threshold_multiotsu
-from PIL import Image
 from sklearn.cluster import KMeans
 from tqdm import tqdm
 
@@ -429,11 +429,11 @@ class ImageNumeric:
         return _frangi_features
 
     def local_binary_pattern(
-            self,
-            image,
-            n_points: int,
-            radius: int,
-            method=SUPERVISE_LEARNING_SETTING.FILTERS.LOCAl_BINARY_PATTERN.METHOD
+        self,
+        image,
+        n_points: int,
+        radius: int,
+        method=SUPERVISE_LEARNING_SETTING.FILTERS.LOCAl_BINARY_PATTERN.METHOD,
     ):
         """
         Compute the Local Binary Pattern (LBP) representation of an input grayscale image.
@@ -584,8 +584,8 @@ class ImageNumeric:
         return _lbp_features
 
     def multiotsu_threshold(
-            self,
-            image,
+        self,
+        image,
     ):
         """
         Compute multi-Otsu threshold values for an input image.
@@ -623,7 +623,8 @@ class ImageNumeric:
             plt_show (bool): Whether to display plots (default: False).
             plt_log (bool): Whether to use a logarithmic scale for y-axis in histograms (default: False).
             figsize (tuple): Size of the displayed figure (default: (10, 10)).
-            classes (int): Number of classes for multi-Otsu thresholding (default: SUPERVISE_LEARNING_SETTING.FILTERS.MULTIOTSU_THRESHOLD.CLASSES).
+            classes (int): Number of classes for multi-Otsu thresholding
+            (default: SUPERVISE_LEARNING_SETTING.FILTERS.MULTIOTSU_THRESHOLD.CLASSES).
 
         Returns:
             dict: A dictionary containing histogram features for each channel (R, G, and B).
@@ -918,7 +919,7 @@ class ImageNumeric:
 
         Returns:
         None
-    """
+        """
 
         cmap = kwargs.get("cmap", "jet")
         filter_name = kwargs.get("filter_name", "hessian")
@@ -1006,9 +1007,9 @@ class ImageNumeric:
 
         if filter_name == "lbp":
             for index, row in tqdm(
-                    self.image_df.iterrows(),
-                    total=self.image_df.shape[0],
-                    desc="Filtering images > lbp",
+                self.image_df.iterrows(),
+                total=self.image_df.shape[0],
+                desc="Filtering images > lbp",
             ):
                 image_path = row["Filepath"]
 
@@ -1019,7 +1020,7 @@ class ImageNumeric:
                     image_gray,
                     n_points=SUPERVISE_LEARNING_SETTING.FILTERS.LOCAl_BINARY_PATTERN.NUM_POINTS,
                     radius=SUPERVISE_LEARNING_SETTING.FILTERS.LOCAl_BINARY_PATTERN.RADIUS,
-                    method=SUPERVISE_LEARNING_SETTING.FILTERS.LOCAl_BINARY_PATTERN.METHOD
+                    method=SUPERVISE_LEARNING_SETTING.FILTERS.LOCAl_BINARY_PATTERN.METHOD,
                 )
 
                 # Get the sub-folder structure from the original image path
@@ -1047,13 +1048,7 @@ class ImageNumeric:
                 plt.savefig(filtered_image_path, bbox_inches="tight", pad_inches=0)
                 plt.close()
 
-    def image_segmentation_knn(
-            self,
-            image_path,
-            num_clusters=5,
-            plt_show=False
-    ):
-
+    def image_segmentation_knn(self, image_path, num_clusters=5, plt_show=False):
         """
         Apply K-Means clustering for image segmentation and return a colored version of the segmented image.
 
@@ -1063,14 +1058,15 @@ class ImageNumeric:
         Args:
             image_path (str): Path to the grayscale image to be segmented.
             num_clusters (int, optional): Number of clusters (colors) for image segmentation (default is 5).
-            plt_show (bool, optional): Whether to show plots of the original grayscale and segmented images (default is False).
+            plt_show (bool, optional): Whether to show plots of the original grayscale and segmented images
+            (default is False).
 
         Returns:
             np.ndarray: Colored version of the segmented image as a NumPy array.
         """
 
         # Load the grayscale image
-        gray_image = Image.open(image_path).convert('L')
+        gray_image = Image.open(image_path).convert("L")
 
         # Convert the grayscale image to a numpy array
         gray_array = np.array(gray_image)
@@ -1097,13 +1093,15 @@ class ImageNumeric:
         if plt_show:
             # Plot the original grayscale image
             plt.subplot(1, 2, 1)
-            plt.imshow(gray_array, cmap='gray')
-            plt.title('Grayscale Image')
+            plt.imshow(gray_array, cmap="gray")
+            plt.title("Grayscale Image")
 
             # Plot the segmented and colored image
             plt.subplot(1, 2, 2)
-            plt.imshow(colored_image, cmap='seismic')  # You can choose a colormap you like
-            plt.title('Segmented and Colored Image')
+            plt.imshow(
+                colored_image, cmap="seismic"
+            )  # You can choose a colormap you like
+            plt.title("Segmented and Colored Image")
 
             plt.tight_layout()
             plt.show()
@@ -1111,13 +1109,13 @@ class ImageNumeric:
         return colored_image
 
     def process_image(
-            self,
-            row,
-            cmap,
-            dataset_path,
-            segmentation_dataset_path,
-            replace_existing,
-            num_clusters=5
+        self,
+        row,
+        cmap,
+        dataset_path,
+        segmentation_dataset_path,
+        replace_existing,
+        num_clusters=5,
     ):
         """
         Process and save an image using image segmentation and colormap.
@@ -1137,12 +1135,15 @@ class ImageNumeric:
             None
         """
 
-
         image_path = row["Filepath"]
         # Get the sub-folder structure from the original image path
         relative_path = Path(image_path).relative_to(dataset_path)
-        segmented_image_dir = Path(segmentation_dataset_path) / relative_path.parent  # Create subdirectory
-        segmented_image_path = segmented_image_dir / f"{relative_path.stem}_filtered{relative_path.suffix}"
+        segmented_image_dir = (
+            Path(segmentation_dataset_path) / relative_path.parent
+        )  # Create subdirectory
+        segmented_image_path = (
+            segmented_image_dir / f"{relative_path.stem}_filtered{relative_path.suffix}"
+        )
         # Handle replacing existing images
         if not replace_existing:
             segmented_image_path = Path(segmentation_dataset_path) / relative_path
@@ -1159,9 +1160,7 @@ class ImageNumeric:
         segmented_image_path.parent.mkdir(parents=True, exist_ok=True)
 
         colored_image = self.image_segmentation_knn(
-            image_path,
-            num_clusters=num_clusters,
-            plt_show=False
+            image_path, num_clusters=num_clusters, plt_show=False
         )
 
         # Create a separate figure for each process to avoid conflicts
@@ -1174,11 +1173,7 @@ class ImageNumeric:
         plt.savefig(segmented_image_path, bbox_inches="tight", pad_inches=0)
         plt.close(fig)
 
-    def image_segmentation(
-            self,
-            num_clusters=5,
-            **kwargs
-    ):
+    def image_segmentation(self, num_clusters=5, **kwargs):
         """
         Apply image segmentation to a directory of images using a specified clustering method.
 
@@ -1213,16 +1208,19 @@ class ImageNumeric:
             with multiprocessing.Pool(processes=multiprocessing.cpu_count()) as pool:
                 results = []
                 for index, row in tqdm(
-                        self.image_df.iterrows(),
-                        total=self.image_df.shape[0],
-                        desc="Segmentation images > kmean",
+                    self.image_df.iterrows(),
+                    total=self.image_df.shape[0],
+                    desc="Segmentation images > kmean",
                 ):
                     result = pool.apply_async(
                         self.process_image,
                         args=(
-                            row, cmap, dataset_path,
+                            row,
+                            cmap,
+                            dataset_path,
                             segmentation_dataset_path,
-                            replace_existing, num_clusters
+                            replace_existing,
+                            num_clusters,
                         ),
                     )
                     results.append(result)
@@ -1231,10 +1229,7 @@ class ImageNumeric:
                 for result in results:
                     result.wait()
 
-    def apply_colormap_to_directory(
-            self,
-            **kwargs
-    ):
+    def apply_colormap_to_directory(self, **kwargs):
         """
         Apply a specified colormap to a directory of images and save the edited images to a new directory.
 
@@ -1247,7 +1242,7 @@ class ImageNumeric:
 
         Returns:
            None
-       """
+        """
 
         cmap = kwargs.get("cmap", "seismic")
         dataset_path = kwargs.get("dataset_path", None)
@@ -1262,11 +1257,10 @@ class ImageNumeric:
             Path(edited_dataset_path).mkdir(parents=True, exist_ok=True)
 
         for index, row in tqdm(
-                self.image_df.iterrows(),
-                total=self.image_df.shape[0],
-                desc="Editing images > cmap",
+            self.image_df.iterrows(),
+            total=self.image_df.shape[0],
+            desc="Editing images > cmap",
         ):
-
             image_path = row["Filepath"]
             # Get the sub-folder structure from the original image path
             relative_path = Path(image_path).relative_to(dataset_path)
