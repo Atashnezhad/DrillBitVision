@@ -505,7 +505,6 @@ class Filters:
     def multiotsu_threshold(
             self,
             image,
-            classes
     ):
         filtered_threshold_multiotsu = threshold_multiotsu(image)
         return filtered_threshold_multiotsu
@@ -625,6 +624,10 @@ class Filters:
 
         return _threshold_features
 
+    def sobel_edge(self, image):
+        filtered_sobel = sobel(image)
+        return filtered_sobel
+
     def sobel_edge_detection_sk(
         self,
         image_path,
@@ -644,11 +647,23 @@ class Filters:
         r, g, b = image[:, :, 0], image[:, :, 1], image[:, :, 2]
 
         # Apply Sobel edge detector to each channel
-        sobel_edges_r = sobel(r)
-        sobel_edges_g = sobel(g)
-        sobel_edges_b = sobel(b)
+        sobel_edges_r = self.sobel_edge(r)
+        sobel_edges_g = self.sobel_edge(g)
+        sobel_edges_b = self.sobel_edge(b)
+
+        # make image gray
+        image_gray = cv2.cvtColor(image, cv2.COLOR_RGB2GRAY)
+        sobl = self.sobel_edge(image_gray)
 
         if plt_show:
+            plt.imshow(sobl, cmap=cmap)
+            plt.title("Sobel Edges")
+            plt.axis("off")
+            plt.show()
+
+        if plt_show:
+            # fig title
+            plt.suptitle("Sobel Edge Detection", fontsize=20)
             # Display the original image and Sobel edges side by side (optional)
             plt.subplot(2, 2, 1)
             plt.imshow(image)
@@ -695,6 +710,8 @@ class Filters:
 
         if plt_show:
             plt.figure(figsize=figsize)
+            # fig title
+            plt.suptitle("Histogram of Sobel Edges", fontsize=20)
             # Display the histograms (optional)
             plt.subplot(3, 1, 1)
             plt.bar(bins_r[:-1], hist_r, width=5, color="r")
@@ -851,3 +868,5 @@ if __name__ == "__main__":
     # )
 
     # obj.scikit_image_example(image_path)
+
+
