@@ -6,16 +6,12 @@ import cv2
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-from skimage.feature import hessian_matrix, hessian_matrix_eigvals, local_binary_pattern
-from skimage.filters import frangi, sobel, threshold_multiotsu
 from skimage import color
-from skimage.filters import meijering, sato, frangi, hessian
+from skimage.feature import hessian_matrix, hessian_matrix_eigvals, local_binary_pattern
+from skimage.filters import frangi, hessian, meijering, sato, sobel, threshold_multiotsu
 from tqdm import tqdm
 
-from neural_network_model.model import (
-    SUPERVISE_LEARNING_SETTING,
-    TRANSFER_LEARNING_SETTING,
-)
+from neural_network_model.model import SUPERVISE_LEARNING_SETTING, TRANSFER_LEARNING_SETTING
 
 # ignore warnings
 warnings.filterwarnings("ignore")
@@ -208,7 +204,6 @@ class Filters:
         if plt_show:
             plt.figure(figsize=figsize)
 
-            channels = ["R", "G", "B"]
             hist_data = [
                 (hist_r, eigenvals_r, "red"),
                 (hist_g, eigenvals_g, "green"),
