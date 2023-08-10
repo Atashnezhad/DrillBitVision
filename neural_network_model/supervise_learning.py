@@ -819,7 +819,7 @@ class Filters:
             for index, row in tqdm(
                 self.image_df.iterrows(),
                 total=self.image_df.shape[0],
-                desc="Filtering images > frangifrangi",
+                desc="Filtering images > frangi",
             ):
                 image_path = row["Filepath"]
 
