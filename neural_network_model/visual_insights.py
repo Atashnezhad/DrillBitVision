@@ -89,17 +89,17 @@ class ImageNumeric:
         axes = plt.figure(figsize=(10, 4)).subplots(2, 9)
         for i, black_ridges in enumerate([True, False]):
             for j, (func, sigmas) in enumerate(
-                [
-                    (self.original, None),
-                    (meijering, [1]),
-                    (meijering, range(1, 5)),
-                    (sato, [1]),
-                    (sato, range(1, 5)),
-                    (frangi, [1]),
-                    (frangi, range(1, 5)),
-                    (hessian, [1]),
-                    (hessian, range(1, 5)),
-                ]
+                    [
+                        (self.original, None),
+                        (meijering, [1]),
+                        (meijering, range(1, 5)),
+                        (sato, [1]),
+                        (sato, range(1, 5)),
+                        (frangi, [1]),
+                        (frangi, range(1, 5)),
+                        (hessian, [1]),
+                        (hessian, range(1, 5)),
+                    ]
             ):
                 result = func(image, black_ridges=black_ridges, sigmas=sigmas)
                 axes[i, j].imshow(result, cmap=cmap)
@@ -138,7 +138,7 @@ class ImageNumeric:
         plt.axis("off")
 
     def plot_histogram_subplot(
-        self, subplot_idx, bins, hist, eigenvals, channel_color, plt_log=True
+            self, subplot_idx, bins, hist, eigenvals, channel_color, plt_log=True
     ):
         """
         Plot a histogram subplot for the Hessian filter feature extraction.
@@ -169,14 +169,14 @@ class ImageNumeric:
         plt.grid(True)
 
     def hessian_filter_feature_extraction(
-        self,
-        image_path,
-        bins=SUPERVISE_LEARNING_SETTING.BINS,
-        cmap="gray",
-        plt_show=False,
-        plt_log=False,
-        figsize=(10, 10),
-        **kwargs,
+            self,
+            image_path,
+            bins=SUPERVISE_LEARNING_SETTING.BINS,
+            cmap="gray",
+            plt_show=False,
+            plt_log=False,
+            figsize=(10, 10),
+            **kwargs,
     ):
         """
         Extract features using the Hessian filter on an input image.
@@ -231,7 +231,7 @@ class ImageNumeric:
             plt.axis("off")
 
             for idx, (title, eigenval) in enumerate(
-                zip(channel_titles, eigenvals), start=2
+                    zip(channel_titles, eigenvals), start=2
             ):
                 self.plot_image_subplot(
                     idx,
@@ -302,14 +302,14 @@ class ImageNumeric:
         return _frangi
 
     def frangi_feature_extraction(
-        self,
-        image_path,
-        plt_show=True,
-        plt_log=False,
-        figsize=(10, 10),
-        bins=SUPERVISE_LEARNING_SETTING.BINS,
-        cmap="gray",
-        **kwargs,
+            self,
+            image_path,
+            plt_show=True,
+            plt_log=False,
+            figsize=(10, 10),
+            bins=SUPERVISE_LEARNING_SETTING.BINS,
+            cmap="gray",
+            **kwargs,
     ):
         """
         Apply Frangi filter to an input image and extract histogram features from the filtered results.
@@ -429,11 +429,11 @@ class ImageNumeric:
         return _frangi_features
 
     def local_binary_pattern(
-        self,
-        image,
-        n_points: int,
-        radius: int,
-        method=SUPERVISE_LEARNING_SETTING.FILTERS.LOCAl_BINARY_PATTERN.METHOD,
+            self,
+            image,
+            n_points: int,
+            radius: int,
+            method=SUPERVISE_LEARNING_SETTING.FILTERS.LOCAl_BINARY_PATTERN.METHOD,
     ):
         """
         Compute the Local Binary Pattern (LBP) representation of an input grayscale image.
@@ -454,17 +454,17 @@ class ImageNumeric:
         return lbp
 
     def lbp_feature_extraction(
-        self,
-        image_path,
-        radius=SUPERVISE_LEARNING_SETTING.FILTERS.LOCAl_BINARY_PATTERN.RADIUS,
-        n_points=SUPERVISE_LEARNING_SETTING.FILTERS.LOCAl_BINARY_PATTERN.NUM_POINTS,
-        bins=SUPERVISE_LEARNING_SETTING.BINS,
-        plt_show=False,
-        plt_log=False,
-        figsize=(10, 10),
-        width=0.5,
-        method=SUPERVISE_LEARNING_SETTING.FILTERS.LOCAl_BINARY_PATTERN.METHOD,
-        cmap="gray",
+            self,
+            image_path,
+            radius=SUPERVISE_LEARNING_SETTING.FILTERS.LOCAl_BINARY_PATTERN.RADIUS,
+            n_points=SUPERVISE_LEARNING_SETTING.FILTERS.LOCAl_BINARY_PATTERN.NUM_POINTS,
+            bins=SUPERVISE_LEARNING_SETTING.BINS,
+            plt_show=False,
+            plt_log=False,
+            figsize=(10, 10),
+            width=0.5,
+            method=SUPERVISE_LEARNING_SETTING.FILTERS.LOCAl_BINARY_PATTERN.METHOD,
+            cmap="gray",
     ):
         """
         Perform Local Binary Pattern (LBP) feature extraction on an input image.
@@ -584,8 +584,9 @@ class ImageNumeric:
         return _lbp_features
 
     def multiotsu_threshold(
-        self,
-        image,
+            self,
+            image,
+            classes=SUPERVISE_LEARNING_SETTING.FILTERS.MULTIOTSU_THRESHOLD.CLASSES,
     ):
         """
         Compute multi-Otsu threshold values for an input image.
@@ -599,17 +600,17 @@ class ImageNumeric:
         Returns:
             numpy.ndarray: An array containing the computed multi-Otsu threshold values.
         """
-        filtered_threshold_multiotsu = threshold_multiotsu(image)
+        filtered_threshold_multiotsu = threshold_multiotsu(image, classes=classes)
         return filtered_threshold_multiotsu
 
     def multiotsu_threshold_feature_extraction(
-        self,
-        image_path,
-        bins=SUPERVISE_LEARNING_SETTING.BINS,
-        plt_show=False,
-        plt_log=False,
-        figsize=(10, 10),
-        classes=SUPERVISE_LEARNING_SETTING.FILTERS.MULTIOTSU_THRESHOLD.CLASSES,
+            self,
+            image_path,
+            bins=SUPERVISE_LEARNING_SETTING.BINS,
+            plt_show=False,
+            plt_log=False,
+            figsize=(10, 10),
+            classes=SUPERVISE_LEARNING_SETTING.FILTERS.MULTIOTSU_THRESHOLD.CLASSES,
     ):
         """
         Apply multi-Otsu thresholding to an image and extract histogram features from the thresholded channels.
@@ -751,13 +752,13 @@ class ImageNumeric:
         return filtered_sobel
 
     def sobel_edge_detection_sk(
-        self,
-        image_path,
-        bins=SUPERVISE_LEARNING_SETTING.BINS,
-        plt_show=False,
-        plt_log=False,
-        figsize=(10, 10),
-        cmap="Greys",
+            self,
+            image_path,
+            bins=SUPERVISE_LEARNING_SETTING.BINS,
+            plt_show=False,
+            plt_log=False,
+            figsize=(10, 10),
+            cmap="Greys",
     ):
         """
         Apply Sobel edge detection to an image and compute histograms of the edges in RGB channels.
@@ -833,13 +834,13 @@ class ImageNumeric:
 
         # Normalize the Sobel edges image to [0, 1]
         sobel_edges_r = (sobel_edges_r - np.min(sobel_edges_r)) / (
-            np.max(sobel_edges_r) - np.min(sobel_edges_r)
+                np.max(sobel_edges_r) - np.min(sobel_edges_r)
         )
         sobel_edges_g = (sobel_edges_g - np.min(sobel_edges_g)) / (
-            np.max(sobel_edges_g) - np.min(sobel_edges_g)
+                np.max(sobel_edges_g) - np.min(sobel_edges_g)
         )
         sobel_edges_b = (sobel_edges_b - np.min(sobel_edges_b)) / (
-            np.max(sobel_edges_b) - np.min(sobel_edges_b)
+                np.max(sobel_edges_b) - np.min(sobel_edges_b)
         )
 
         # Convert the Sobel edges images to uint8
@@ -900,8 +901,8 @@ class ImageNumeric:
         return _sobel_features
 
     def filter_images(
-        self,
-        **kwargs,
+            self,
+            **kwargs,
     ):
         """
         Apply image filtering based on specified methods and save the filtered images.
@@ -935,9 +936,9 @@ class ImageNumeric:
 
         if filter_name == "hessian":
             for index, row in tqdm(
-                self.image_df.iterrows(),
-                total=self.image_df.shape[0],
-                desc="Filtering images > hessian",
+                    self.image_df.iterrows(),
+                    total=self.image_df.shape[0],
+                    desc="Filtering images > hessian",
             ):
                 image_path = row["Filepath"]
 
@@ -971,9 +972,9 @@ class ImageNumeric:
 
         if filter_name == "frangi":
             for index, row in tqdm(
-                self.image_df.iterrows(),
-                total=self.image_df.shape[0],
-                desc="Filtering images > frangi",
+                    self.image_df.iterrows(),
+                    total=self.image_df.shape[0],
+                    desc="Filtering images > frangi",
             ):
                 image_path = row["Filepath"]
 
@@ -1007,9 +1008,9 @@ class ImageNumeric:
 
         if filter_name == "lbp":
             for index, row in tqdm(
-                self.image_df.iterrows(),
-                total=self.image_df.shape[0],
-                desc="Filtering images > lbp",
+                    self.image_df.iterrows(),
+                    total=self.image_df.shape[0],
+                    desc="Filtering images > lbp",
             ):
                 image_path = row["Filepath"]
 
@@ -1109,13 +1110,13 @@ class ImageNumeric:
         return colored_image
 
     def process_image(
-        self,
-        row,
-        cmap,
-        dataset_path,
-        segmentation_dataset_path,
-        replace_existing,
-        num_clusters=5,
+            self,
+            row,
+            cmap,
+            dataset_path,
+            segmentation_dataset_path,
+            replace_existing,
+            num_clusters=5,
     ):
         """
         Process and save an image using image segmentation and colormap.
@@ -1139,10 +1140,10 @@ class ImageNumeric:
         # Get the sub-folder structure from the original image path
         relative_path = Path(image_path).relative_to(dataset_path)
         segmented_image_dir = (
-            Path(segmentation_dataset_path) / relative_path.parent
+                Path(segmentation_dataset_path) / relative_path.parent
         )  # Create subdirectory
         segmented_image_path = (
-            segmented_image_dir / f"{relative_path.stem}_filtered{relative_path.suffix}"
+                segmented_image_dir / f"{relative_path.stem}_filtered{relative_path.suffix}"
         )
         # Handle replacing existing images
         if not replace_existing:
@@ -1208,9 +1209,9 @@ class ImageNumeric:
             with multiprocessing.Pool(processes=multiprocessing.cpu_count()) as pool:
                 results = []
                 for index, row in tqdm(
-                    self.image_df.iterrows(),
-                    total=self.image_df.shape[0],
-                    desc="Segmentation images > kmean",
+                        self.image_df.iterrows(),
+                        total=self.image_df.shape[0],
+                        desc="Segmentation images > kmean",
                 ):
                     result = pool.apply_async(
                         self.process_image,
@@ -1257,9 +1258,9 @@ class ImageNumeric:
             Path(edited_dataset_path).mkdir(parents=True, exist_ok=True)
 
         for index, row in tqdm(
-            self.image_df.iterrows(),
-            total=self.image_df.shape[0],
-            desc="Editing images > cmap",
+                self.image_df.iterrows(),
+                total=self.image_df.shape[0],
+                desc="Editing images > cmap",
         ):
             image_path = row["Filepath"]
             # Get the sub-folder structure from the original image path
@@ -1287,86 +1288,109 @@ class ImageNumeric:
             plt.close()
 
 
+class RunCodeLocally:
+    """
+    this is to wrap the lines of code in the name main function
+    here i have it in a class so that i can call it from the main.py file
+    less clutter in the name main function
+    """
+
+    def __init__(self):
+        pass
+
+    def run_1(self):
+        obj = ImageNumeric()
+        print(obj.image_df.head())
+        # Load the image
+        # image_path = str(
+        #     (Path(__file__).parent / ".." / "dataset" / "pdc_bit" / "Image_1.jpg")
+        # )
+        image_path = str(
+            (Path(__file__).parent / ".." / "dataset_ad" / "MildDemented" / "mildDem0.jpg")
+        )
+
+        # Apply hessian filter
+        hessian_features = obj.hessian_filter_feature_extraction(
+            image_path, plt_show=True, plt_log=True,
+        )
+        print(hessian_features)
+
+        # Apply frangi filter
+        frangifeatures = obj.frangi_feature_extraction(
+            image_path, plt_show=True, plt_log=True
+        )
+        print(frangifeatures)
+
+        # # Apply LBP filter
+        lbp_result = obj.lbp_feature_extraction(image_path, plt_show=True, plt_log=True)
+        print(lbp_result)
+
+        # Apply Multi-Otsu thresholding
+        multi_otsu_features = obj.multiotsu_threshold_feature_extraction(
+            image_path, plt_show=True, plt_log=True
+        )
+        print(multi_otsu_features)
+
+        # # Apply Sobel edge detector
+        sobel_features = obj.sobel_edge_detection_sk(
+            image_path, plt_show=True, plt_log=True, cmap="gray"
+        )
+        print(sobel_features)
+
+    def run_2(self):
+        dataset_path = Path(__file__).parent / ".." / "dataset_ad"
+        obj = ImageNumeric(dataset_address=dataset_path)
+        # followings are code apply to whole directory
+        # obj.filter_images(
+        #     dataset_path=dataset_path,
+        #     filtered_dataset_path=Path(__file__).parent / ".." / "filtered_dataset_ad_hessian",
+        #     replace_existing=False,
+        #     cmap="seismic",
+        # )
+        # obj.filter_images(
+        #     dataset_path=dataset_path,
+        #     filtered_dataset_path=Path(__file__).parent / ".." / "filtered_dataset_ad_frangi",
+        #     replace_existing=False,
+        #     cmap="seismic",
+        #     filter_name="frangi"
+        # )
+        # obj.filter_images(
+        #     dataset_path=dataset_path,
+        #     filtered_dataset_path=Path(__file__).parent / ".." / "filtered_dataset_ad_lbp",
+        #     replace_existing=False,
+        #     cmap="seismic",
+        #     filter_name="lbp"
+        # )
+
+        # obj.image_segmentation(
+        #     clustering_method="kmean",
+        #     dataset_path=dataset_path,
+        #     segmentation_dataset_path=Path(__file__).parent / ".." / "segmentation_dataset_ad_kmean_3",
+        #     num_clusters=3,
+        #     cmap="viridis",
+        # )
+
+        # obj.apply_colormap_to_directory(
+        #     cmap="seismic",
+        #     dataset_path=dataset_path,
+        #     edited_dataset_path=Path(__file__).parent / ".." / "edited_dataset_ad",
+        #     replace_existing=False,
+        # )
+
+        image_path = str(
+            (Path(__file__).parent / ".." / "dataset_ad" / "MildDemented" / "mildDem0.jpg")
+        )
+        obj.scikit_image_example(image_path)
+
+        obj.image_segmentation_knn(image_path, num_clusters=5)
+
+
 if __name__ == "__main__":
-    # obj = Filters()
 
-    # print(obj.image_df.head())
+    run_locally_obj = RunCodeLocally()
 
-    # Load the image
-    # image_path = str(
-    #     (Path(__file__).parent / ".." / "dataset" / "pdc_bit" / "Image_1.jpg")
-    # )
+    run_locally_obj.run_1()
 
-    image_path = str(
-        (Path(__file__).parent / ".." / "dataset_ad" / "MildDemented" / "mildDem0.jpg")
-    )
+    run_locally_obj.run_2()
 
-    # Apply hessian filter
-    # hessian_features = obj.hessian_filter_feature_extraction(
-    #     image_path, plt_show=True, plt_log=True,
-    # )
-    # print(hessian_features)
 
-    # Apply frangi filter
-    # frangifeatures = obj.frangi_feature_extraction(
-    #     image_path, plt_show=True, plt_log=True
-    # )
-    # print(frangifeatures)
-
-    # # Apply LBP filter
-    # lbp_result = obj.lbp_feature_extraction(image_path, plt_show=True, plt_log=True)
-    # print(lbp_result)
-
-    # Apply Multi-Otsu thresholding
-    # multi_otsu_features = obj.multiotsu_threshold_feature_extraction(
-    #     image_path, plt_show=True, plt_log=True
-    # )
-    # print(multi_otsu_features)
-
-    # # Apply Sobel edge detector
-    # sobel_features = obj.sobel_edge_detection_sk(
-    #     image_path, plt_show=True, plt_log=True, cmap="gray"
-    # )
-    # print(sobel_features)
-
-    dataset_path = Path(__file__).parent / ".." / "dataset_ad"
-    obj = ImageNumeric(dataset_address=dataset_path)
-    # obj.filter_images(
-    #     dataset_path=dataset_path,
-    #     filtered_dataset_path=Path(__file__).parent / ".." / "filtered_dataset_ad_hessian",
-    #     replace_existing=False,
-    #     cmap="seismic",
-    # )
-    # obj.filter_images(
-    #     dataset_path=dataset_path,
-    #     filtered_dataset_path=Path(__file__).parent / ".." / "filtered_dataset_ad_frangi",
-    #     replace_existing=False,
-    #     cmap="seismic",
-    #     filter_name="frangi"
-    # )
-    # obj.filter_images(
-    #     dataset_path=dataset_path,
-    #     filtered_dataset_path=Path(__file__).parent / ".." / "filtered_dataset_ad_lbp",
-    #     replace_existing=False,
-    #     cmap="seismic",
-    #     filter_name="lbp"
-    # )
-
-    # obj.scikit_image_example(image_path)
-
-    # obj.image_segmentation_knn(image_path, num_clusters=5)
-
-    # obj.image_segmentation(
-    #     clustering_method="kmean",
-    #     dataset_path=dataset_path,
-    #     segmentation_dataset_path=Path(__file__).parent / ".." / "segmentation_dataset_ad_kmean_3",
-    #     num_clusters=3,
-    #     cmap="viridis",
-    # )
-
-    obj.apply_colormap_to_directory(
-        cmap="seismic",
-        dataset_path=dataset_path,
-        edited_dataset_path=Path(__file__).parent / ".." / "edited_dataset_ad",
-        replace_existing=False,
-    )
