@@ -661,6 +661,8 @@ class TransferModel(Preprocessing, BitVision):
         rotation = kwargs.get("rotation", 90)
         y_axis_label_size = kwargs.get("y_axis_label_size", 10)
         x_axis_label_size = kwargs.get("x_axis_label_size", 10)
+        title_size = kwargs.get("title_size", 10)
+        fig_title = kwargs.get("fig_title", "Confusion Matrix")
 
         (
             train_generator,
@@ -710,7 +712,8 @@ class TransferModel(Preprocessing, BitVision):
         # set x and y axis label size
         plt.yticks(fontsize=y_axis_label_size)
         plt.xticks(fontsize=x_axis_label_size)
-        plt.title("Normalized Confusion Matrix")
+        # title size
+        plt.title(fig_title, fontsize=title_size)
         plt.savefig(figure_folder_path / "confusion_matrix.png")
         plt.show()
 
@@ -910,8 +913,8 @@ if __name__ == "__main__":
         dataset_address=Path(__file__).parent / ".." / "dataset_ad"
     )
 
-    transfer_model.plot_classes_number()
-    transfer_model.analyze_image_names()
+    # transfer_model.plot_classes_number()
+    # transfer_model.analyze_image_names()
     transfer_model.plot_data_images(num_rows=3, num_cols=3, cmap="jet")
     # transfer_model.train_model(
     #     epochs=3,
@@ -928,5 +931,7 @@ if __name__ == "__main__":
         rotation=90,
         y_axis_label_size=8,
         x_axis_label_size=8,
+        title_size=12,
+        fig_title="Original Confusion Matrix",
     )
     transfer_model.grad_cam_viz(num_rows=3, num_cols=2)
