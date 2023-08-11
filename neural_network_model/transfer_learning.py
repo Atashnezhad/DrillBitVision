@@ -700,6 +700,8 @@ class TransferModel(Preprocessing, BitVision):
         plt.show()
 
         self.pred = pred
+        report = classification_report(y_test, pred)
+        return report
 
     def _get_img_array(self, img_path, size):
         img = tf.keras.preprocessing.image.load_img(img_path, target_size=size)
