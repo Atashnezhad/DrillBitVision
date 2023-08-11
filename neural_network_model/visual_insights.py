@@ -1295,6 +1295,7 @@ class ImageNumeric:
             arrangement='1x4',
             figsize=(10, 5),
             axes_ticks=True,
+            title_show=False,
     ):
 
         # Get the unique labels
@@ -1315,7 +1316,8 @@ class ImageNumeric:
 
         rows, cols = map(int, arrangement.split('x'))
         fig, axes = plt.subplots(rows, cols, figsize=figsize)
-        fig.suptitle("Image Display", fontsize=16)
+        if title_show:
+            fig.suptitle("Image Display", fontsize=16)
 
         if rows == 1:
             axes = [axes]
@@ -1333,12 +1335,11 @@ class ImageNumeric:
                 custom_title = label
 
             axes[row][col].imshow(image)
-            axes[row][col].set_title(custom_title)
             # show the x and y-axis
-            # axes[row][col].set_xticks([])
-            # axes[row][col].set_yticks([])
             if not axes_ticks:
                 axes[row][col].axis('off')
+
+            axes[row][col].set_title(custom_title)
 
         plt.tight_layout()
         plt.show()
@@ -1455,7 +1456,9 @@ class RunCodeLocally:
         obj.display_images_from_json(
             title_mapping=custom_titles,
             arrangement='1x4',
-            figsize=(10, 3)
+            figsize=(10, 3),
+            # title_show=True,
+            # axes_ticks=False,
         )
 
 
