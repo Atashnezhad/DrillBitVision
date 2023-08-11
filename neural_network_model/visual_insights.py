@@ -1291,10 +1291,9 @@ class ImageNumeric:
 class RunCodeLocally:
     """
     this is to wrap the lines of code in the name main function
-    here i have it in a class so that i can call it from the main.py file
+    here I have it in a class so that I can call it from the main.py file
     less clutter in the name main function
     """
-
     def __init__(self):
         pass
 
@@ -1311,13 +1310,13 @@ class RunCodeLocally:
 
         # Apply hessian filter
         hessian_features = obj.hessian_filter_feature_extraction(
-            image_path, plt_show=True, plt_log=True,
+            image_path, plt_show=True, plt_log=True, cmap="seismic"
         )
         print(hessian_features)
 
         # Apply frangi filter
         frangifeatures = obj.frangi_feature_extraction(
-            image_path, plt_show=True, plt_log=True
+            image_path, plt_show=True, plt_log=True,
         )
         print(frangifeatures)
 
@@ -1378,11 +1377,11 @@ class RunCodeLocally:
         # )
 
         image_path = str(
-            (Path(__file__).parent / ".." / "dataset_ad" / "MildDemented" / "mildDem0.jpg")
+            (Path(__file__).parent / ".." / "dataset_ad" / "MildDemented" / "mildDem1.jpg")
         )
         obj.scikit_image_example(image_path)
 
-        obj.image_segmentation_knn(image_path, num_clusters=5)
+        obj.image_segmentation_knn(image_path, num_clusters=2, plt_show=True)
 
 
 if __name__ == "__main__":
