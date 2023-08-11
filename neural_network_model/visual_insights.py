@@ -1,3 +1,4 @@
+import json
 import multiprocessing
 import os
 import warnings
@@ -1287,6 +1288,37 @@ class ImageNumeric:
             plt.savefig(edited_image_path, bbox_inches="tight", pad_inches=0)
             plt.close()
 
+    def display_images_from_json(self, json_data, arrangement='1x4', figsize=(10, 5)):
+        """
+        Display images from the given JSON data in a matplotlib figure.
+
+        Parameters:
+            json_data (dict): A dictionary containing labels as keys and file paths as values.
+            arrangement (str): The arrangement of images. Defaults to '1x4'.
+            figsize (tuple): The size of the figure. Defaults to (10, 5).
+
+        Returns:
+            None
+        """
+        rows, cols = map(int, arrangement.split('x'))
+        fig, axes = plt.subplots(rows, cols, figsize=figsize)
+        fig.suptitle("Image Display", fontsize=16)
+
+        if rows == 1:
+            axes = [axes]
+
+        for i, (label, filepath) in enumerate(json_data.items()):
+            row = i // cols
+            col = i % cols
+
+            image = cv2.imread(filepath)
+            axes[row][col].imshow(image)
+            axes[row][col].set_title(label)
+            axes[row][col].axis('off')
+
+        plt.tight_layout()
+        plt.show()
+
 
 class RunCodeLocally:
     """
@@ -1383,13 +1415,35 @@ class RunCodeLocally:
 
         obj.image_segmentation_knn(image_path, num_clusters=2, plt_show=True)
 
+    def run_3(self):
+        obj = ImageNumeric(dataset_address=Path(__file__).parent / ".." / "dataset_ad")
+        # print(obj.image_df.head())
+        # Get the unique labels
+        unique_labels = obj.image_df['Label'].unique()
+
+        # Randomly select four unique labels
+        import random
+        selected_labels = random.sample(list(unique_labels), 4)
+        # Create a dictionary to store selected data
+        selected_data = {}
+        for label in selected_labels:
+            label_data = obj.image_df[obj.image_df['Label'] == label].sample(n=1)
+            selected_data[label] = label_data['Filepath'].values[0]
+        # Convert the dictionary to JSON
+        selected_json = json.dumps(selected_data, indent=4)
+
+        print(selected_json)
+
+        # Display the images
+        obj.display_images_from_json(selected_data, arrangement='1x4', figsize=(10, 10))
+
 
 if __name__ == "__main__":
 
     run_locally_obj = RunCodeLocally()
 
-    run_locally_obj.run_1()
-
-    run_locally_obj.run_2()
+    # run_locally_obj.run_1()
+    # run_locally_obj.run_2()
+    run_locally_obj.run_3()
 
 
