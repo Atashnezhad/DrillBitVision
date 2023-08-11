@@ -1291,23 +1291,28 @@ class ImageNumeric:
 
     def display_images_from_json(
             self,
-            json_data,
             title_mapping=None,
             arrangement='1x4',
-            figsize=(10, 5)
+            figsize=(10, 5),
+            axes_ticks=True,
     ):
-        """
-        Display images from the given JSON data in a matplotlib figure.
 
-        Parameters:
-            json_data (dict): A dictionary containing labels as keys and file paths as values.
-            title_mapping (dict): A dictionary containing labels as keys and custom titles as values.
-            arrangement (str): The arrangement of images. Defaults to '1x4'.
-            figsize (tuple): The size of the figure. Defaults to (10, 5).
+        # Get the unique labels
+        unique_labels = self.image_df['Label'].unique()
 
-        Returns:
-            None
-        """
+        # Randomly select four unique labels
+        import random
+        number_of_classes = len(unique_labels)
+        selected_labels = random.sample(list(unique_labels), number_of_classes)
+        # Create a dictionary to store selected data
+        selected_data = {}
+        for label in selected_labels:
+            label_data = self.image_df[self.image_df['Label'] == label].sample(n=1)
+            selected_data[label] = label_data['Filepath'].values[0]
+        # Convert the dictionary to JSON
+        selected_json = json.dumps(selected_data, indent=4)
+        logging.info(f"Selected JSON: {selected_json}")
+
         rows, cols = map(int, arrangement.split('x'))
         fig, axes = plt.subplots(rows, cols, figsize=figsize)
         fig.suptitle("Image Display", fontsize=16)
@@ -1315,7 +1320,7 @@ class ImageNumeric:
         if rows == 1:
             axes = [axes]
 
-        for i, (label, filepath) in enumerate(json_data.items()):
+        for i, (label, filepath) in enumerate(selected_data.items()):
             row = i // cols
             col = i % cols
 
@@ -1329,7 +1334,11 @@ class ImageNumeric:
 
             axes[row][col].imshow(image)
             axes[row][col].set_title(custom_title)
-            axes[row][col].axis('off')
+            # show the x and y-axis
+            # axes[row][col].set_xticks([])
+            # axes[row][col].set_yticks([])
+            if not axes_ticks:
+                axes[row][col].axis('off')
 
         plt.tight_layout()
         plt.show()
@@ -1431,23 +1440,9 @@ class RunCodeLocally:
         obj.image_segmentation_knn(image_path, num_clusters=2, plt_show=True)
 
     def run_3(self):
-        obj = ImageNumeric(dataset_address=Path(__file__).parent / ".." / "dataset")
-        # print(obj.image_df.head())
-        # Get the unique labels
-        unique_labels = obj.image_df['Label'].unique()
-
-        # Randomly select four unique labels
-        import random
-        number_of_classes = len(unique_labels)
-        selected_labels = random.sample(list(unique_labels), number_of_classes)
-        # Create a dictionary to store selected data
-        selected_data = {}
-        for label in selected_labels:
-            label_data = obj.image_df[obj.image_df['Label'] == label].sample(n=1)
-            selected_data[label] = label_data['Filepath'].values[0]
-        # Convert the dictionary to JSON
-        selected_json = json.dumps(selected_data, indent=4)
-        print(selected_json)
+        obj = ImageNumeric(
+            dataset_address=Path(__file__).parent / ".." / "dataset_ad"
+        )
 
         # Display the images
         # Example title mapping (custom titles for labels)
@@ -1458,9 +1453,8 @@ class RunCodeLocally:
             "VeryMildDemented": "Very Mild"
         }
         obj.display_images_from_json(
-            selected_data,
-            # title_mapping=custom_titles,
-            arrangement='1x2',
+            title_mapping=custom_titles,
+            arrangement='1x4',
             figsize=(10, 3)
         )
 
