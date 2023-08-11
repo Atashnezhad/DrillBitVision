@@ -652,13 +652,6 @@ class TransferModel(Preprocessing, BitVision):
         :param kwargs: the arguments to pass to the predict method
         :return: None
         """
-        (
-            train_generator,
-            test_generator,
-            train_images,
-            val_images,
-            test_images,
-        ) = self._create_gen()
 
         figure_folder_path = kwargs.get(
             "figure_folder_path", Path(__file__).parent / ".." / "figures"
@@ -668,6 +661,14 @@ class TransferModel(Preprocessing, BitVision):
         rotation = kwargs.get("rotation", 90)
         y_axis_label_size = kwargs.get("y_axis_label_size", 10)
         x_axis_label_size = kwargs.get("x_axis_label_size", 10)
+
+        (
+            train_generator,
+            test_generator,
+            train_images,
+            val_images,
+            test_images,
+        ) = self._create_gen()
 
         # Load the model
         # here we check if the model_path path is provided and load it otherwise we use the self.model
@@ -927,9 +928,5 @@ if __name__ == "__main__":
         rotation=90,
         y_axis_label_size=8,
         x_axis_label_size=8,
-
     )
-    transfer_model.grad_cam_viz(
-        num_rows=3,
-        num_cols=2
-    )
+    transfer_model.grad_cam_viz(num_rows=3, num_cols=2)
