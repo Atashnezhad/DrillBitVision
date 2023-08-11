@@ -658,6 +658,7 @@ class TransferModel(Preprocessing, BitVision):
             "figure_folder_path", Path(__file__).parent / ".." / "figures"
         )
         conf_matx_normalize = kwargs.get("normalize", None)
+        cmap = kwargs.get("cmap", None)
 
         # Load the model
         # here we check if the model_path path is provided and load it otherwise we use the self.model
@@ -692,6 +693,7 @@ class TransferModel(Preprocessing, BitVision):
             annot=True,
             xticklabels=sorted(set(y_test)),
             yticklabels=sorted(set(y_test)),
+            cmap=cmap,
         )
         plt.title("Normalized Confusion Matrix")
         plt.savefig(figure_folder_path / "confusion_matrix.png")

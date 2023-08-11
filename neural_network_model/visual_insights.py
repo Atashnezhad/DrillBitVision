@@ -945,7 +945,14 @@ class ImageNumeric:
                 image_path = row["Filepath"]
 
                 image = cv2.imread(image_path)
-                eigenvals = self.hessian(image)
+                # Convert the image to RGB if it's in BGR
+                if len(image.shape) == 3:  # Check if the image is color (has 3 channels)
+                    image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+
+                    # Convert the image to grayscale
+                    image_gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+                    # Compute eigenvalues of Hessian matrix
+                    eigenvals = self.hessian(image_gray)
 
                 # Get the sub-folder structure from the original image path
                 relative_path = Path(image_path).relative_to(dataset_path)
@@ -1051,7 +1058,7 @@ class ImageNumeric:
                 plt.savefig(filtered_image_path, bbox_inches="tight", pad_inches=0)
                 plt.close()
 
-    def image_segmentation_knn(self, image_path, num_clusters=5, plt_show=False):
+    def image_segmentation_knn(self, image_path, num_clusters=5, plt_show=False, cmap="gray"):
         """
         Apply K-Means clustering for image segmentation and return a colored version of the segmented image.
 
@@ -1070,6 +1077,7 @@ class ImageNumeric:
 
         # Load the grayscale image
         gray_image = Image.open(image_path).convert("L")
+        original_image = cv2.imread(image_path)
 
         # Convert the grayscale image to a numpy array
         gray_array = np.array(gray_image)
@@ -1096,13 +1104,13 @@ class ImageNumeric:
         if plt_show:
             # Plot the original grayscale image
             plt.subplot(1, 2, 1)
-            plt.imshow(gray_array, cmap="gray")
-            plt.title("Grayscale Image")
+            plt.imshow(original_image)
+            plt.title("Original Image")
 
             # Plot the segmented and colored image
             plt.subplot(1, 2, 2)
             plt.imshow(
-                colored_image, cmap="seismic"
+                colored_image, cmap=cmap
             )  # You can choose a colormap you like
             plt.title("Segmented and Colored Image")
 
@@ -1396,13 +1404,16 @@ class RunCodeLocally:
     def run_2(self):
         dataset_path = Path(__file__).parent / ".." / "dataset_ad"
         obj = ImageNumeric(dataset_address=dataset_path)
+
         # followings are code apply to whole directory
-        # obj.filter_images(
-        #     dataset_path=dataset_path,
-        #     filtered_dataset_path=Path(__file__).parent / ".." / "filtered_dataset_ad_hessian",
-        #     replace_existing=False,
-        #     cmap="seismic",
-        # )
+        # hessian by default
+        obj.filter_images(
+            dataset_path=dataset_path,
+            filtered_dataset_path=Path(__file__).parent / ".." / "filtered_dataset_ad_hessian",
+            replace_existing=False,
+            cmap="seismic",
+            filter_name="hessian"
+        )
         # obj.filter_images(
         #     dataset_path=dataset_path,
         #     filtered_dataset_path=Path(__file__).parent / ".." / "filtered_dataset_ad_frangi",
@@ -1414,10 +1425,27 @@ class RunCodeLocally:
         #     dataset_path=dataset_path,
         #     filtered_dataset_path=Path(__file__).parent / ".." / "filtered_dataset_ad_lbp",
         #     replace_existing=False,
-        #     cmap="seismic",
+        #     cmap="gray",
         #     filter_name="lbp"
         # )
 
+    def run_3(self):
+        dataset_path = Path(__file__).parent / ".." / "dataset_ad"
+        obj = ImageNumeric(dataset_address=dataset_path)
+        image_path = str(
+            (Path(__file__).parent / ".." / "dataset_ad" / "MildDemented" / "mildDem1.jpg")
+        )
+
+        obj.scikit_image_example(image_path)
+
+        # only on one image
+        obj.image_segmentation_knn(
+            image_path,
+            num_clusters=3,
+            plt_show=True,
+            cmap="viridis"
+        )
+        # whole directory
         # obj.image_segmentation(
         #     clustering_method="kmean",
         #     dataset_path=dataset_path,
@@ -1426,21 +1454,7 @@ class RunCodeLocally:
         #     cmap="viridis",
         # )
 
-        # obj.apply_colormap_to_directory(
-        #     cmap="seismic",
-        #     dataset_path=dataset_path,
-        #     edited_dataset_path=Path(__file__).parent / ".." / "edited_dataset_ad",
-        #     replace_existing=False,
-        # )
-
-        image_path = str(
-            (Path(__file__).parent / ".." / "dataset_ad" / "MildDemented" / "mildDem1.jpg")
-        )
-        obj.scikit_image_example(image_path)
-
-        obj.image_segmentation_knn(image_path, num_clusters=2, plt_show=True)
-
-    def run_3(self):
+    def run_4(self):
         obj = ImageNumeric(
             dataset_address=Path(__file__).parent / ".." / "dataset_ad"
         )
@@ -1461,13 +1475,26 @@ class RunCodeLocally:
             # axes_ticks=False,
         )
 
+    def run_5(self):
+        dataset_path = Path(__file__).parent / ".." / "dataset_ad"
+        obj = ImageNumeric(dataset_address=dataset_path)
+
+        obj.apply_colormap_to_directory(
+            cmap="seismic",
+            dataset_path=dataset_path,
+            edited_dataset_path=Path(__file__).parent / ".." / "edited_dataset_ad",
+            replace_existing=False,
+        )
+
 
 if __name__ == "__main__":
 
     run_locally_obj = RunCodeLocally()
 
     # run_locally_obj.run_1()
-    # run_locally_obj.run_2()
-    run_locally_obj.run_3()
+    run_locally_obj.run_2()
+    # run_locally_obj.run_3()
+    # run_locally_obj.run_4()
+    # run_locally_obj.run_5()
 
 
