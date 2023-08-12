@@ -663,6 +663,7 @@ class TransferModel(Preprocessing, BitVision):
         x_axis_label_size = kwargs.get("x_axis_label_size", 10)
         title_size = kwargs.get("title_size", 10)
         fig_title = kwargs.get("fig_title", "Confusion Matrix")
+        conf_matx_font_size = kwargs.get("conf_matx_font_size", 12)
 
         (
             train_generator,
@@ -706,6 +707,7 @@ class TransferModel(Preprocessing, BitVision):
             xticklabels=sorted(set(y_test)),
             yticklabels=sorted(set(y_test)),
             cmap=cmap,
+            annot_kws={'fontsize': conf_matx_font_size}
         )
         # y axis label rotation 90
         plt.yticks(rotation=rotation)
@@ -931,7 +933,8 @@ if __name__ == "__main__":
         rotation=90,
         y_axis_label_size=8,
         x_axis_label_size=8,
-        title_size=12,
+        title_size=14,
         fig_title="Original Confusion Matrix",
+        conf_matx_font_size=12,
     )
     transfer_model.grad_cam_viz(num_rows=3, num_cols=2)
