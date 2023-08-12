@@ -4,6 +4,7 @@ import multiprocessing
 import os
 import warnings
 from pathlib import Path
+import random
 
 import cv2
 import matplotlib.pyplot as plt
@@ -1310,11 +1311,12 @@ class ImageNumeric:
         # Get the unique labels
         unique_labels = self.image_df["Label"].unique()
 
-        # Randomly select four unique labels
-        import random
+        # Use specified labels from title_mapping if available, otherwise use random selection
+        if title_mapping is not None:
+            selected_labels = [label for label in title_mapping if label in unique_labels]
+        else:
+            selected_labels = random.sample(list(unique_labels), len(unique_labels))
 
-        number_of_classes = len(unique_labels)
-        selected_labels = random.sample(list(unique_labels), number_of_classes)
         # Create a dictionary to store selected data
         selected_data = {}
         for label in selected_labels:
@@ -1476,9 +1478,9 @@ class RunCodeLocally:
         # Display the images
         # Example title mapping (custom titles for labels)
         custom_titles = {
+            "NonDemented": "Healthy",
             "ModerateDemented": "Moderate",
             "MildDemented": "Mild",
-            "NonDemented": "Healthy",
             "VeryMildDemented": "Very Mild",
         }
         obj.display_images_from_json(
@@ -1505,7 +1507,7 @@ if __name__ == "__main__":
     run_locally_obj = RunCodeLocally()
 
     # run_locally_obj.run_1()
-    run_locally_obj.run_2()
+    # run_locally_obj.run_2()
     # run_locally_obj.run_3()
-    # run_locally_obj.run_4()
+    run_locally_obj.run_4()
     # run_locally_obj.run_5()
