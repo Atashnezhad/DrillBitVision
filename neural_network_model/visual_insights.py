@@ -1300,8 +1300,9 @@ class ImageNumeric:
             plt.savefig(edited_image_path, bbox_inches="tight", pad_inches=0)
             plt.close()
 
-    def display_img_class_random(
+    def display_img_class(
             self,
+            random=True,
             title_mapping=None,
             arrangement="1x4",
             figsize=(10, 5),
@@ -1317,14 +1318,19 @@ class ImageNumeric:
         else:
             selected_labels = unique_labels
 
-        self._plot_it(
-            selected_labels,
-            title_show,
-            figsize,
-            arrangement,
-            title_mapping,
-            axes_ticks
-        )
+        if random:
+            self._plot_it(
+                selected_labels,
+                title_show,
+                figsize,
+                arrangement,
+                title_mapping,
+                axes_ticks
+            )
+        else:
+            ...
+
+
 
     def _plot_it(
             self,
@@ -1502,10 +1508,10 @@ class RunCodeLocally:
             "MildDemented": "Mild",
             "VeryMildDemented": "Very Mild",
         }
-        obj.display_img_class_random(
+        obj.display_img_class(
             title_mapping=custom_titles,
-            arrangement="1x4",
-            figsize=(10, 3),
+            arrangement="2x2",
+            figsize=(5, 5),
             title_show=True,
             # axes_ticks=False,
         )
