@@ -664,6 +664,7 @@ class TransferModel(Preprocessing, BitVision):
         title_size = kwargs.get("title_size", 10)
         fig_title = kwargs.get("fig_title", "Confusion Matrix")
         conf_matx_font_size = kwargs.get("conf_matx_font_size", 12)
+        custom_titles = kwargs.get("custom_titles", None)
 
         (
             train_generator,
@@ -701,11 +702,19 @@ class TransferModel(Preprocessing, BitVision):
 
         cf_matrix = confusion_matrix(y_test, pred, normalize=conf_matx_normalize)
         plt.figure(figsize=(10, 6))
+
+        if custom_titles is not None:
+            x_labels = [custom_titles[label] for label in sorted(set(y_test))]
+            y_labels = [custom_titles[label] for label in sorted(set(y_test))]
+        else:
+            x_labels = sorted(set(y_test))
+            y_labels = sorted(set(y_test))
+
         sns.heatmap(
             cf_matrix,
             annot=True,
-            xticklabels=sorted(set(y_test)),
-            yticklabels=sorted(set(y_test)),
+            xticklabels=x_labels,
+            yticklabels=y_labels,
             cmap=cmap,
             annot_kws={"fontsize": conf_matx_font_size},
         )
@@ -926,15 +935,23 @@ if __name__ == "__main__":
     # transfer_model.plot_metrics_results()
     # transfer_model.results()
     # one can pass the model address to the predict_test method
+    custom_titles = {
+        "NonDemented": "Healthy",
+        "ModerateDemented": "Moderate",
+        "MildDemented": "Mild",
+        "VeryMildDemented": "Very Mild",
+    }
     transfer_model.predict_test(
         model_path=(
             Path(__file__).parent / ".." / "deep_model" / "tf_model_ad_1.h5"
         ).resolve(),
         rotation=90,
-        y_axis_label_size=8,
-        x_axis_label_size=8,
+        y_axis_label_size=12,
+        x_axis_label_size=12,
         title_size=14,
         fig_title="Original Confusion Matrix",
         conf_matx_font_size=12,
+        custom_titles=custom_titles,
+        cmap="winter"
     )
     transfer_model.grad_cam_viz(num_rows=3, num_cols=2)

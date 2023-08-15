@@ -23,7 +23,13 @@ def test_run():
     transfer_model.train_model()
     transfer_model.plot_metrics_results()
     transfer_model.results()
-    transfer_model.predict_test()
+    custom_titles = {
+        "NonDemented": "Healthy",
+        "ModerateDemented": "Moderate",
+        "MildDemented": "Mild",
+        "VeryMildDemented": "Very Mild",
+    }
+    transfer_model.predict_test(custom_titles=custom_titles)
     transfer_model.grad_cam_viz(num_rows=3, num_cols=2)
 
     assert True
