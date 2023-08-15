@@ -1303,6 +1303,7 @@ class ImageNumeric:
     def display_img_class(
             self,
             random=True,
+            selected_imgs=None,
             title_mapping=None,
             arrangement="1x4",
             figsize=(10, 5),
@@ -1328,9 +1329,32 @@ class ImageNumeric:
                 axes_ticks
             )
         else:
-            ...
+            # for each img in selected_imgs, find the path from self.image_df
+            # and plot it in a figure with the title of the label and arrangement
+            # Extract last section of path for each row in the dataframe
+            filenames = (self.image_df['Filepath'].apply(os.path.basename))
+            selected_imgs_pathes = []
+            for img in selected_imgs:
+                print("Searching for:", img)
 
+                # matching_rows = self.image_df[
+                #     self.image_df['Filepath'].apply(lambda path: path.split("\\")[-1] == img)
+                # ]
 
+                for _path in self.image_df['Filepath']:
+                    edit_path = _path.split("\\")[-1]
+                    if edit_path == img:
+                        print("Matched path:", _path)
+                        selected_imgs_pathes.append(_path)
+                        break
+
+                # if matching_rows.empty:
+                #     print("No match found for:", img)
+                # else:
+                #     matching_paths = matching_rows['Filepath'].tolist()
+                #     selected_imgs_pathes.extend(matching_paths)
+                #     print("Matched paths:", matching_paths) # Append the matching file paths to the list
+            print(len(selected_imgs_pathes))
 
     def _plot_it(
             self,
@@ -1350,6 +1374,7 @@ class ImageNumeric:
         # Convert the dictionary to JSON
         selected_json = json.dumps(selected_data, indent=4)
         logging.info(f"Selected JSON: {selected_json}")
+        print(f"Selected JSON: {selected_json}")
 
         rows, cols = map(int, arrangement.split("x"))
         fig, axes = plt.subplots(rows, cols, figsize=figsize)
@@ -1509,6 +1534,8 @@ class RunCodeLocally:
             "VeryMildDemented": "Very Mild",
         }
         obj.display_img_class(
+            selected_imgs=["nonDem441.jpg", "mildDem542.jpg", "mildDem262.jpg", "mildDem201.jpg"],
+            random=False,
             title_mapping=custom_titles,
             arrangement="2x2",
             figsize=(5, 5),
