@@ -1333,28 +1333,66 @@ class ImageNumeric:
             # and plot it in a figure with the title of the label and arrangement
             # Extract last section of path for each row in the dataframe
             filenames = (self.image_df['Filepath'].apply(os.path.basename))
-            selected_imgs_pathes = []
+            selected_imgs_pathes = {}
             for img in selected_imgs:
-                print("Searching for:", img)
-
-                # matching_rows = self.image_df[
-                #     self.image_df['Filepath'].apply(lambda path: path.split("\\")[-1] == img)
-                # ]
+                logging.info("Searching for:", img)
 
                 for _path in self.image_df['Filepath']:
                     edit_path = _path.split("\\")[-1]
                     if edit_path == img:
                         print("Matched path:", _path)
-                        selected_imgs_pathes.append(_path)
+                        selected_imgs_pathes[img] = _path
                         break
+            logging.info("Selected images pathes:", selected_imgs_pathes)
+            print("Selected images pathes:", selected_imgs_pathes)
 
-                # if matching_rows.empty:
-                #     print("No match found for:", img)
-                # else:
-                #     matching_paths = matching_rows['Filepath'].tolist()
-                #     selected_imgs_pathes.extend(matching_paths)
-                #     print("Matched paths:", matching_paths) # Append the matching file paths to the list
-            print(len(selected_imgs_pathes))
+            selected_imgs_pathes = {
+                title_mapping[path.split("\\")[-2]]: path
+                for img_name, path in selected_imgs_pathes.items()
+            }
+            print("Selected images path's:", selected_imgs_pathes)
+            # Plot the selected images
+            self._plot_it_2(
+                arrangement,
+                figsize,
+                title_show,
+                axes_ticks,
+                selected_imgs_pathes
+            )
+
+    def _plot_it_2(
+            self,
+            arrangement,
+            figsize,
+            title_show,
+            axes_ticks,
+            selected_imgs_pathes
+
+    ):
+        rows, cols = map(int, arrangement.split("x"))
+        fig, axes = plt.subplots(rows, cols, figsize=figsize)
+        if title_show:
+            fig.suptitle("Image Display", fontsize=16)
+
+        if rows == 1:
+            axes = [axes]
+
+        for i, (label, filepath) in enumerate(selected_imgs_pathes.items()):
+            row = i // cols
+            col = i % cols
+            image = cv2.imread(filepath)
+            custom_title = label
+            axes[row][col].imshow(image)
+            # show the x and y-axis
+            if not axes_ticks:
+                axes[row][col].axis("off")
+
+            axes[row][col].set_title(custom_title)
+
+        plt.tight_layout()
+        plt.show()
+
+
 
     def _plot_it(
             self,
@@ -1369,6 +1407,8 @@ class ImageNumeric:
         selected_data = {}
         for label in selected_labels:
             label_data = self.image_df[self.image_df["Label"] == label].sample(n=1)
+            print(label_data)
+            print(label_data["Filepath"].values[0])
             selected_data[label] = label_data["Filepath"].values[0]
 
         # Convert the dictionary to JSON
@@ -1534,8 +1574,8 @@ class RunCodeLocally:
             "VeryMildDemented": "Very Mild",
         }
         obj.display_img_class(
-            selected_imgs=["nonDem441.jpg", "mildDem542.jpg", "mildDem262.jpg", "mildDem201.jpg"],
-            random=False,
+            selected_imgs=["nonDem441.jpg", "verymildDem1622.jpg", "mildDem262.jpg", "mildDem201.jpg"],
+            random=True,
             title_mapping=custom_titles,
             arrangement="2x2",
             figsize=(5, 5),
