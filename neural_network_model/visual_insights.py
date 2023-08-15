@@ -1338,19 +1338,19 @@ class ImageNumeric:
                 logging.info("Searching for:", img)
 
                 for _path in self.image_df['Filepath']:
-                    edit_path = _path.split("\\")[-1]
+                    edit_path = os.path.basename(_path)
                     if edit_path == img:
-                        print("Matched path:", _path)
+                        logging.info("Matched path:", _path)
                         selected_imgs_pathes[img] = _path
                         break
             logging.info("Selected images pathes:", selected_imgs_pathes)
-            print("Selected images pathes:", selected_imgs_pathes)
+            logging.info("Selected images pathes:", selected_imgs_pathes)
 
             selected_imgs_pathes = {
-                title_mapping[path.split("\\")[-2]]: path
+                title_mapping[path.split(os.path.sep)[-2]]: path
                 for img_name, path in selected_imgs_pathes.items()
             }
-            print("Selected images path's:", selected_imgs_pathes)
+            logging.info("Selected images path's:", selected_imgs_pathes)
             # Plot the selected images
             self._plot_it_2(
                 arrangement,
@@ -1406,15 +1406,16 @@ class ImageNumeric:
         # Create a dictionary to store selected data
         selected_data = {}
         for label in selected_labels:
-            label_data = self.image_df[self.image_df["Label"] == label].sample(n=1)
-            print(label_data)
-            print(label_data["Filepath"].values[0])
+            image_df = pd.DataFrame(self.image_df)
+            label_data = image_df[image_df["Label"] == label].sample(n=1)
+            logging.info(label_data)
+            logging.info(label_data["Filepath"].values[0])
             selected_data[label] = label_data["Filepath"].values[0]
 
         # Convert the dictionary to JSON
         selected_json = json.dumps(selected_data, indent=4)
         logging.info(f"Selected JSON: {selected_json}")
-        print(f"Selected JSON: {selected_json}")
+        logging.info(f"Selected JSON: {selected_json}")
 
         rows, cols = map(int, arrangement.split("x"))
         fig, axes = plt.subplots(rows, cols, figsize=figsize)
@@ -1574,11 +1575,11 @@ class RunCodeLocally:
             "VeryMildDemented": "Very Mild",
         }
         obj.display_img_class(
-            selected_imgs=["nonDem441.jpg", "verymildDem1622.jpg", "mildDem262.jpg", "mildDem201.jpg"],
-            random=True,
+            selected_imgs=["nonDem441.jpg", "verymildDem1622.jpg", "mildDem262.jpg", "moderateDem38.jpg"],
+            random=False,
             title_mapping=custom_titles,
-            arrangement="2x2",
-            figsize=(5, 5),
+            arrangement="1x4",
+            figsize=(10, 5),
             title_show=True,
             # axes_ticks=False,
         )
