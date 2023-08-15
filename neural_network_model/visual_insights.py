@@ -2,7 +2,6 @@ import json
 import logging
 import multiprocessing
 import os
-import random
 import warnings
 from pathlib import Path
 
@@ -1595,6 +1594,6 @@ if __name__ == "__main__":
 
     # run_locally_obj.run_1()
     # run_locally_obj.run_2()
-    # run_locally_obj.run_3()
-    run_locally_obj.run_4()
+    run_locally_obj.run_3()
+    # run_locally_obj.run_4()
     # run_locally_obj.run_5()

@@ -952,6 +952,7 @@ if __name__ == "__main__":
         fig_title="Original Confusion Matrix",
         conf_matx_font_size=12,
         custom_titles=custom_titles,
-        cmap="winter"
+        cmap="winter",
+        normalize="true",
     )
     transfer_model.grad_cam_viz(num_rows=3, num_cols=2)
