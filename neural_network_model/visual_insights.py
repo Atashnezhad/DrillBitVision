@@ -2,9 +2,9 @@ import json
 import logging
 import multiprocessing
 import os
+import random
 import warnings
 from pathlib import Path
-import random
 
 import cv2
 import matplotlib.pyplot as plt
@@ -92,17 +92,17 @@ class ImageNumeric:
         axes = plt.figure(figsize=(10, 4)).subplots(2, 9)
         for i, black_ridges in enumerate([True, False]):
             for j, (func, sigmas) in enumerate(
-                    [
-                        (self.original, None),
-                        (meijering, [1]),
-                        (meijering, range(1, 5)),
-                        (sato, [1]),
-                        (sato, range(1, 5)),
-                        (frangi, [1]),
-                        (frangi, range(1, 5)),
-                        (hessian, [1]),
-                        (hessian, range(1, 5)),
-                    ]
+                [
+                    (self.original, None),
+                    (meijering, [1]),
+                    (meijering, range(1, 5)),
+                    (sato, [1]),
+                    (sato, range(1, 5)),
+                    (frangi, [1]),
+                    (frangi, range(1, 5)),
+                    (hessian, [1]),
+                    (hessian, range(1, 5)),
+                ]
             ):
                 result = func(image, black_ridges=black_ridges, sigmas=sigmas)
                 axes[i, j].imshow(result, cmap=cmap)
@@ -141,7 +141,7 @@ class ImageNumeric:
         plt.axis("off")
 
     def plot_histogram_subplot(
-            self, subplot_idx, bins, hist, eigenvals, channel_color, plt_log=True
+        self, subplot_idx, bins, hist, eigenvals, channel_color, plt_log=True
     ):
         """
         Plot a histogram subplot for the Hessian filter feature extraction.
@@ -172,14 +172,14 @@ class ImageNumeric:
         plt.grid(True)
 
     def hessian_filter_feature_extraction(
-            self,
-            image_path,
-            bins=SUPERVISE_LEARNING_SETTING.BINS,
-            cmap="gray",
-            plt_show=False,
-            plt_log=False,
-            figsize=(10, 10),
-            **kwargs,
+        self,
+        image_path,
+        bins=SUPERVISE_LEARNING_SETTING.BINS,
+        cmap="gray",
+        plt_show=False,
+        plt_log=False,
+        figsize=(10, 10),
+        **kwargs,
     ):
         """
         Extract features using the Hessian filter on an input image.
@@ -234,7 +234,7 @@ class ImageNumeric:
             plt.axis("off")
 
             for idx, (title, eigenval) in enumerate(
-                    zip(channel_titles, eigenvals), start=2
+                zip(channel_titles, eigenvals), start=2
             ):
                 self.plot_image_subplot(
                     idx,
@@ -305,14 +305,14 @@ class ImageNumeric:
         return _frangi
 
     def frangi_feature_extraction(
-            self,
-            image_path,
-            plt_show=True,
-            plt_log=False,
-            figsize=(10, 10),
-            bins=SUPERVISE_LEARNING_SETTING.BINS,
-            cmap="gray",
-            **kwargs,
+        self,
+        image_path,
+        plt_show=True,
+        plt_log=False,
+        figsize=(10, 10),
+        bins=SUPERVISE_LEARNING_SETTING.BINS,
+        cmap="gray",
+        **kwargs,
     ):
         """
         Apply Frangi filter to an input image and extract histogram features from the filtered results.
@@ -432,11 +432,11 @@ class ImageNumeric:
         return _frangi_features
 
     def local_binary_pattern(
-            self,
-            image,
-            n_points: int,
-            radius: int,
-            method=SUPERVISE_LEARNING_SETTING.FILTERS.LOCAl_BINARY_PATTERN.METHOD,
+        self,
+        image,
+        n_points: int,
+        radius: int,
+        method=SUPERVISE_LEARNING_SETTING.FILTERS.LOCAl_BINARY_PATTERN.METHOD,
     ):
         """
         Compute the Local Binary Pattern (LBP) representation of an input grayscale image.
@@ -457,17 +457,17 @@ class ImageNumeric:
         return lbp
 
     def lbp_feature_extraction(
-            self,
-            image_path,
-            radius=SUPERVISE_LEARNING_SETTING.FILTERS.LOCAl_BINARY_PATTERN.RADIUS,
-            n_points=SUPERVISE_LEARNING_SETTING.FILTERS.LOCAl_BINARY_PATTERN.NUM_POINTS,
-            bins=SUPERVISE_LEARNING_SETTING.BINS,
-            plt_show=False,
-            plt_log=False,
-            figsize=(10, 10),
-            width=0.5,
-            method=SUPERVISE_LEARNING_SETTING.FILTERS.LOCAl_BINARY_PATTERN.METHOD,
-            cmap="gray",
+        self,
+        image_path,
+        radius=SUPERVISE_LEARNING_SETTING.FILTERS.LOCAl_BINARY_PATTERN.RADIUS,
+        n_points=SUPERVISE_LEARNING_SETTING.FILTERS.LOCAl_BINARY_PATTERN.NUM_POINTS,
+        bins=SUPERVISE_LEARNING_SETTING.BINS,
+        plt_show=False,
+        plt_log=False,
+        figsize=(10, 10),
+        width=0.5,
+        method=SUPERVISE_LEARNING_SETTING.FILTERS.LOCAl_BINARY_PATTERN.METHOD,
+        cmap="gray",
     ):
         """
         Perform Local Binary Pattern (LBP) feature extraction on an input image.
@@ -587,9 +587,9 @@ class ImageNumeric:
         return _lbp_features
 
     def multiotsu_threshold(
-            self,
-            image,
-            classes=SUPERVISE_LEARNING_SETTING.FILTERS.MULTIOTSU_THRESHOLD.CLASSES,
+        self,
+        image,
+        classes=SUPERVISE_LEARNING_SETTING.FILTERS.MULTIOTSU_THRESHOLD.CLASSES,
     ):
         """
         Compute multi-Otsu threshold values for an input image.
@@ -607,13 +607,13 @@ class ImageNumeric:
         return filtered_threshold_multiotsu
 
     def multiotsu_threshold_feature_extraction(
-            self,
-            image_path,
-            bins=SUPERVISE_LEARNING_SETTING.BINS,
-            plt_show=False,
-            plt_log=False,
-            figsize=(10, 10),
-            classes=SUPERVISE_LEARNING_SETTING.FILTERS.MULTIOTSU_THRESHOLD.CLASSES,
+        self,
+        image_path,
+        bins=SUPERVISE_LEARNING_SETTING.BINS,
+        plt_show=False,
+        plt_log=False,
+        figsize=(10, 10),
+        classes=SUPERVISE_LEARNING_SETTING.FILTERS.MULTIOTSU_THRESHOLD.CLASSES,
     ):
         """
         Apply multi-Otsu thresholding to an image and extract histogram features from the thresholded channels.
@@ -755,13 +755,13 @@ class ImageNumeric:
         return filtered_sobel
 
     def sobel_edge_detection_sk(
-            self,
-            image_path,
-            bins=SUPERVISE_LEARNING_SETTING.BINS,
-            plt_show=False,
-            plt_log=False,
-            figsize=(10, 10),
-            cmap="Greys",
+        self,
+        image_path,
+        bins=SUPERVISE_LEARNING_SETTING.BINS,
+        plt_show=False,
+        plt_log=False,
+        figsize=(10, 10),
+        cmap="Greys",
     ):
         """
         Apply Sobel edge detection to an image and compute histograms of the edges in RGB channels.
@@ -837,13 +837,13 @@ class ImageNumeric:
 
         # Normalize the Sobel edges image to [0, 1]
         sobel_edges_r = (sobel_edges_r - np.min(sobel_edges_r)) / (
-                np.max(sobel_edges_r) - np.min(sobel_edges_r)
+            np.max(sobel_edges_r) - np.min(sobel_edges_r)
         )
         sobel_edges_g = (sobel_edges_g - np.min(sobel_edges_g)) / (
-                np.max(sobel_edges_g) - np.min(sobel_edges_g)
+            np.max(sobel_edges_g) - np.min(sobel_edges_g)
         )
         sobel_edges_b = (sobel_edges_b - np.min(sobel_edges_b)) / (
-                np.max(sobel_edges_b) - np.min(sobel_edges_b)
+            np.max(sobel_edges_b) - np.min(sobel_edges_b)
         )
 
         # Convert the Sobel edges images to uint8
@@ -904,8 +904,8 @@ class ImageNumeric:
         return _sobel_features
 
     def filter_images(
-            self,
-            **kwargs,
+        self,
+        **kwargs,
     ):
         """
         Apply image filtering based on specified methods and save the filtered images.
@@ -939,16 +939,16 @@ class ImageNumeric:
 
         if filter_name == "hessian":
             for index, row in tqdm(
-                    self.image_df.iterrows(),
-                    total=self.image_df.shape[0],
-                    desc="Filtering images > hessian",
+                self.image_df.iterrows(),
+                total=self.image_df.shape[0],
+                desc="Filtering images > hessian",
             ):
                 image_path = row["Filepath"]
 
                 image = cv2.imread(image_path)
                 # Convert the image to RGB if it's in BGR
                 if (
-                        len(image.shape) == 3
+                    len(image.shape) == 3
                 ):  # Check if the image is color (has 3 channels)
                     image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
 
@@ -984,9 +984,9 @@ class ImageNumeric:
 
         if filter_name == "frangi":
             for index, row in tqdm(
-                    self.image_df.iterrows(),
-                    total=self.image_df.shape[0],
-                    desc="Filtering images > frangi",
+                self.image_df.iterrows(),
+                total=self.image_df.shape[0],
+                desc="Filtering images > frangi",
             ):
                 image_path = row["Filepath"]
 
@@ -1020,9 +1020,9 @@ class ImageNumeric:
 
         if filter_name == "lbp":
             for index, row in tqdm(
-                    self.image_df.iterrows(),
-                    total=self.image_df.shape[0],
-                    desc="Filtering images > lbp",
+                self.image_df.iterrows(),
+                total=self.image_df.shape[0],
+                desc="Filtering images > lbp",
             ):
                 image_path = row["Filepath"]
 
@@ -1062,7 +1062,7 @@ class ImageNumeric:
                 plt.close()
 
     def image_segmentation_knn(
-            self, image_path, num_clusters=5, plt_show=False, cmap="gray"
+        self, image_path, num_clusters=5, plt_show=False, cmap="gray"
     ):
         """
         Apply K-Means clustering for image segmentation and return a colored version of the segmented image.
@@ -1123,13 +1123,13 @@ class ImageNumeric:
         return colored_image
 
     def process_image(
-            self,
-            row,
-            cmap,
-            dataset_path,
-            segmentation_dataset_path,
-            replace_existing,
-            num_clusters=5,
+        self,
+        row,
+        cmap,
+        dataset_path,
+        segmentation_dataset_path,
+        replace_existing,
+        num_clusters=5,
     ):
         """
         Process and save an image using image segmentation and colormap.
@@ -1153,10 +1153,10 @@ class ImageNumeric:
         # Get the sub-folder structure from the original image path
         relative_path = Path(image_path).relative_to(dataset_path)
         segmented_image_dir = (
-                Path(segmentation_dataset_path) / relative_path.parent
+            Path(segmentation_dataset_path) / relative_path.parent
         )  # Create subdirectory
         segmented_image_path = (
-                segmented_image_dir / f"{relative_path.stem}_filtered{relative_path.suffix}"
+            segmented_image_dir / f"{relative_path.stem}_filtered{relative_path.suffix}"
         )
         # Handle replacing existing images
         if not replace_existing:
@@ -1222,9 +1222,9 @@ class ImageNumeric:
             with multiprocessing.Pool(processes=multiprocessing.cpu_count()) as pool:
                 results = []
                 for index, row in tqdm(
-                        self.image_df.iterrows(),
-                        total=self.image_df.shape[0],
-                        desc="Segmentation images > kmean",
+                    self.image_df.iterrows(),
+                    total=self.image_df.shape[0],
+                    desc="Segmentation images > kmean",
                 ):
                     result = pool.apply_async(
                         self.process_image,
@@ -1271,9 +1271,9 @@ class ImageNumeric:
             Path(edited_dataset_path).mkdir(parents=True, exist_ok=True)
 
         for index, row in tqdm(
-                self.image_df.iterrows(),
-                total=self.image_df.shape[0],
-                desc="Editing images > cmap",
+            self.image_df.iterrows(),
+            total=self.image_df.shape[0],
+            desc="Editing images > cmap",
         ):
             image_path = row["Filepath"]
             # Get the sub-folder structure from the original image path
@@ -1301,43 +1301,44 @@ class ImageNumeric:
             plt.close()
 
     def display_img_class(
-            self,
-            random=True,
-            selected_imgs=None,
-            title_mapping=None,
-            arrangement="1x4",
-            figsize=(10, 5),
-            axes_ticks=True,
-            title_show=False,
+        self,
+        _random=True,
+        selected_imgs=None,
+        title_mapping=None,
+        arrangement="1x4",
+        figsize=(10, 5),
+        axes_ticks=True,
+        title_show=False,
     ):
         # Get the unique labels
         unique_labels = self.image_df["Label"].unique()
 
-        # Use specified labels from title_mapping if available, otherwise use random selection
+        # Use specified labels from title_mapping if available, otherwise use _random selection
         if title_mapping is not None:
-            selected_labels = [label for label in title_mapping if label in unique_labels]
+            selected_labels = [
+                label for label in title_mapping if label in unique_labels
+            ]
         else:
             selected_labels = unique_labels
 
-        if random:
+        if _random:
             self._plot_it(
                 selected_labels,
                 title_show,
                 figsize,
                 arrangement,
                 title_mapping,
-                axes_ticks
+                axes_ticks,
             )
         else:
             # for each img in selected_imgs, find the path from self.image_df
             # and plot it in a figure with the title of the label and arrangement
             # Extract last section of path for each row in the dataframe
-            filenames = (self.image_df['Filepath'].apply(os.path.basename))
             selected_imgs_pathes = {}
             for img in selected_imgs:
                 logging.info("Searching for:", img)
 
-                for _path in self.image_df['Filepath']:
+                for _path in self.image_df["Filepath"]:
                     edit_path = os.path.basename(_path)
                     if edit_path == img:
                         logging.info("Matched path:", _path)
@@ -1353,21 +1354,11 @@ class ImageNumeric:
             logging.info("Selected images path's:", selected_imgs_pathes)
             # Plot the selected images
             self._plot_it_2(
-                arrangement,
-                figsize,
-                title_show,
-                axes_ticks,
-                selected_imgs_pathes
+                arrangement, figsize, title_show, axes_ticks, selected_imgs_pathes
             )
 
     def _plot_it_2(
-            self,
-            arrangement,
-            figsize,
-            title_show,
-            axes_ticks,
-            selected_imgs_pathes
-
+        self, arrangement, figsize, title_show, axes_ticks, selected_imgs_pathes
     ):
         rows, cols = map(int, arrangement.split("x"))
         fig, axes = plt.subplots(rows, cols, figsize=figsize)
@@ -1392,16 +1383,14 @@ class ImageNumeric:
         plt.tight_layout()
         plt.show()
 
-
-
     def _plot_it(
-            self,
-            selected_labels,
-            title_show,
-            figsize,
-            arrangement,
-            title_mapping,
-            axes_ticks
+        self,
+        selected_labels,
+        title_show,
+        figsize,
+        arrangement,
+        title_mapping,
+        axes_ticks,
     ):
         # Create a dictionary to store selected data
         selected_data = {}
@@ -1467,11 +1456,11 @@ class RunCodeLocally:
         # )
         image_path = str(
             (
-                    Path(__file__).parent
-                    / ".."
-                    / "dataset_ad"
-                    / "MildDemented"
-                    / "mildDem0.jpg"
+                Path(__file__).parent
+                / ".."
+                / "dataset_ad"
+                / "MildDemented"
+                / "mildDem0.jpg"
             )
         )
 
@@ -1514,8 +1503,8 @@ class RunCodeLocally:
         obj.filter_images(
             dataset_path=dataset_path,
             filtered_dataset_path=Path(__file__).parent
-                                  / ".."
-                                  / "filtered_dataset_ad_hessian",
+            / ".."
+            / "filtered_dataset_ad_hessian",
             replace_existing=False,
             cmap="seismic",
             filter_name="hessian",
@@ -1540,11 +1529,11 @@ class RunCodeLocally:
         obj = ImageNumeric(dataset_address=dataset_path)
         image_path = str(
             (
-                    Path(__file__).parent
-                    / ".."
-                    / "dataset_ad"
-                    / "MildDemented"
-                    / "mildDem1.jpg"
+                Path(__file__).parent
+                / ".."
+                / "dataset_ad"
+                / "MildDemented"
+                / "mildDem1.jpg"
             )
         )
 
@@ -1575,8 +1564,13 @@ class RunCodeLocally:
             "VeryMildDemented": "Very Mild",
         }
         obj.display_img_class(
-            selected_imgs=["nonDem441.jpg", "verymildDem1622.jpg", "mildDem262.jpg", "moderateDem38.jpg"],
-            random=False,
+            selected_imgs=[
+                "nonDem441.jpg",
+                "verymildDem1622.jpg",
+                "mildDem262.jpg",
+                "moderateDem38.jpg",
+            ],
+            _random=False,
             title_mapping=custom_titles,
             arrangement="1x4",
             figsize=(10, 5),

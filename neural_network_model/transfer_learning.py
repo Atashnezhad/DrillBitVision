@@ -707,7 +707,7 @@ class TransferModel(Preprocessing, BitVision):
             xticklabels=sorted(set(y_test)),
             yticklabels=sorted(set(y_test)),
             cmap=cmap,
-            annot_kws={'fontsize': conf_matx_font_size}
+            annot_kws={"fontsize": conf_matx_font_size},
         )
         # y axis label rotation 90
         plt.yticks(rotation=rotation)
