@@ -1,6 +1,7 @@
 import json
 from pprint import pprint
 
+import pandas as pd
 from pydantic import BaseModel, Field
 from typing import Dict, List
 from pathlib import Path
@@ -81,31 +82,59 @@ if __name__ == '__main__':
     import matplotlib.pyplot as plt
     import numpy as np
 
-    plt.figure(figsize=(10, 6))
-    plt.title("History of Accuracy")
-    plt.xlabel("Epochs")
-    plt.ylabel("Accuracy")
-
-    # Define a list of colors for different cases
+    # Create a list of colors and line styles for each case
+    line_styles = ['-', '--', '-.', ':']
     colors = ['b', 'g', 'r', 'c', 'm', 'y', 'k']
 
+    plt.figure(figsize=(10, 6))
+    plt.title("History of Val Loss", fontsize=16)
+    plt.xlabel("Epochs", fontsize=16)
+    plt.ylabel("Loss", fontsize=16)
+
+    # Iterate through cases and apply customizations
     for idx, case in enumerate(cases_list):
         history = cases_dict.get(case).history
         plt.plot(
-            history.categorical_accuracy,
+            history.val_loss,
             label=case,
+            linestyle=line_styles[idx % len(line_styles)],
             color=colors[idx % len(colors)],
-            linestyle='-',
-            marker='o',
+            linewidth=2,
+            marker='o',  # Add markers at data points
             markersize=5,
+            markerfacecolor=colors[idx % len(colors)],
+            markeredgecolor='k'  # Marker edge color
         )
+
+    plt.legend()
+    plt.grid(True, linestyle='--', alpha=0.7)
+
 
     # Add legend outside the plot
     plt.legend(loc='upper left', bbox_to_anchor=(1, 1))
-    plt.grid(True)
 
-    # Customize the appearance
-    plt.xticks(np.arange(0, len(history.loss), step=5))  # Adjust x-axis ticks
-    plt.tight_layout()  # Improve layout
+    # Customize tick marks on the axes
+    plt.xticks(np.arange(0, len(history.categorical_accuracy), step=5))  # Adjust step as needed
+    # plt.yticks(np.arange(0, 1.1, step=0.1))
+
+    # change x and y axis labels font size
+    plt.tick_params(axis='both', which='major', labelsize=16)
+    # change legend font size
+    plt.rcParams['legend.fontsize'] = 16
+    # x and y axis font size
+    plt.rcParams['axes.labelsize'] = 16
+
+
+    # Add a grid with dashed lines
+    plt.grid(True, linestyle='--', alpha=0.7)
+
+    # Add a background color to the plot
+    plt.gca().set_facecolor('#f9f9f9')
+
+    # Add a title to the legend
+    leg = plt.legend()
+    leg.set_title("Cases")
+    plt.tight_layout()
+
+    # Display the plot
     plt.show()
-
