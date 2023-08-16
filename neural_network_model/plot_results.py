@@ -48,7 +48,7 @@ class ParsedData(BaseModel):
         return ParsedData(**accepted_format)
 
 
-def plot_1(cases_dict):
+def plot_1():
     # make a plot and compare all cases accuracy in one plot
     # Create a list of colors and line styles for each case
     line_styles = ['-', '--', '-.', ':']
@@ -104,7 +104,7 @@ def plot_1(cases_dict):
     plt.show()
 
 
-def plot_2(cases_dict):
+def plot_2():
 
     plt.figure(figsize=(10, 6))
     # Set the whole font size
@@ -146,7 +146,7 @@ def plot_2(cases_dict):
     # Display the plot
     plt.show()
 
-def plot_3(cases_dict):
+def plot_3():
     import matplotlib.pyplot as plt
 
     # Set the whole font size
@@ -232,7 +232,8 @@ if __name__ == '__main__':
     }
     pprint(cases_dict.get("original"))
 
-    # plot_1(cases_dict)
-    # plot_2(cases_dict)
+    plot_1()
+    plot_2()
+    plot_3()
 
-    plot_3(cases_dict)
+
