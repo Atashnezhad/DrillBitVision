@@ -138,33 +138,48 @@ if __name__ == '__main__':
 
     # plot_1(cases_dict)
 
+    import matplotlib.pyplot as plt
+
     plt.figure(figsize=(10, 6))
-    # set the whole fond size
+    # Set the whole font size
     plt.rcParams.update({'font.size': 16})
 
-    plt.bar(
+    plt.barh(
         cases_list,
         [cases_dict.get(case).report.accuracy for case in cases_list],
         color=['b', 'g', 'r', 'c', 'm', 'y', 'k'],
-        width=0.5,
+        height=0.5,
         align='center',
         alpha=0.7
     )
-    # set the title of the plot
-    plt.title("Accuracy of Cases", fontsize=16)
-    # y axis label
-    plt.ylabel("Accuracy", fontsize=16)
 
-    # Rotate x-axis labels for better visibility
-    plt.xticks(rotation=45, ha='right')
+    # Set the title of the plot
+    plt.title("Accuracy of Cases", fontsize=20, pad=20)  # Increase font size and add padding
+
+    # X-axis label
+    plt.xlabel("Accuracy", fontsize=18)
+
+    # Invert y-axis for horizontal bar plot
+    plt.gca().invert_yaxis()
+
+    # Add grid with dashed lines
     plt.grid(True, linestyle='--', alpha=0.7)
-    # set y axis limits to 0 and 1
-    plt.ylim(0, 1)
 
-    # x axis labels font size
-    # plt.tick_params(axis='x', which='major', labelsize=16)
-    plt.tight_layout()
+    # Set x-axis limits to 0 and 1
+    plt.xlim(0, 1)
+
+    # Customize y-axis tick labels font size
+    plt.tick_params(axis='y', labelsize=14)
+
+    # Add background color to the plot
+    plt.gca().set_facecolor('#f9f9f9')
+
+    # Add some padding around the plot
+    plt.tight_layout(pad=1.0)
+
+    # Display the plot
     plt.show()
+
 
 
 
