@@ -198,43 +198,34 @@ if __name__ == '__main__':
 
     print(metrics_dict)
 
-    # Define the rows and columns for subplots
-    rows = 2
-    cols = 2
-
     # Create a list of metric names to plot
-    metric_names_to_plot = ["precision", "recall", "f1_score", "support"]
+    metric_names_to_plot = ["precision", "recall", "f1_score"]
 
     # Create subplots
-    fig, axes = plt.subplots(rows, cols, figsize=(15, 10))
+    fig, axes = plt.subplots(len(metric_names_to_plot), 1, figsize=(14, 10))
     plt.subplots_adjust(wspace=0.3, hspace=0.5)
 
     colors = ['b', 'g', 'r', 'c', 'm', 'y', 'k']
 
     for idx, metric_name in enumerate(metric_names_to_plot):
-        ax = axes[idx // cols, idx % cols]
+        ax = axes[idx]
         ax.set_title(f"{metric_name.capitalize()} Comparison")
 
         for i, case in enumerate(cases_list):
             metric_values = metrics_dict[metric_name]
             metric_value = metric_values.get(case)  # Get the metric value for the current case
             if metric_value is not None:
-                ax.bar(case, metric_value, color=colors[i % len(colors)], alpha=0.7)
+                ax.bar(i, metric_value, color=colors[i % len(colors)], alpha=0.7, label=case)
 
         ax.set_xlabel("Cases")
         ax.set_ylabel(metric_name.capitalize())
-        # ax.set_ylim(0, 1)  # Set y-axis limits
+        # set y-axis limits
+        ax.set_ylim(0, 1)
         # rotate x-axis labels
-        ax.tick_params(axis='x', rotation=45)
+        ax.set_xticks([])
+        ax.legend()  # Add legend for case labels
 
     # tighten layout
     plt.tight_layout()
 
     plt.show()
-
-
-
-
-
-
-
