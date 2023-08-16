@@ -12,7 +12,7 @@ from pathlib import Path
 class Metrics(BaseModel):
     precision: float = None
     recall: float = None
-    f1_score: float = None
+    f1_score: float = Field(alias="f1-score")
     support: float = None
 
 
@@ -104,41 +104,7 @@ def plot_1(cases_dict):
     plt.show()
 
 
-if __name__ == '__main__':
-    # read json data from file
-    json_filename = "results.json"
-    data_path = Path(__file__).parent
-    data_address = data_path / json_filename
-
-    with open(data_address, 'r') as f:
-        data_list = f.read()
-    # Parse the JSON string into a dictionary
-    data_list = json.loads(data_list)
-
-    cases_list = [
-        "original",
-        "Hessian_filter_seismic",
-        "LBP_filter_grey",
-        "Segmented_3_viridis",
-        "Segmented_5_seismic",
-        "Edited_seismic",
-    ]
-    # parse data
-    parsed_data = [
-        ParsedData.parse_data(_data, name)
-        for _data, name in zip(data_list, cases_list)
-    ]
-
-    # make a dictionary using cases_list as keys and parsed_data cases as values
-    cases_dict = {
-        cases_list[i]: parsed_data[i].case
-        for i in range(len(parsed_data))
-    }
-    pprint(cases_dict.get("original"))
-
-    # plot_1(cases_dict)
-
-    import matplotlib.pyplot as plt
+def plot_2(cases_dict):
 
     plt.figure(figsize=(10, 6))
     # Set the whole font size
@@ -179,6 +145,94 @@ if __name__ == '__main__':
 
     # Display the plot
     plt.show()
+
+
+if __name__ == '__main__':
+    # read json data from file
+    json_filename = "results.json"
+    data_path = Path(__file__).parent
+    data_address = data_path / json_filename
+
+    with open(data_address, 'r') as f:
+        data_list = f.read()
+    # Parse the JSON string into a dictionary
+    data_list = json.loads(data_list)
+
+    cases_list = [
+        "original",
+        "Hessian_filter_seismic",
+        "LBP_filter_grey",
+        "Segmented_3_viridis",
+        "Segmented_5_seismic",
+        "Edited_seismic",
+    ]
+    # parse data
+    parsed_data = [
+        ParsedData.parse_data(_data, name)
+        for _data, name in zip(data_list, cases_list)
+    ]
+
+    # make a dictionary using cases_list as keys and parsed_data cases as values
+    cases_dict = {
+        cases_list[i]: parsed_data[i].case
+        for i in range(len(parsed_data))
+    }
+    pprint(cases_dict.get("original"))
+
+    # plot_1(cases_dict)
+    # plot_2(cases_dict)
+
+    plt.figure(figsize=(10, 6))
+    # Set the whole font size
+    plt.rcParams.update({'font.size': 16})
+
+    metric_names = ["precision", "recall", "f1_score", "support"]  # Add other metrics if needed
+
+    metrics_dict = {}
+    for metric in metric_names:
+        case_metrics = {}
+        for idx, case in enumerate(cases_list):
+            value = getattr(parsed_data[idx].case.report.MildDemented, metric)
+            case_metrics[case] = value
+        metrics_dict[metric] = case_metrics
+
+    print(metrics_dict)
+
+    # Define the rows and columns for subplots
+    rows = 2
+    cols = 2
+
+    # Create a list of metric names to plot
+    metric_names_to_plot = ["precision", "recall", "f1_score", "support"]
+
+    # Create subplots
+    fig, axes = plt.subplots(rows, cols, figsize=(15, 10))
+    plt.subplots_adjust(wspace=0.3, hspace=0.5)
+
+    colors = ['b', 'g', 'r', 'c', 'm', 'y', 'k']
+
+    for idx, metric_name in enumerate(metric_names_to_plot):
+        ax = axes[idx // cols, idx % cols]
+        ax.set_title(f"{metric_name.capitalize()} Comparison")
+
+        for i, case in enumerate(cases_list):
+            metric_values = metrics_dict[metric_name]
+            metric_value = metric_values.get(case)  # Get the metric value for the current case
+            if metric_value is not None:
+                ax.bar(case, metric_value, color=colors[i % len(colors)], alpha=0.7)
+
+        ax.set_xlabel("Cases")
+        ax.set_ylabel(metric_name.capitalize())
+        # ax.set_ylim(0, 1)  # Set y-axis limits
+        # rotate x-axis labels
+        ax.tick_params(axis='x', rotation=45)
+
+    # tighten layout
+    plt.tight_layout()
+
+    plt.show()
+
+
 
 
 
