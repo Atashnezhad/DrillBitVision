@@ -182,10 +182,10 @@ if __name__ == '__main__':
     # plot_1(cases_dict)
     # plot_2(cases_dict)
 
-    plt.figure(figsize=(10, 6))
-    # Set the whole font size
-    plt.rcParams.update({'font.size': 16})
 
+
+    # Set the whole font size
+    plt.rcParams.update({'font.size': 22})
     metric_names = ["precision", "recall", "f1_score", "support"]  # Add other metrics if needed
 
     metrics_dict = {}
@@ -202,7 +202,9 @@ if __name__ == '__main__':
     metric_names_to_plot = ["precision", "recall", "f1_score"]
 
     # Create subplots
-    fig, axes = plt.subplots(len(metric_names_to_plot), 1, figsize=(14, 10))
+    fig, axes = plt.subplots(len(metric_names_to_plot), 1, figsize=(16, 14))
+    # set figure title
+    fig.suptitle("Mild Demented Comparison", fontsize=30)
     plt.subplots_adjust(wspace=0.3, hspace=0.5)
 
     colors = ['b', 'g', 'r', 'c', 'm', 'y', 'k']
