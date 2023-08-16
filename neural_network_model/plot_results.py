@@ -146,6 +146,59 @@ def plot_2(cases_dict):
     # Display the plot
     plt.show()
 
+def plot_3(cases_dict):
+    import matplotlib.pyplot as plt
+
+    # Set the whole font size
+    plt.rcParams.update({'font.size': 22})
+    metric_names = ["precision", "recall", "f1_score", "support"]  # Add other metrics if needed
+
+    metrics_dict = {}
+    for metric in metric_names:
+        case_metrics = {}
+        for idx, case in enumerate(cases_list):
+            value = getattr(parsed_data[idx].case.report.MildDemented, metric)
+            case_metrics[case] = value
+        metrics_dict[metric] = case_metrics
+
+    print(metrics_dict)
+
+    # Create a list of metric names to plot
+    metric_names_to_plot = ["precision", "recall", "f1_score"]
+
+    import matplotlib.pyplot as plt
+
+    # Create subplots
+    fig, axes = plt.subplots(len(metric_names_to_plot), 1, figsize=(16, 14))
+    # set figure title
+    fig.suptitle("Mild Demented Comparison", fontsize=30)
+    plt.subplots_adjust(wspace=0.3, hspace=0.5)
+
+    colors = ['b', 'g', 'r', 'c', 'm', 'y', 'k']
+
+    for idx, metric_name in enumerate(metric_names_to_plot):
+        ax = axes[idx]
+        ax.set_title(f"{metric_name.capitalize()} Comparison")
+
+        for i, case in enumerate(cases_list):
+            metric_values = metrics_dict[metric_name]
+            metric_value = metric_values.get(case)  # Get the metric value for the current case
+            if metric_value is not None:
+                ax.bar(i, metric_value, color=colors[i % len(colors)], alpha=0.7, label=case)
+
+        ax.set_xlabel("Cases")
+        ax.set_ylabel(metric_name.capitalize())
+        # set y-axis limits
+        ax.set_ylim(0, 1)
+        # rotate x-axis labels
+        ax.set_xticks([])
+        ax.legend(loc='upper left', bbox_to_anchor=(1, 1))  # Move the legend outside of the figure
+
+    # tighten layout
+    plt.tight_layout()
+
+    plt.show()
+
 
 if __name__ == '__main__':
     # read json data from file
@@ -182,52 +235,4 @@ if __name__ == '__main__':
     # plot_1(cases_dict)
     # plot_2(cases_dict)
 
-
-
-    # Set the whole font size
-    plt.rcParams.update({'font.size': 22})
-    metric_names = ["precision", "recall", "f1_score", "support"]  # Add other metrics if needed
-
-    metrics_dict = {}
-    for metric in metric_names:
-        case_metrics = {}
-        for idx, case in enumerate(cases_list):
-            value = getattr(parsed_data[idx].case.report.NonDemented, metric)
-            case_metrics[case] = value
-        metrics_dict[metric] = case_metrics
-
-    print(metrics_dict)
-
-    # Create a list of metric names to plot
-    metric_names_to_plot = ["precision", "recall", "f1_score"]
-
-    # Create subplots
-    fig, axes = plt.subplots(len(metric_names_to_plot), 1, figsize=(16, 14))
-    # set figure title
-    fig.suptitle("Non Demented (Healthy) Comparison", fontsize=30)
-    plt.subplots_adjust(wspace=0.3, hspace=0.5)
-
-    colors = ['b', 'g', 'r', 'c', 'm', 'y', 'k']
-
-    for idx, metric_name in enumerate(metric_names_to_plot):
-        ax = axes[idx]
-        ax.set_title(f"{metric_name.capitalize()} Comparison")
-
-        for i, case in enumerate(cases_list):
-            metric_values = metrics_dict[metric_name]
-            metric_value = metric_values.get(case)  # Get the metric value for the current case
-            if metric_value is not None:
-                ax.bar(i, metric_value, color=colors[i % len(colors)], alpha=0.7, label=case)
-
-        ax.set_xlabel("Cases")
-        ax.set_ylabel(metric_name.capitalize())
-        # set y-axis limits
-        ax.set_ylim(0, 1)
-        # rotate x-axis labels
-        ax.set_xticks([])
-        ax.legend()  # Add legend for case labels
-
-    # tighten layout
-    plt.tight_layout()
-
-    plt.show()
+    plot_3(cases_dict)
