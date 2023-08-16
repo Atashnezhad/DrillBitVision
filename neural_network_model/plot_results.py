@@ -1,4 +1,5 @@
 import json
+from pprint import pprint
 
 from pydantic import BaseModel, Field
 from typing import Dict, List
@@ -69,6 +70,42 @@ if __name__ == '__main__':
         for _data, name in zip(data_list, cases_list)
     ]
 
-    # print(parsed_data[0].case.report.MildDemented.precision)
-    for i in range(len(parsed_data)):
-        print(parsed_data[i].case.report.MildDemented.precision)
+    # make a dictionary using cases_list as keys and parsed_data cases as values
+    cases_dict = {
+        cases_list[i]: parsed_data[i].case
+        for i in range(len(parsed_data))
+    }
+    pprint(cases_dict.get("original"))
+
+    # make a plot and compare all cases accuracy in one plot
+    import matplotlib.pyplot as plt
+    import numpy as np
+
+    plt.figure(figsize=(10, 6))
+    plt.title("History of Accuracy")
+    plt.xlabel("Epochs")
+    plt.ylabel("Accuracy")
+
+    # Define a list of colors for different cases
+    colors = ['b', 'g', 'r', 'c', 'm', 'y', 'k']
+
+    for idx, case in enumerate(cases_list):
+        history = cases_dict.get(case).history
+        plt.plot(
+            history.categorical_accuracy,
+            label=case,
+            color=colors[idx % len(colors)],
+            linestyle='-',
+            marker='o',
+            markersize=5,
+        )
+
+    # Add legend outside the plot
+    plt.legend(loc='upper left', bbox_to_anchor=(1, 1))
+    plt.grid(True)
+
+    # Customize the appearance
+    plt.xticks(np.arange(0, len(history.loss), step=5))  # Adjust x-axis ticks
+    plt.tight_layout()  # Improve layout
+    plt.show()
+
