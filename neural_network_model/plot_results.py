@@ -192,7 +192,7 @@ if __name__ == '__main__':
     for metric in metric_names:
         case_metrics = {}
         for idx, case in enumerate(cases_list):
-            value = getattr(parsed_data[idx].case.report.MildDemented, metric)
+            value = getattr(parsed_data[idx].case.report.NonDemented, metric)
             case_metrics[case] = value
         metrics_dict[metric] = case_metrics
 
@@ -204,7 +204,7 @@ if __name__ == '__main__':
     # Create subplots
     fig, axes = plt.subplots(len(metric_names_to_plot), 1, figsize=(16, 14))
     # set figure title
-    fig.suptitle("Mild Demented Comparison", fontsize=30)
+    fig.suptitle("Non Demented (Healthy) Comparison", fontsize=30)
     plt.subplots_adjust(wspace=0.3, hspace=0.5)
 
     colors = ['b', 'g', 'r', 'c', 'm', 'y', 'k']
