@@ -105,18 +105,27 @@ def plot_1():
 
 
 def plot_2():
-    plt.figure(figsize=(10, 6))
+    plt.figure(figsize=(12, 6))
     # Set the whole font size
     plt.rcParams.update({"font.size": 16})
 
-    plt.barh(
+    bars = plt.barh(
         cases_list,
         [cases_dict.get(case).report.accuracy for case in cases_list],
         color=["b", "g", "r", "c", "m", "y", "k"],
         height=0.5,
         align="center",
         alpha=0.7,
+        tick_label=cases_list,
     )
+
+    # dont show y axis labels
+    plt.yticks([])
+    # set y axis label cases
+    plt.ylabel("Cases", fontsize=18)
+
+    # Add legend with proper labels
+    plt.legend(bars, cases_list, loc="upper left", bbox_to_anchor=(1, 1))
 
     # Set the title of the plot
     plt.title(
@@ -245,6 +254,6 @@ if __name__ == "__main__":
     cases_dict = {cases_list[i]: parsed_data[i].case for i in range(len(parsed_data))}
     pprint(cases_dict.get("original"))
 
-    plot_1()
+    # plot_1()
     plot_2()
-    plot_3()
+    # plot_3()
