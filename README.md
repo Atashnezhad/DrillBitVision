@@ -187,6 +187,7 @@ This module empowers users to enhance their images using diverse filters such as
 Moreover, users have the capability to engage in image segmentation through the utilization of the K-means clustering algorithm. This method applies image segmentation to a batch of images within a designated directory, employing a specified clustering technique (with K-Means being the default). 
 
 ## Applying Ridge operators
+
 ```python
 dataset_path = Path(__file__).parent / ".." / "dataset"
 obj = ImageNumeric(dataset_address=dataset_path)
@@ -209,7 +210,7 @@ obj.scikit_image_example(
     
 ```
 
-![alt text](assets\scikit_image_example.jpg "Logo Title Text 1")
+![alt text](assets/scikit_image_example.jpg "Logo Title Text 1")
 
 
 * Extracting histogram features
