@@ -186,7 +186,7 @@ Note that the dataset structure should be as follows:
 This module empowers users to enhance their images using diverse filters such as Hessian, Frangi, LBP (Local Binary Pattern), multi-Otsu thresholding, and Sobel. Additionally, the module facilitates the extraction of histogram features from the filtered outcomes. It computes histograms for each color channel (R, G, B) of the filtered image, yielding histogram counts that serve as features.
 Moreover, users have the capability to engage in image segmentation through the utilization of the K-means clustering algorithm. This method applies image segmentation to a batch of images within a designated directory, employing a specified clustering technique (with K-Means being the default). 
 
-## Appying skimage filters
+## Applying Ridge operators
 ```python
 dataset_path = Path(__file__).parent / ".." / "dataset"
 obj = ImageNumeric(dataset_address=dataset_path)
