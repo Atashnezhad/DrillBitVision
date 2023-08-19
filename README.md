@@ -208,7 +208,8 @@ obj.scikit_image_example(
 )
     
 ```
-![alt text](C:\Users\atashne\Desktop\DrillBitVision\assets\scikit_image_example.jpg "Logo Title Text 1")
+
+![alt text](assets\scikit_image_example.jpg "Logo Title Text 1")
 
 
 * Extracting histogram features
