@@ -180,3 +180,187 @@ Note that the dataset structure should be as follows:
 │   └── class .
 │   └── class N      
 ```
+
+## Visual Insight module
+
+This module empowers users to enhance their images using diverse filters such as Hessian, Frangi, LBP (Local Binary Pattern), multi-Otsu thresholding, and Sobel. Additionally, the module facilitates the extraction of histogram features from the filtered outcomes. It computes histograms for each color channel (R, G, B) of the filtered image, yielding histogram counts that serve as features.
+Moreover, users have the capability to engage in image segmentation through the utilization of the K-means clustering algorithm. This method applies image segmentation to a batch of images within a designated directory, employing a specified clustering technique (with K-Means being the default). 
+
+## Appying skimage filters
+```python
+dataset_path = Path(__file__).parent / ".." / "dataset"
+obj = ImageNumeric(dataset_address=dataset_path)
+image_path = str(
+    (
+            Path(__file__).parent
+            / ".."
+            / "dataset"
+            / "pdc_bit"
+            / "Image_26.jpg"
+    )
+)
+
+obj.scikit_image_example(
+    image_path,
+    section_zoom=[0, 2000, 0, 1000],
+    save_path=Path(__file__).parent / ".." / "assets",
+    save_name="scikit_image_example.jpg",
+)
+    
+```
+![alt text](C:\Users\atashne\Desktop\DrillBitVision\assets\scikit_image_example.jpg "Logo Title Text 1")
+
+
+* Extracting histogram features
+```python
+obj = ImageNumeric()
+print(obj.image_df.head())
+# Load the image
+image_path = str(
+    (
+        Path(__file__).parent
+        / ".."
+        / "dataset_ad"
+        / "MildDemented"
+        / "mildDem0.jpg"
+    )
+)
+
+# Apply hessian filter
+hessian_features = obj.hessian_filter_feature_extraction(
+    image_path, plt_show=True, plt_log=True, cmap="seismic"
+)
+print(hessian_features)
+
+# Apply frangi filter
+frangifeatures = obj.frangi_feature_extraction(
+    image_path,
+    plt_show=True,
+    plt_log=True,
+)
+print(frangifeatures)
+
+# # Apply LBP filter
+lbp_result = obj.lbp_feature_extraction(image_path, plt_show=True, plt_log=True)
+print(lbp_result)
+
+# Apply Multi-Otsu thresholding
+multi_otsu_features = obj.multiotsu_threshold_feature_extraction(
+    image_path, plt_show=True, plt_log=True
+)
+print(multi_otsu_features)
+
+# # Apply Sobel edge detector
+sobel_features = obj.sobel_edge_detection_sk(
+    image_path, plt_show=True, plt_log=True, cmap="gray"
+)
+print(sobel_features)
+
+
+
+```
+
+* Filtering images
+```python
+dataset_path = Path(__file__).parent / ".." / "dataset_ad"
+obj = ImageNumeric(dataset_address=dataset_path)
+
+# followings are code apply to whole directory
+# hessian by default
+obj.filter_images(
+    dataset_path=dataset_path,
+    filtered_dataset_path=Path(__file__).parent
+    / ".."
+    / "filtered_dataset_ad_hessian",
+    replace_existing=False,
+    cmap="seismic",
+    filter_name="hessian",
+)
+# obj.filter_images(
+#     dataset_path=dataset_path,
+#     filtered_dataset_path=Path(__file__).parent / ".." / "filtered_dataset_ad_frangi",
+#     replace_existing=False,
+#     cmap="seismic",
+#     filter_name="frangi"
+# )
+# obj.filter_images(
+#     dataset_path=dataset_path,
+#     filtered_dataset_path=Path(__file__).parent / ".." / "filtered_dataset_ad_lbp",
+#     replace_existing=False,
+#     cmap="gray",
+#     filter_name="lbp"
+# )
+
+```
+
+* Image segmentation
+```python
+
+dataset_path = Path(__file__).parent / ".." / "dataset_ad"
+obj = ImageNumeric(dataset_address=dataset_path)
+image_path = str(
+    (
+        Path(__file__).parent
+        / ".."
+        / "dataset_ad"
+        / "MildDemented"
+        / "mildDem1.jpg"
+    )
+)
+
+# only on one image
+obj.image_segmentation_knn(
+    image_path, num_clusters=3, plt_show=True, cmap="viridis"
+)
+# whole directory
+obj.image_segmentation(
+    clustering_method="kmean",
+    dataset_path=dataset_path,
+    segmentation_dataset_path=Path(__file__).parent / ".." / "segmentation_dataset_ad_kmean_3",
+    num_clusters=3,
+    cmap="viridis",
+)
+```
+
+* Displaying images from data directory
+```python
+obj = ImageNumeric(dataset_address=Path(__file__).parent / ".." / "dataset_ad")
+
+# Display the images
+# Example title mapping (custom titles for labels)
+custom_titles = {
+    "NonDemented": "Healthy",
+    "ModerateDemented": "Moderate",
+    "MildDemented": "Mild",
+    "VeryMildDemented": "Very Mild",
+}
+obj.display_img_class(
+    selected_imgs=[
+        "nonDem441.jpg",
+        "verymildDem1622.jpg",
+        "mildDem262.jpg",
+        "moderateDem38.jpg",
+    ],
+    _random=False,
+    title_mapping=custom_titles,
+    arrangement="1x4",
+    figsize=(10, 5),
+    title_show=True,
+    # axes_ticks=False,
+)
+```
+
+* Color map image
+```python
+dataset_path = Path(__file__).parent / ".." / "dataset_ad"
+obj = ImageNumeric(dataset_address=dataset_path)
+
+obj.apply_colormap_to_directory(
+    cmap="seismic",
+    dataset_path=dataset_path,
+    edited_dataset_path=Path(__file__).parent / ".." / "edited_dataset_ad",
+    replace_existing=False,
+)
+```
+
+
