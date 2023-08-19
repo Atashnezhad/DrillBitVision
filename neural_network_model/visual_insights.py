@@ -111,7 +111,7 @@ class ImageNumeric:
         if section_zoom and self.is_valid_section(section_zoom, image_shape):
             # crop the image
             image = image[
-                section_zoom[0] : section_zoom[1], section_zoom[2] : section_zoom[3]
+                section_zoom[0]: section_zoom[1], section_zoom[2]: section_zoom[3]
             ]
         image = color.rgb2gray(image)
         cmap = plt.cm.gray
