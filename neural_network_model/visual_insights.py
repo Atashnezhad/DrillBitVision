@@ -71,6 +71,22 @@ class ImageNumeric:
         """Return the original image, ignoring any kwargs."""
         return image
 
+    def is_valid_section(self, section_zoom, image_shape):
+        if len(section_zoom) != 4:
+            return False
+
+        top, bottom, left, right = section_zoom
+
+        if top >= bottom or left >= right:
+            return False
+
+        image_height, image_width = image_shape
+
+        if top < 0 or bottom > image_height or left < 0 or right > image_width:
+            return False
+
+        return True
+
     def scikit_image_example(self, image_path, **kwargs):
         """
         Generate a grid of subplots to showcase the effects of different filters from the scikit-image library
@@ -79,29 +95,45 @@ class ImageNumeric:
         Parameters:
             image_path (str): Path to the input image.
             **kwargs: Additional keyword arguments.
+            section (list): Section of the image to be processed.
 
         Returns:
             None
         """
         image = cv2.imread(image_path)
-        image = color.rgb2gray(image)  # [300:700, 700:900]
+        logging.info(f"image shape: {image.shape}")
+        section_zoom: list = kwargs.get("section_zoom", None)
+
+        save_path = kwargs.get("save_path", None)
+        save_name = kwargs.get("save_name", None)
+
+        image_shape = image.shape[:2]
+        if section_zoom and self.is_valid_section(section_zoom, image_shape):
+            # crop the image
+            image = image[
+                section_zoom[0] : section_zoom[1], section_zoom[2] : section_zoom[3]
+            ]
+        image = color.rgb2gray(image)
         cmap = plt.cm.gray
 
         plt.rcParams["axes.titlesize"] = "medium"
         axes = plt.figure(figsize=(10, 4)).subplots(2, 9)
         for i, black_ridges in enumerate([True, False]):
-            for j, (func, sigmas) in enumerate(
-                [
-                    (self.original, None),
-                    (meijering, [1]),
-                    (meijering, range(1, 5)),
-                    (sato, [1]),
-                    (sato, range(1, 5)),
-                    (frangi, [1]),
-                    (frangi, range(1, 5)),
-                    (hessian, [1]),
-                    (hessian, range(1, 5)),
-                ]
+            for j, (func, sigmas) in tqdm(
+                enumerate(
+                    [
+                        (self.original, None),
+                        (meijering, [1]),
+                        (meijering, range(1, 5)),
+                        (sato, [1]),
+                        (sato, range(1, 5)),
+                        (frangi, [1]),
+                        (frangi, range(1, 5)),
+                        (hessian, [1]),
+                        (hessian, range(1, 5)),
+                    ]
+                ),
+                total=9,
             ):
                 result = func(image, black_ridges=black_ridges, sigmas=sigmas)
                 axes[i, j].imshow(result, cmap=cmap)
@@ -114,6 +146,13 @@ class ImageNumeric:
                     axes[i, j].set_ylabel(f"{black_ridges = }")
                 axes[i, j].set_xticks([])
                 axes[i, j].set_yticks([])
+
+        # save the figure using save_path and save_name
+        if save_path and save_name:
+            # check if the save path exists if not create it
+            if not os.path.exists(save_path):
+                os.makedirs(save_path)
+            plt.savefig(save_path / save_name)
 
         plt.tight_layout()
         plt.show()
@@ -1524,24 +1563,23 @@ class RunCodeLocally:
         # )
 
     def run_3(self):
-        dataset_path = Path(__file__).parent / ".." / "dataset_ad"
+        dataset_path = Path(__file__).parent / ".." / "dataset"
         obj = ImageNumeric(dataset_address=dataset_path)
         image_path = str(
-            (
-                Path(__file__).parent
-                / ".."
-                / "dataset_ad"
-                / "MildDemented"
-                / "mildDem1.jpg"
-            )
+            (Path(__file__).parent / ".." / "dataset" / "pdc_bit" / "Image_26.jpg")
         )
 
-        obj.scikit_image_example(image_path)
+        obj.scikit_image_example(
+            image_path,
+            section_zoom=[0, 2000, 0, 1000],
+            save_path=Path(__file__).parent / ".." / "assets",
+            save_name="scikit_image_example.jpg",
+        )
 
         # only on one image
-        obj.image_segmentation_knn(
-            image_path, num_clusters=3, plt_show=True, cmap="viridis"
-        )
+        # obj.image_segmentation_knn(
+        #     image_path, num_clusters=3, plt_show=True, cmap="viridis"
+        # )
         # whole directory
         # obj.image_segmentation(
         #     clustering_method="kmean",
