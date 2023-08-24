@@ -1474,6 +1474,38 @@ class ImageNumeric:
         plt.tight_layout()
         plt.show()
 
+    def region_of_interest(self, image_address: str, plt_show=False):
+        # Load the image
+        image = cv2.imread(image_address, cv2.IMREAD_GRAYSCALE)
+
+        # Apply Gaussian blur to reduce noise and improve edge detection
+        blurred = cv2.GaussianBlur(image, (5, 5), 0)
+
+        # Apply Canny edge detection
+        edges = cv2.Canny(blurred, threshold1=10, threshold2=150)
+
+        # Find contours in the edge-detected image
+        contours, _ = cv2.findContours(edges.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+
+        if contours:
+            # Sort contours by area in descending order
+            sorted_contours = sorted(contours, key=cv2.contourArea, reverse=True)
+
+            # Get the largest contour
+            largest_contour = sorted_contours[0]
+
+            # Get the bounding rectangle of the largest contour
+            x, y, width, height = cv2.boundingRect(largest_contour)
+
+            # Crop the image using the bounding rectangle
+            cropped_image = image[y:y + height, x:x + width]
+
+            # Save or process the cropped image
+            cv2.imwrite("cropped_object.jpg", cropped_image)
+        else:
+            print("No contours found in the image.")
+
+
 
 class RunCodeLocally:
     """
@@ -1563,15 +1595,15 @@ class RunCodeLocally:
         # )
 
     def run_3(self):
-        dataset_path = Path(__file__).parent / ".." / "dataset"
+        dataset_path = Path(__file__).parent / ".." / "dataset_core"
         obj = ImageNumeric(dataset_address=dataset_path)
         image_path = str(
-            (Path(__file__).parent / ".." / "dataset" / "pdc_bit" / "Image_26.jpg")
+            (Path(__file__).parent / ".." / "dataset_core" / "FORGE 16A 32-78_5473-5476blended masked.jpg")
         )
 
         obj.scikit_image_example(
             image_path,
-            section_zoom=[0, 2000, 0, 1000],
+            # section_zoom=[0, 2000, 0, 1000],
             save_path=Path(__file__).parent / ".." / "assets",
             save_name="scikit_image_example.jpg",
         )
@@ -1626,12 +1658,20 @@ class RunCodeLocally:
             replace_existing=False,
         )
 
+    def run_6(self):
+
+        obj = ImageNumeric()
+        image_path = str(Path(__file__).parent / ".." / "dataset_core" / "FORGE 16A 32-78_5473-5476blended masked.jpg")
+
+        obj.region_of_interest(image_path, plt_show=True)
+
 
 if __name__ == "__main__":
     run_locally_obj = RunCodeLocally()
 
     # run_locally_obj.run_1()
     # run_locally_obj.run_2()
-    run_locally_obj.run_3()
+    # run_locally_obj.run_3()
     # run_locally_obj.run_4()
     # run_locally_obj.run_5()
+    run_locally_obj.run_6()
