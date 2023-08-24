@@ -1474,9 +1474,17 @@ class ImageNumeric:
         plt.tight_layout()
         plt.show()
 
-    def region_of_interest(self, image_address: str, plt_show=False):
+    def region_of_interest(
+            self,
+            image_address: str,
+            plt_show=False,
+            path_name_to_save: str = None,
+    ):
         # Load the image
-        image = cv2.imread(image_address, cv2.IMREAD_GRAYSCALE)
+        image = cv2.imread(
+            image_address,
+            cv2.IMREAD_GRAYSCALE
+        )
 
         # Apply Gaussian blur to reduce noise and improve edge detection
         blurred = cv2.GaussianBlur(image, (5, 5), 0)
@@ -1501,7 +1509,7 @@ class ImageNumeric:
             cropped_image = image[y:y + height, x:x + width]
 
             # Save or process the cropped image
-            cv2.imwrite("cropped_object.jpg", cropped_image)
+            cv2.imwrite(path_name_to_save, cropped_image)
         else:
             print("No contours found in the image.")
 
@@ -1662,8 +1670,12 @@ class RunCodeLocally:
 
         obj = ImageNumeric()
         image_path = str(Path(__file__).parent / ".." / "dataset_core" / "FORGE 16A 32-78_5473-5476blended masked.jpg")
-
-        obj.region_of_interest(image_path, plt_show=True)
+        path_name_to_save = str(Path(__file__).parent / ".." / "dataset_core" / "region_of_interest.jpg")
+        obj.region_of_interest(
+            image_path,
+            plt_show=True,
+            path_name_to_save=path_name_to_save
+        )
 
 
 if __name__ == "__main__":
