@@ -51,6 +51,8 @@ class TransferModel(Preprocessing, BitVision):
 
         self.pred: np.ndarray = None
 
+        self.class_labels: dict = None
+
     def _prepare_data(
         self,
         print_data_head=False,
@@ -439,6 +441,11 @@ class TransferModel(Preprocessing, BitVision):
             # class_weight=class_weights_dict,
         )
 
+        # # get the self.class_labels from the train_generator
+        self.class_labels = train_images.class_indices
+        # Print the class labels
+        logging.info(f"Class labels: {self.class_labels}")
+
         val_images = train_generator.flow_from_dataframe(
             dataframe=train_df,
             x_col=xcol,
@@ -542,6 +549,12 @@ class TransferModel(Preprocessing, BitVision):
             val_images,
             test_images,
         ) = self._create_model()
+
+        # After you create the data generator for training (train_generator), you can get the class labels like this:
+        # self.class_labels = train_generator.class_indices
+        # # Print the class labels
+        # logging.info("Class labels:", self.class_labels)
+
         inputs = pretrained_model.input
 
         number_of_units_layer_1 = TRANSFER_LEARNING_SETTING.DENSE_LAYER_1_UNITS
@@ -932,6 +945,32 @@ class TransferModel(Preprocessing, BitVision):
         )
         plt.show()
 
+    def predict_one_image(self, img_path: str):
+        """
+        Predict one image
+        :param img_path: path to the image
+        :return: None
+        """
+        # Load the image
+        img = tf.keras.preprocessing.image.load_img(
+            img_path, target_size=(224, 224)
+        )
+        # Convert the image to array
+        img_array = tf.keras.preprocessing.image.img_to_array(img)
+        # Expand the dimension of the image
+        img_array = tf.expand_dims(img_array, 0)
+        # Preprocess the image
+        img_array = tf.keras.applications.mobilenet_v2.preprocess_input(img_array)
+        # Predict the image
+        predictions = self.model.predict(img_array)
+        predicted_class = tf.argmax(predictions, axis=1)[0]
+        # Print the label
+        # logging.info(f"predicted_class {predicted_class}")
+        # use the self.class_labels to get the label
+        flipped_dict = {value: key for key, value in self.class_labels.items()}
+        predicted_label = flipped_dict[predicted_class.numpy()]
+        logging.info(f"predicted_label {predicted_label}")
+
 
 if __name__ == "__main__":
     from neural_network_model.process_data import Preprocessing
@@ -948,7 +987,7 @@ if __name__ == "__main__":
     # transfer_model.analyze_image_names()
     transfer_model.plot_data_images(num_rows=3, num_cols=3, cmap="jet")
     transfer_model.train_model(
-        epochs=3,
+        epochs=1,
         model_save_path=(Path(__file__).parent / ".." / "deep_model").resolve(),
         model_name="tf_model_ad_1.h5",
     )
@@ -971,8 +1010,14 @@ if __name__ == "__main__":
         title_size=14,
         fig_title="Original Confusion Matrix",
         conf_matx_font_size=12,
-        custom_titles=custom_titles,
+        # custom_titles=custom_titles,
         cmap="winter",
         normalize="true",
     )
     transfer_model.grad_cam_viz(num_rows=3, num_cols=2)
+
+    transfer_model.predict_one_image(
+        img_path=str(Path(__file__).parent / ".." / "dataset_ad" / "MildDemented" / "mildDem0.jpg"),
+    )
+
+
