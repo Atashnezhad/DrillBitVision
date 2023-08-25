@@ -20,6 +20,7 @@ from sklearn.cluster import KMeans
 from sklearn.metrics import classification_report, confusion_matrix
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
+from tensorflow.keras.preprocessing.image import ImageDataGenerator, load_img, img_to_array, array_to_img
 from sklearn.utils.class_weight import compute_class_weight
 
 from neural_network_model.bit_vision import BitVision
@@ -370,12 +371,12 @@ class TransferModel(Preprocessing, BitVision):
         """
         train_df, test_df = self._train_test_split()
         # Load the Images with a generator and Data Augmentation
-        train_generator = tf.keras.preprocessing.image.ImageDataGenerator(
+        train_generator = ImageDataGenerator(
             preprocessing_function=tf.keras.applications.mobilenet_v2.preprocess_input,
             validation_split=TRANSFER_LEARNING_SETTING.VALIDATION_SPLIT,
         )
 
-        test_generator = tf.keras.preprocessing.image.ImageDataGenerator(
+        test_generator = ImageDataGenerator(
             preprocessing_function=tf.keras.applications.mobilenet_v2.preprocess_input
         )
 
@@ -745,8 +746,8 @@ class TransferModel(Preprocessing, BitVision):
         return report
 
     def _get_img_array(self, img_path, size):
-        img = tf.keras.preprocessing.image.load_img(img_path, target_size=size)
-        array = tf.keras.preprocessing.image.img_to_array(img)
+        img = load_img(img_path, target_size=size)
+        array = img_to_array(img)
         # We add a dimension to transform our array into a "batch"
         # of size "size"
         array = np.expand_dims(array, axis=0)
@@ -814,8 +815,8 @@ class TransferModel(Preprocessing, BitVision):
             os.makedirs(cam_path)
 
         # Load the original image
-        img = tf.keras.preprocessing.image.load_img(img_path)
-        img = tf.keras.preprocessing.image.img_to_array(img)
+        img = load_img(img_path)
+        img = img_to_array(img)
 
         # Rescale heatmap to a range 0-255
         heatmap = np.uint8(255 * heatmap)
@@ -828,13 +829,13 @@ class TransferModel(Preprocessing, BitVision):
         jet_heatmap = jet_colors[heatmap]
 
         # Create an image with RGB colorized heatmap
-        jet_heatmap = tf.keras.preprocessing.image.array_to_img(jet_heatmap)
+        jet_heatmap = array_to_img(jet_heatmap)
         jet_heatmap = jet_heatmap.resize((img.shape[1], img.shape[0]))
-        jet_heatmap = tf.keras.preprocessing.image.img_to_array(jet_heatmap)
+        jet_heatmap = img_to_array(jet_heatmap)
 
         # Superimpose the heatmap on original image
         superimposed_img = jet_heatmap * alpha + img
-        superimposed_img = tf.keras.preprocessing.image.array_to_img(superimposed_img)
+        superimposed_img = array_to_img(superimposed_img)
 
         # Save the superimposed image
         superimposed_img.save(cam_path / cam_name)
