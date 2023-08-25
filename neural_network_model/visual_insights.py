@@ -1753,6 +1753,16 @@ class RunCodeLocally:
             dir_path=str(Path(__file__).parent / ".." / "dataset_core" / "divided_images")
         )
 
+    def augment_data(self):
+        from neural_network_model.process_data import Preprocessing
+        obj = Preprocessing(
+            dataset_address=Path(__file__).parent / ".." / "dataset_core" / "dataset"
+        )
+        obj.augment_data(
+            number_of_images_tobe_gen=10,
+            augment_data_address=Path(__file__).parent / ".." / "dataset_core" / "augmented_dataset"
+        )
+
 
 if __name__ == "__main__":
     run_locally_obj = RunCodeLocally()
@@ -1763,4 +1773,5 @@ if __name__ == "__main__":
     # run_locally_obj.run_4()
     # run_locally_obj.run_5()
     # run_locally_obj.run_6()
-    run_locally_obj.run_7()
+    # run_locally_obj.run_7()
+    run_locally_obj.augment_data()
