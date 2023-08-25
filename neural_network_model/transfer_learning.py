@@ -20,6 +20,7 @@ from sklearn.cluster import KMeans
 from sklearn.metrics import classification_report, confusion_matrix
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
+from sklearn.utils.class_weight import compute_class_weight
 
 from neural_network_model.bit_vision import BitVision
 from neural_network_model.model import TRANSFER_LEARNING_SETTING
@@ -399,6 +400,16 @@ class TransferModel(Preprocessing, BitVision):
         horizontal_flip = TRANSFER_LEARNING_SETTING.AUGMENTATION_SETTING.HORIZONTAL_FLIP
         fill_mode = TRANSFER_LEARNING_SETTING.AUGMENTATION_SETTING.FILL_MODE
 
+        # # Calculate class weights
+        # class_labels = train_df['Label'].unique()
+        # class_weights = compute_class_weight(
+        #     'balanced',
+        #     classes=class_labels,
+        #     y=train_df['Label']
+        # )
+        # class_weights_dict = dict(zip(range(len(class_labels)), class_weights))
+        # logging.info(f"class_weights_dict: {class_weights_dict}")
+
         train_images = train_generator.flow_from_dataframe(
             dataframe=train_df,
             x_col=xcol,
@@ -417,6 +428,7 @@ class TransferModel(Preprocessing, BitVision):
             shear_range=shear_range,
             horizontal_flip=horizontal_flip,
             fill_mode=fill_mode,
+            # class_weight=class_weights_dict,
         )
 
         val_images = train_generator.flow_from_dataframe(
@@ -927,13 +939,13 @@ if __name__ == "__main__":
     # transfer_model.plot_classes_number()
     # transfer_model.analyze_image_names()
     transfer_model.plot_data_images(num_rows=3, num_cols=3, cmap="jet")
-    # transfer_model.train_model(
-    #     epochs=3,
-    #     model_save_path=(Path(__file__).parent / ".." / "deep_model").resolve(),
-    #     model_name="tf_model_ad_1.h5",
-    # )
-    # transfer_model.plot_metrics_results()
-    # transfer_model.results()
+    transfer_model.train_model(
+        epochs=3,
+        model_save_path=(Path(__file__).parent / ".." / "deep_model").resolve(),
+        model_name="tf_model_ad_1.h5",
+    )
+    transfer_model.plot_metrics_results()
+    transfer_model.results()
     # one can pass the model address to the predict_test method
     custom_titles = {
         "NonDemented": "Healthy",
