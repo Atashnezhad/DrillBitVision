@@ -326,7 +326,7 @@ class TransferModel(Preprocessing, BitVision):
                 filepath = self.image_df.Filepath[i]
                 file_extension = os.path.splitext(filepath)[1].lower()
 
-                if file_extension in [".png", ".jpg"]:
+                if file_extension in TRANSFER_LEARNING_SETTING.SUPPORTED_FILE_FORMATS:
                     try:
                         image = plt.imread(filepath)
                         ax.imshow(image, cmap=cmap)

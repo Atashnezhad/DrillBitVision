@@ -278,6 +278,16 @@ class TransferLearningSetting(Setting):
         # Allow extra fields in the model (to ignore the pydantic ConfigError)
         extra = Extra.allow
 
+    SUPPORTED_FILE_FORMATS: list = [
+        ".jpg",
+        ".jpeg",
+        ".png",
+        ".bmp",
+        ".tif",
+        ".tiff",
+        ".gif",
+    ]
+
 
 class localBinaryPatterns(BaseModel):
     NUM_POINTS: int = 8
