@@ -20,8 +20,13 @@ from sklearn.cluster import KMeans
 from sklearn.metrics import classification_report, confusion_matrix
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
-from tensorflow.keras.preprocessing.image import ImageDataGenerator, load_img, img_to_array, array_to_img
 from sklearn.utils.class_weight import compute_class_weight
+from tensorflow.keras.preprocessing.image import (
+    ImageDataGenerator,
+    array_to_img,
+    img_to_array,
+    load_img,
+)
 
 from neural_network_model.bit_vision import BitVision
 from neural_network_model.model import TRANSFER_LEARNING_SETTING
@@ -64,6 +69,8 @@ class TransferModel(Preprocessing, BitVision):
         filepaths = list(image_dir.glob(r"**/*.png"))
         # add those with jpg extension
         filepaths.extend(list(image_dir.glob(r"**/*.jpg")))
+        # add those with jpeg extension
+        filepaths.extend(list(image_dir.glob(r"**/*.jpeg")))
         labels = list(map(lambda x: os.path.split(os.path.split(x)[0])[1], filepaths))
 
         filepaths = pd.Series(filepaths, name=x_col).astype(str)
