@@ -1759,7 +1759,7 @@ class RunCodeLocally:
             dataset_address=Path(__file__).parent / ".." / "dataset_core" / "dataset"
         )
         obj.augment_data(
-            number_of_images_tobe_gen=10,
+            number_of_images_tobe_gen=500,
             augment_data_address=Path(__file__).parent / ".." / "dataset_core" / "augmented_dataset"
         )
 
