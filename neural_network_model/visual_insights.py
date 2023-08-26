@@ -17,7 +17,10 @@ from skimage.filters import frangi, hessian, meijering, sato, sobel, threshold_m
 from sklearn.cluster import KMeans
 from tqdm import tqdm
 
-from neural_network_model.model import SUPERVISE_LEARNING_SETTING, TRANSFER_LEARNING_SETTING
+from neural_network_model.model import (
+    SUPERVISE_LEARNING_SETTING,
+    TRANSFER_LEARNING_SETTING,
+)
 
 # ignore warnings
 warnings.filterwarnings("ignore")

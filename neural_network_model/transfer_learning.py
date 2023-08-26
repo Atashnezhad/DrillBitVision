@@ -952,9 +952,7 @@ class TransferModel(Preprocessing, BitVision):
         :return: None
         """
         # Load the image
-        img = tf.keras.preprocessing.image.load_img(
-            img_path, target_size=(224, 224)
-        )
+        img = tf.keras.preprocessing.image.load_img(img_path, target_size=(224, 224))
         # Convert the image to array
         img_array = tf.keras.preprocessing.image.img_to_array(img)
         # Expand the dimension of the image
@@ -1017,7 +1015,11 @@ if __name__ == "__main__":
     transfer_model.grad_cam_viz(num_rows=3, num_cols=2)
 
     transfer_model.predict_one_image(
-        img_path=str(Path(__file__).parent / ".." / "dataset_ad" / "MildDemented" / "mildDem0.jpg"),
+        img_path=str(
+            Path(__file__).parent
+            / ".."
+            / "dataset_ad"
+            / "MildDemented"
+            / "mildDem0.jpg"
+        ),
     )
-
-
