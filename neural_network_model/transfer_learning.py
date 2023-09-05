@@ -945,7 +945,7 @@ class TransferModel(Preprocessing, BitVision):
         )
         plt.show()
 
-    def predict_one_image(self, img_path: str):
+    def predict_one_image(self, img_path: str) -> str:
         """
         Predict one image
         :param img_path: path to the image
@@ -968,6 +968,7 @@ class TransferModel(Preprocessing, BitVision):
         flipped_dict = {value: key for key, value in self.class_labels.items()}
         predicted_label = flipped_dict[predicted_class.numpy()]
         logging.info(f"predicted_label {predicted_label}")
+        return predicted_label
 
 
 if __name__ == "__main__":
