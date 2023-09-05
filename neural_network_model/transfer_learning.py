@@ -7,6 +7,7 @@ import logging
 import math
 import os
 from pathlib import Path
+from typing import Tuple, Dict
 
 import matplotlib.cm as cm
 import numpy as np
@@ -29,7 +30,7 @@ from tensorflow.keras.preprocessing.image import (
 )
 
 from neural_network_model.bit_vision import BitVision
-from neural_network_model.model import TRANSFER_LEARNING_SETTING
+from neural_network_model.model import TRANSFER_LEARNING_SETTING, SETTING
 from neural_network_model.process_data import Preprocessing
 
 # Initialize the logger
@@ -945,14 +946,17 @@ class TransferModel(Preprocessing, BitVision):
         )
         plt.show()
 
-    def predict_one_image(self, img_path: str) -> str:
+    def predict_one_image(self, img_path: str) -> Tuple[np.ndarray, Dict]:
         """
         Predict one image
         :param img_path: path to the image
         :return: None
         """
         # Load the image
-        img = tf.keras.preprocessing.image.load_img(img_path, target_size=(224, 224))
+        img = tf.keras.preprocessing.image.load_img(
+            img_path,
+            target_size=SETTING.FLOW_FROM_DIRECTORY_SETTING.TARGET_SIZE,
+        )
         # Convert the image to array
         img_array = tf.keras.preprocessing.image.img_to_array(img)
         # Expand the dimension of the image
@@ -960,15 +964,31 @@ class TransferModel(Preprocessing, BitVision):
         # Preprocess the image
         img_array = tf.keras.applications.mobilenet_v2.preprocess_input(img_array)
         # Predict the image
-        predictions = self.model.predict(img_array)
-        predicted_class = tf.argmax(predictions, axis=1)[0]
+        prediction = self.model.predict(img_array)
+        predicted_class = tf.argmax(prediction, axis=1)[0]
+
+        # also get the probability of the prediction for all the classes
+        softmax_output = np.exp(prediction) / np.sum(np.exp(prediction), axis=1, keepdims=True)
+        probabilities = softmax_output[0]
+
+        # Create a new dictionary to store class-probability pairs
+        class_probabilities = {}
+
+        # Iterate through the class dictionary and probabilities, and add them to the new dictionary
+        for class_name, class_index in self.class_labels.items():
+            probability = probabilities[class_index]
+            class_probabilities[class_name] = probability
+
         # Print the label
         # logging.info(f"predicted_class {predicted_class}")
         # use the self.class_labels to get the label
-        flipped_dict = {value: key for key, value in self.class_labels.items()}
+        flipped_dict = {
+            value: key
+            for key, value in self.class_labels.items()
+        }
         predicted_label = flipped_dict[predicted_class.numpy()]
-        logging.info(f"predicted_label {predicted_label}")
-        return predicted_label
+        logging.info(f"predicted_label {predicted_label} with probability of {probabilities[predicted_class.numpy()]:.2f}")
+        return predicted_label, class_probabilities
 
 
 if __name__ == "__main__":
