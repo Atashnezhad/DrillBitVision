@@ -2,7 +2,7 @@
 # Author: Datalira
 # Link: https://www.kaggle.com/code/databeru/plant-seedlings-classifier-grad-cam-acc-95
 # Location: Dresden, Saxony, Germany
-
+import json
 import logging
 import math
 import os
@@ -445,6 +445,13 @@ class TransferModel(Preprocessing, BitVision):
 
         # # get the self.class_labels from the train_generator
         self.class_labels = train_images.class_indices
+        # save the class labels on disk as a json file
+        with open(
+                Path(__file__).parent / "class_labels.json", "w"
+        ) as f:
+            json.dump(self.class_labels, f)
+            logger.info(f"Class labels were saved in {f.name}")
+
         # Print the class labels
         logging.info(f"Class labels: {self.class_labels}")
 
@@ -947,13 +954,26 @@ class TransferModel(Preprocessing, BitVision):
         )
         plt.show()
 
-    def predict_one_image(self, img_path: str, model_path=None) -> Tuple[np.ndarray, Dict]:
+    def predict_one_image(
+            self,
+            img_path: str,
+            model_path=None,
+            class_labels_path: str = None
+    ) -> Tuple[np.ndarray, Dict]:
         """
         Predict one image
         :param img_path: path to the image
         :param model_path: path to the model
+        :param class_labels_path: path to the class labels
         :return: None
         """
+
+        if class_labels_path:
+            # read the class labels from the json file
+            with open(class_labels_path, "r") as f:
+                class_labels = json.load(f)
+        else:
+            class_labels = self.class_labels
         # Load the image
         img = tf.keras.preprocessing.image.load_img(
             img_path,
@@ -982,14 +1002,14 @@ class TransferModel(Preprocessing, BitVision):
         class_probabilities = {}
 
         # Iterate through the class dictionary and probabilities, and add them to the new dictionary
-        for class_name, class_index in self.class_labels.items():
+        for class_name, class_index in class_labels.items():
             probability = probabilities[class_index]
             class_probabilities[class_name] = probability
 
-        # use the self.class_labels to get the label
+        # use the class_labels to get the label
         flipped_dict = {
             value: key
-            for key, value in self.class_labels.items()
+            for key, value in class_labels.items()
         }
         predicted_label = flipped_dict[predicted_class.numpy()]
         logging.info(
@@ -1056,7 +1076,8 @@ class TransferModel(Preprocessing, BitVision):
                 # Replace the following line with your model's prediction code
                 predicted_label, class_probabilities = self.predict_one_image(
                     img_path=patch_filename,
-                    model_path=model_path
+                    model_path=model_path,
+                    class_labels_path=str(Path(__file__).parent / "class_labels.json")
                 )
 
                 save_results[f'patch_{count}.jpg'] = {
@@ -1082,7 +1103,6 @@ class TransferModel(Preprocessing, BitVision):
 
                 # Display the image using matplotlib
                 if fig_show:
-
                     plt.figure(figsize=figsize)
                     plt.imshow(image_with_box)
                     plt.axis('off')  # Turn off axis labels
@@ -1109,11 +1129,11 @@ if __name__ == "__main__":
     # transfer_model.plot_classes_number()
     # transfer_model.analyze_image_names()
     # transfer_model.plot_data_images(num_rows=3, num_cols=3, cmap="jet")
-    transfer_model.train_model(
-        epochs=1,
-        model_save_path=(Path(__file__).parent / ".." / "deep_model").resolve(),
-        model_name="tf_model_core_1.h5",
-    )
+    # transfer_model.train_model(
+    #     epochs=1,
+    #     model_save_path=(Path(__file__).parent / ".." / "deep_model").resolve(),
+    #     model_name="tf_model_core_1.h5",
+    # )
     # transfer_model.plot_metrics_results()
     # transfer_model.results()
     # one can pass the model address to the predict_test method
@@ -1156,9 +1176,9 @@ if __name__ == "__main__":
         "stride": 150,
         "patch_images_dir": Path(__file__).parent / ".." / "dataset_core" / "patch_images",
         "img_with_box_dir": Path(__file__).parent / ".." / "dataset_core" / "core_images_with_box_red",
-        "figsize": (15, 15),
-        "fig_show": False,
-        "model_path": None
+        "figsize": (15, 3),
+        "fig_show": True,
+        "model_path": Path(__file__).parent / ".." / "deep_model" / "tf_model_core_1.h5"
     }
     save_results = transfer_model.predict_image_patch_classes(**kwargs_dict)
     print(save_results)
