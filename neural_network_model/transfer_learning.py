@@ -9,6 +9,7 @@ import os
 from pathlib import Path
 from typing import Dict, Tuple
 
+import cv2
 import matplotlib.cm as cm
 import numpy as np
 import pandas as pd
@@ -993,6 +994,95 @@ class TransferModel(Preprocessing, BitVision):
             f"predicted_label {predicted_label} with probability of {probabilities[predicted_class.numpy()]:.2f}")
         return predicted_label, class_probabilities
 
+    def predict_image_patch_classes(self, **kwargs):
+        """
+        Predict the classes of the image patches
+        This function gets the path to an image which is a horizontal and make patches of the image
+        for each path it does the prediction and save the image and also the original image with the box in
+        separated folders
+        :param kwargs:
+            img_path: path to the image
+            window_percent: the percentage of the window size
+            stride: the stride of the window
+            output_dir: the output directory to save the patches
+            core_box_red_dir: the output directory to save the original image with the box
+            figsize: Tuple the size of the figure
+        :return: None
+        """
+
+        img_path = kwargs.get("img_path", None)
+        figsize = kwargs.get("figsize", (15, 15))
+        window_percent = kwargs.get("window_percent", 10)
+        stride = kwargs.get("stride", 150)
+        output_dir = kwargs.get("output_dir", Path(__file__).parent / ".." / "dataset_ad" / "patch_images")
+        core_box_red_dir = kwargs.get("core_box_red_dir", Path(__file__).parent / ".." / "dataset_ad" /
+                                      "core_images_with_box_red")
+
+        if img_path is None:
+            raise ValueError("img_path is None")
+
+        # Load the image
+        image = cv2.imread(img_path)
+
+        # Calculate the window size based on the percentage
+        height, width, _ = image.shape
+        window_height = int(height)
+        window_width = int(width * window_percent / 100)
+
+        # Output directory to save patch images
+        os.makedirs(output_dir, exist_ok=True)
+
+        # Output directory to save patch images
+        os.makedirs(core_box_red_dir, exist_ok=True)
+
+        save_results = {}
+
+        # Iterate through the image using sliding window
+        count = 0
+        for y in range(0, height - window_height + 1, stride):
+            for x in range(0, width - window_width + 1 + stride, stride):
+                # Extract the patch using the sliding window
+                patch = image[y:y + window_height, x:x + window_width]
+
+                # Save the patch as an image
+                patch_filename = os.path.join(output_dir, f'patch_{count}.jpg')
+                cv2.imwrite(patch_filename, patch)
+
+                # Pass the patch to your model for estimation
+                # Replace the following line with your model's prediction code
+                predicted_label, class_probabilities = transfer_model.predict_one_image(img_path=patch_filename)
+
+                save_results[f'patch_{count}.jpg'] = {
+                    'predicted_label': predicted_label,
+                    'class_probabilities': class_probabilities
+                }
+
+                count += 1
+
+                # Create a copy of the original image to draw on
+                image_with_box = image.copy()
+
+                # Draw a single red box
+                cv2.rectangle(
+                    image_with_box,
+                    (x, y),
+                    (x + window_width - stride, y + window_height),
+                    (0, 0, 255), 4
+                )  # Red box
+
+                # Convert BGR image to RGB for matplotlib
+                image_rgb = cv2.cvtColor(image_with_box, cv2.COLOR_BGR2RGB)
+
+                # Display the image using matplotlib
+                plt.figure(figsize=figsize)
+                plt.imshow(image_with_box)
+                plt.axis('off')  # Turn off axis labels
+                plt.show()
+
+                # Save the image
+                core_filename = os.path.join(core_box_red_dir, f'patch_{count}.jpg')
+                cv2.imwrite(core_filename, image_rgb)
+
 
 if __name__ == "__main__":
     from neural_network_model.process_data import Preprocessing
@@ -1002,7 +1092,7 @@ if __name__ == "__main__":
     # obj.download_images(limit=30)
 
     transfer_model = TransferModel(
-        dataset_address=Path(__file__).parent / ".." / "dataset_ad"
+        dataset_address=Path(__file__).parent / ".." / "dataset_core" / "augmented_dataset",
     )
 
     # transfer_model.plot_classes_number()
@@ -1011,20 +1101,20 @@ if __name__ == "__main__":
     transfer_model.train_model(
         epochs=1,
         model_save_path=(Path(__file__).parent / ".." / "deep_model").resolve(),
-        model_name="tf_model_ad_1.h5",
+        model_name="tf_model_core_1.h5",
     )
     transfer_model.plot_metrics_results()
     transfer_model.results()
     # one can pass the model address to the predict_test method
-    custom_titles = {
-        "NonDemented": "Healthy",
-        "ModerateDemented": "Moderate",
-        "MildDemented": "Mild",
-        "VeryMildDemented": "Very Mild",
-    }
+    # custom_titles = {
+    #     "NonDemented": "Healthy",
+    #     "ModerateDemented": "Moderate",
+    #     "MildDemented": "Mild",
+    #     "VeryMildDemented": "Very Mild",
+    # }
     transfer_model.predict_test(
         model_path=(
-            Path(__file__).parent / ".." / "deep_model" / "tf_model_ad_2.h5"
+                Path(__file__).parent / ".." / "deep_model" / "tf_model_core_1.h5"
         ).resolve(),
         rotation=90,
         y_axis_label_size=12,
@@ -1042,8 +1132,11 @@ if __name__ == "__main__":
         img_path=str(
             Path(__file__).parent
             / ".."
-            / "dataset_ad"
-            / "MildDemented"
-            / "mildDem0.jpg"
+            / "dataset_core"
+            / "augmented_dataset"
+            / "GRANODIORITE"
+            / "augmented_image_0_9.jpeg"
         ),
     )
+
+    transfer_model.predict_image_patch_classes()
