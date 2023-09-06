@@ -1006,8 +1006,8 @@ class TransferModel(Preprocessing, BitVision):
             img_path: path to the image
             window_percent: the percentage of the window size
             stride: the stride of the window
-            output_dir: the output directory to save the patches
-            core_box_red_dir: the output directory to save the original image with the box
+            patch_images_dir: the output directory to save the patch images
+            img_with_box_dir: the output directory to save the original image with the box
             figsize: Tuple the size of the figure
         :return: save_results: Dict the dictionary of the results
         """
