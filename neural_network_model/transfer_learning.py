@@ -968,6 +968,8 @@ class TransferModel(Preprocessing, BitVision):
         if model_path is not None:
             logger.info(f"Loading the model from {model_path}")
             self.model = tf.keras.models.load_model(model_path)
+        else:
+            logger.info(f"Using the self.model from memory")
         # Predict the image
         prediction = self.model.predict(img_array)
         predicted_class = tf.argmax(prediction, axis=1)[0]
@@ -1007,16 +1009,18 @@ class TransferModel(Preprocessing, BitVision):
             output_dir: the output directory to save the patches
             core_box_red_dir: the output directory to save the original image with the box
             figsize: Tuple the size of the figure
-        :return: None
+        :return: save_results: Dict the dictionary of the results
         """
 
         img_path = kwargs.get("img_path", None)
         figsize = kwargs.get("figsize", (15, 15))
         window_percent = kwargs.get("window_percent", 10)
         stride = kwargs.get("stride", 150)
-        output_dir = kwargs.get("output_dir", Path(__file__).parent / ".." / "dataset_ad" / "patch_images")
-        core_box_red_dir = kwargs.get("core_box_red_dir", Path(__file__).parent / ".." / "dataset_ad" /
-                                      "core_images_with_box_red")
+        output_dir = kwargs.get("output_dir", Path(__file__).parent / ".." / "dataset" / "patch_images")
+        core_box_red_dir = kwargs.get("core_box_red_dir", Path(__file__).parent / ".." / "dataset" /
+                                      "images_with_box")
+        fig_show = kwargs.get("fig_show", False)
+        model_path = kwargs.get("model_path", None)
 
         if img_path is None:
             raise ValueError("img_path is None")
@@ -1050,7 +1054,10 @@ class TransferModel(Preprocessing, BitVision):
 
                 # Pass the patch to your model for estimation
                 # Replace the following line with your model's prediction code
-                predicted_label, class_probabilities = transfer_model.predict_one_image(img_path=patch_filename)
+                predicted_label, class_probabilities = self.predict_one_image(
+                    img_path=patch_filename,
+                    model_path=model_path
+                )
 
                 save_results[f'patch_{count}.jpg'] = {
                     'predicted_label': predicted_label,
@@ -1074,14 +1081,18 @@ class TransferModel(Preprocessing, BitVision):
                 image_rgb = cv2.cvtColor(image_with_box, cv2.COLOR_BGR2RGB)
 
                 # Display the image using matplotlib
-                plt.figure(figsize=figsize)
-                plt.imshow(image_with_box)
-                plt.axis('off')  # Turn off axis labels
-                plt.show()
+                if fig_show:
+
+                    plt.figure(figsize=figsize)
+                    plt.imshow(image_with_box)
+                    plt.axis('off')  # Turn off axis labels
+                    plt.show()
 
                 # Save the image
                 core_filename = os.path.join(core_box_red_dir, f'patch_{count}.jpg')
                 cv2.imwrite(core_filename, image_rgb)
+
+        return save_results
 
 
 if __name__ == "__main__":
@@ -1097,14 +1108,14 @@ if __name__ == "__main__":
 
     # transfer_model.plot_classes_number()
     # transfer_model.analyze_image_names()
-    transfer_model.plot_data_images(num_rows=3, num_cols=3, cmap="jet")
+    # transfer_model.plot_data_images(num_rows=3, num_cols=3, cmap="jet")
     transfer_model.train_model(
         epochs=1,
         model_save_path=(Path(__file__).parent / ".." / "deep_model").resolve(),
         model_name="tf_model_core_1.h5",
     )
-    transfer_model.plot_metrics_results()
-    transfer_model.results()
+    # transfer_model.plot_metrics_results()
+    # transfer_model.results()
     # one can pass the model address to the predict_test method
     # custom_titles = {
     #     "NonDemented": "Healthy",
@@ -1112,31 +1123,42 @@ if __name__ == "__main__":
     #     "MildDemented": "Mild",
     #     "VeryMildDemented": "Very Mild",
     # }
-    transfer_model.predict_test(
-        model_path=(
-                Path(__file__).parent / ".." / "deep_model" / "tf_model_core_1.h5"
-        ).resolve(),
-        rotation=90,
-        y_axis_label_size=12,
-        x_axis_label_size=12,
-        title_size=14,
-        fig_title="Original Confusion Matrix",
-        conf_matx_font_size=12,
-        # custom_titles=custom_titles,
-        cmap="winter",
-        normalize="true",
-    )
-    transfer_model.grad_cam_viz(num_rows=3, num_cols=2)
+    # transfer_model.predict_test(
+    #     model_path=(
+    #             Path(__file__).parent / ".." / "deep_model" / "tf_model_core_1.h5"
+    #     ).resolve(),
+    #     rotation=90,
+    #     y_axis_label_size=12,
+    #     x_axis_label_size=12,
+    #     title_size=14,
+    #     fig_title="Original Confusion Matrix",
+    #     conf_matx_font_size=12,
+    #     # custom_titles=custom_titles,
+    #     cmap="winter",
+    #     normalize="true",
+    # )
+    # transfer_model.grad_cam_viz(num_rows=3, num_cols=2)
 
-    transfer_model.predict_one_image(
-        img_path=str(
-            Path(__file__).parent
-            / ".."
-            / "dataset_core"
-            / "augmented_dataset"
-            / "GRANODIORITE"
-            / "augmented_image_0_9.jpeg"
-        ),
-    )
+    # transfer_model.predict_one_image(
+    #     img_path=str(
+    #         Path(__file__).parent
+    #         / ".."
+    #         / "dataset_core"
+    #         / "augmented_dataset"
+    #         / "GRANODIORITE"
+    #         / "augmented_image_0_9.jpeg"
+    #     ),
+    # )
 
-    transfer_model.predict_image_patch_classes()
+    kwargs_dict = {
+        "img_path": str(Path(__file__).parent / ".." / "dataset_core" / "long_core" / "Picture1.png"),
+        "window_percent": 10,
+        "stride": 150,
+        "output_dir": Path(__file__).parent / ".." / "dataset_core" / "patch_images",
+        "core_box_red_dir": Path(__file__).parent / ".." / "dataset_core" / "core_images_with_box_red",
+        "figsize": (15, 15),
+        "fig_show": False,
+        "model_path": None
+    }
+    save_results = transfer_model.predict_image_patch_classes(**kwargs_dict)
+    print(save_results)
