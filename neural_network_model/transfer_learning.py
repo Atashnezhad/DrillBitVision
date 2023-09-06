@@ -1042,6 +1042,7 @@ class TransferModel(Preprocessing, BitVision):
                                       "images_with_box")
         fig_show = kwargs.get("fig_show", False)
         model_path = kwargs.get("model_path", None)
+        class_labels_path = kwargs.get("class_labels_path", None)
 
         if img_path is None:
             raise ValueError("img_path is None")
@@ -1081,7 +1082,7 @@ class TransferModel(Preprocessing, BitVision):
                 predicted_label, class_probabilities = self.predict_one_image(
                     img_path=patch_filename,
                     model_path=model_path,
-                    class_labels_path=str(Path(__file__).parent / "class_labels.json")
+                    class_labels_path=class_labels_path
                 )
 
                 save_results[f'patch_{count}.jpg'] = {
@@ -1181,8 +1182,9 @@ if __name__ == "__main__":
         "patch_images_dir": Path(__file__).parent / ".." / "dataset_core" / "patch_images",
         "img_with_box_dir": Path(__file__).parent / ".." / "dataset_core" / "core_images_with_box_red",
         "figsize": (15, 3),
-        "fig_show": False,
-        "model_path": Path(__file__).parent / ".." / "deep_model" / "tf_model_core_1.h5"
+        "fig_show": True,
+        "model_path": Path(__file__).parent / ".." / "deep_model" / "tf_model_core_1.h5",
+        "class_labels_path": str(Path(__file__).parent / "class_labels.json")
     }
     save_results = transfer_model.predict_image_patch_classes(**kwargs_dict)
     print(save_results)
