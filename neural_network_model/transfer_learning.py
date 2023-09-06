@@ -1139,11 +1139,11 @@ if __name__ == "__main__":
     # transfer_model.plot_classes_number()
     # transfer_model.analyze_image_names()
     # transfer_model.plot_data_images(num_rows=3, num_cols=3, cmap="jet")
-    # transfer_model.train_model(
-    #     epochs=1,
-    #     model_save_path=(Path(__file__).parent / ".." / "deep_model").resolve(),
-    #     model_name="tf_model_core_1.h5",
-    # )
+    transfer_model.train_model(
+        epochs=1,
+        model_save_path=(Path(__file__).parent / ".." / "deep_model").resolve(),
+        model_name="tf_model_core_1.h5",
+    )
     # transfer_model.plot_metrics_results()
     # transfer_model.results()
     # one can pass the model address to the predict_test method
@@ -1153,27 +1153,21 @@ if __name__ == "__main__":
     #     "MildDemented": "Mild",
     #     "VeryMildDemented": "Very Mild",
     # }
-    # transfer_model.predict_test(
-    #     model_path=(
-    #             Path(__file__).parent / ".." / "deep_model" / "tf_model_core_1.h5"
-    #     ).resolve(),
-    #     rotation=90,
-    #     y_axis_label_size=12,
-    #     x_axis_label_size=12,
-    #     title_size=14,
-    #     fig_title="Original Confusion Matrix",
-    #     conf_matx_font_size=12,
-    #     # custom_titles=custom_titles,
-    #     cmap="winter",
-    #     normalize="true",
-    # )
-    transfer_model.grad_cam_viz(
-        num_rows=3,
-        num_cols=2,
-        model_path=Path(__file__).parent / ".." / "deep_model" / "tf_model_core_1.h5",
-        test_dataset_address=Path(__file__).parent / ".." / "dataset_core" / "patch_images",
-        save_path=Path(__file__).parent / ".." / "figures" / "grad_cam.png",
+    transfer_model.predict_test(
+        model_path=(
+                Path(__file__).parent / ".." / "deep_model" / "tf_model_core_1.h5"
+        ).resolve(),
+        rotation=90,
+        y_axis_label_size=12,
+        x_axis_label_size=12,
+        title_size=14,
+        fig_title="Original Confusion Matrix",
+        conf_matx_font_size=12,
+        # custom_titles=custom_titles,
+        cmap="winter",
+        normalize="true",
     )
+    transfer_model.grad_cam_viz(num_rows=3, num_cols=2)
 
     # transfer_model.predict_one_image(
     #     img_path=str(
