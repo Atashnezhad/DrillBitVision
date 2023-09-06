@@ -892,16 +892,43 @@ class TransferModel(Preprocessing, BitVision):
         num_rows = kwargs.get("num_rows", None)
         num_cols = kwargs.get("num_cols", None)
         last_conv_layer_name = kwargs.get("last_conv_layer_name", "Conv_1")
-        img_size = kwargs.get("img_size", (224, 224))
+        img_size = kwargs.get("img_size", SETTING.FLOW_FROM_DIRECTORY_SETTING.TARGET_SIZE)
         gard_cam_image_name = kwargs.get("gard_cam_image_name", "transf_cam.jpg")
         figsize = kwargs.get("figsize", (8, 6))
         title_lable_size = kwargs.get("title_lable_size", 8)
+        model_path = kwargs.get("model_path", None)
+        test_dataset_address = kwargs.get("test_dataset_address", None)
+        x_col = TRANSFER_LEARNING_SETTING.DF_X_COL_NAME,
+        y_col = TRANSFER_LEARNING_SETTING.DF_Y_COL_NAME,
+        save_path = kwargs.get("save_path", Path(__file__).parent / ".." / "figures" / "grad_cam.png", )
 
+        if model_path:
+            logger.info(f"Loading the model from {model_path}")
+            self.model = tf.keras.models.load_model(model_path)
+        else:
+            logger.info(f"Using the self.model from memory")
         # Remove last layer's softmax
         self.model.layers[-1].activation = None
 
         # Display the part of the pictures used by the neural network to classify the pictures
-        _, test_df = self._train_test_split()
+        if test_dataset_address:
+            # Get filepaths and labels
+            filepaths = list(test_dataset_address.glob(r"**/*.png"))
+            # add those with jpg extension
+            filepaths.extend(list(test_dataset_address.glob(r"**/*.jpg")))
+            # add those with jpeg extension
+            filepaths.extend(list(test_dataset_address.glob(r"**/*.jpeg")))
+            labels = [path.stem for path in filepaths]
+
+            filepaths = pd.Series(filepaths, name=x_col).astype(str)
+            labels = pd.Series(labels, name=y_col)
+
+            # Concatenate filepaths and labels
+            test_df = pd.concat([filepaths, labels], axis=1)
+            # test_df, _ = train_test_split(test_df, train_size=1)
+
+        else:
+            _, test_df = self._train_test_split()
 
         if not num_rows and not num_cols:
             # Get the number of rows and columns for subplots
@@ -950,7 +977,7 @@ class TransferModel(Preprocessing, BitVision):
         plt.tight_layout()
         # save the figure
         plt.savefig(
-            Path(__file__).parent / ".." / "figures" / "grad_cam.png",
+            save_path,
             bbox_inches="tight",
         )
         plt.show()
@@ -986,7 +1013,7 @@ class TransferModel(Preprocessing, BitVision):
         img_array = tf.expand_dims(img_array, 0)
         # Preprocess the image
         img_array = tf.keras.applications.mobilenet_v2.preprocess_input(img_array)
-        if model_path is not None:
+        if model_path:
             logger.info(f"Loading the model from {model_path}")
             self.model = tf.keras.models.load_model(model_path)
         else:
@@ -1052,8 +1079,10 @@ class TransferModel(Preprocessing, BitVision):
 
         # Calculate the window size based on the percentage
         height, width, _ = image.shape
+        logger.info(f"Image height, width: {height}, {width}")
         window_height = int(height)
         window_width = int(width * window_percent / 100)
+        logger.info(f"Window height, width: {window_height}, {window_width}")
 
         # Output directory to save patch images
         os.makedirs(patch_images_dir, exist_ok=True)
@@ -1071,7 +1100,10 @@ class TransferModel(Preprocessing, BitVision):
                     desc="Predicting the image patches"
             ):
                 # Extract the patch using the sliding window
-                patch = image[y:y + window_height, x:x + window_width]
+                patch = image[
+                        y:y + window_height,
+                        x:x + window_width
+                        ]
 
                 # Save the patch as an image
                 patch_filename = os.path.join(patch_images_dir, f'patch_{count}.jpg')
@@ -1099,7 +1131,7 @@ class TransferModel(Preprocessing, BitVision):
                 cv2.rectangle(
                     image_with_box,
                     (x, y),
-                    (x + window_width - stride, y + window_height),
+                    (x + window_width, y + window_height),
                     (0, 0, 255), 4
                 )  # Red box
 
@@ -1114,8 +1146,8 @@ class TransferModel(Preprocessing, BitVision):
                     plt.show()
 
                 # Save the image
-                core_filename = os.path.join(img_with_box_dir, f'patch_{count}.jpg')
-                cv2.imwrite(core_filename, image_rgb)
+                _filename = os.path.join(img_with_box_dir, f'patch_{count}.jpg')
+                cv2.imwrite(_filename, image_rgb)
 
         return save_results
 
@@ -1162,7 +1194,13 @@ if __name__ == "__main__":
     #     cmap="winter",
     #     normalize="true",
     # )
-    # transfer_model.grad_cam_viz(num_rows=3, num_cols=2)
+    transfer_model.grad_cam_viz(
+        num_rows=3,
+        num_cols=2,
+        model_path=Path(__file__).parent / ".." / "deep_model" / "tf_model_core_1.h5",
+        test_dataset_address=Path(__file__).parent / ".." / "dataset_core" / "patch_images",
+        save_path=Path(__file__).parent / ".." / "figures" / "grad_cam.png",
+    )
 
     # transfer_model.predict_one_image(
     #     img_path=str(
@@ -1177,7 +1215,7 @@ if __name__ == "__main__":
 
     kwargs_dict = {
         "img_path": str(Path(__file__).parent / ".." / "dataset_core" / "long_core" / "Picture1.png"),
-        "window_percent": 10,
+        "window_percent": 5,
         "stride": 150,
         "patch_images_dir": Path(__file__).parent / ".." / "dataset_core" / "patch_images",
         "img_with_box_dir": Path(__file__).parent / ".." / "dataset_core" / "core_images_with_box_red",
