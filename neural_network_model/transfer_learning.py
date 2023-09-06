@@ -29,6 +29,7 @@ from tensorflow.keras.preprocessing.image import (
     img_to_array,
     load_img,
 )
+from tqdm import tqdm
 
 from neural_network_model.bit_vision import BitVision
 from neural_network_model.model import SETTING, TRANSFER_LEARNING_SETTING
@@ -36,7 +37,7 @@ from neural_network_model.process_data import Preprocessing
 
 # Initialize the logger
 logger = logging.getLogger()
-logger.setLevel(logging.INFO)
+logger.setLevel(logging.WARNING)
 
 
 class TransferModel(Preprocessing, BitVision):
@@ -1064,7 +1065,10 @@ class TransferModel(Preprocessing, BitVision):
         # Iterate through the image using sliding window
         count = 0
         for y in range(0, height - window_height + 1, stride):
-            for x in range(0, width - window_width + 1 + stride, stride):
+            for x in tqdm(
+                    range(0, width - window_width + 1 + stride, stride),
+                    desc="Predicting the image patches"
+            ):
                 # Extract the patch using the sliding window
                 patch = image[y:y + window_height, x:x + window_width]
 
@@ -1177,7 +1181,7 @@ if __name__ == "__main__":
         "patch_images_dir": Path(__file__).parent / ".." / "dataset_core" / "patch_images",
         "img_with_box_dir": Path(__file__).parent / ".." / "dataset_core" / "core_images_with_box_red",
         "figsize": (15, 3),
-        "fig_show": True,
+        "fig_show": False,
         "model_path": Path(__file__).parent / ".." / "deep_model" / "tf_model_core_1.h5"
     }
     save_results = transfer_model.predict_image_patch_classes(**kwargs_dict)
