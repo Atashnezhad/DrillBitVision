@@ -7,7 +7,7 @@ import logging
 import math
 import os
 from pathlib import Path
-from typing import Tuple, Dict
+from typing import Dict, Tuple
 
 import matplotlib.cm as cm
 import numpy as np
@@ -30,7 +30,7 @@ from tensorflow.keras.preprocessing.image import (
 )
 
 from neural_network_model.bit_vision import BitVision
-from neural_network_model.model import TRANSFER_LEARNING_SETTING, SETTING
+from neural_network_model.model import SETTING, TRANSFER_LEARNING_SETTING
 from neural_network_model.process_data import Preprocessing
 
 # Initialize the logger
@@ -1024,7 +1024,7 @@ if __name__ == "__main__":
     }
     transfer_model.predict_test(
         model_path=(
-                Path(__file__).parent / ".." / "deep_model" / "tf_model_ad_1.h5"
+            Path(__file__).parent / ".." / "deep_model" / "tf_model_ad_1.h5"
         ).resolve(),
         rotation=90,
         y_axis_label_size=12,
