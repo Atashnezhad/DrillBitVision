@@ -1024,7 +1024,7 @@ if __name__ == "__main__":
     }
     transfer_model.predict_test(
         model_path=(
-            Path(__file__).parent / ".." / "deep_model" / "tf_model_ad_1.h5"
+            Path(__file__).parent / ".." / "deep_model" / "tf_model_ad_2.h5"
         ).resolve(),
         rotation=90,
         y_axis_label_size=12,
