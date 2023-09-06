@@ -55,10 +55,10 @@ class TransferModel(Preprocessing, BitVision):
         self.class_labels: dict = None
 
     def _prepare_data(
-        self,
-        print_data_head=False,
-        x_col=TRANSFER_LEARNING_SETTING.DF_X_COL_NAME,
-        y_col=TRANSFER_LEARNING_SETTING.DF_Y_COL_NAME,
+            self,
+            print_data_head=False,
+            x_col=TRANSFER_LEARNING_SETTING.DF_X_COL_NAME,
+            y_col=TRANSFER_LEARNING_SETTING.DF_Y_COL_NAME,
     ):
         """
         Prepare the data for the model
@@ -92,11 +92,11 @@ class TransferModel(Preprocessing, BitVision):
         logging.info("Data was prepared")
 
     def plot_classes_number(
-        self,
-        figsize=(10, 5),
-        x_rotation=0,
-        palette="Greens_r",
-        **kwargs,
+            self,
+            figsize=(10, 5),
+            x_rotation=0,
+            palette="Greens_r",
+            **kwargs,
     ) -> None:
         """
         Plot the number of images per species
@@ -147,14 +147,14 @@ class TransferModel(Preprocessing, BitVision):
             logger.info(f"number of images belong to {names[i]}: {counts[i]}")
 
     def analyze_image_names(
-        self,
-        figsize=(20, 22),
-        figsize_2=(10, 7),
-        cmap_2="YlGnBu",
-        size=15,
-        label_size=25,
-        num_cluster=5,
-        **kwargs,
+            self,
+            figsize=(20, 22),
+            figsize_2=(10, 7),
+            cmap_2="YlGnBu",
+            size=15,
+            label_size=25,
+            num_cluster=5,
+            **kwargs,
     ) -> None:
         """
         Analyze the image names if there is any pattern in the names
@@ -291,7 +291,7 @@ class TransferModel(Preprocessing, BitVision):
         plt.show()
 
     def plot_data_images(
-        self, num_rows=None, num_cols=None, figsize=(15, 10), **kwargs
+            self, num_rows=None, num_cols=None, figsize=(15, 10), **kwargs
     ):
         """
         Plot the images in a grid
@@ -775,7 +775,7 @@ class TransferModel(Preprocessing, BitVision):
         return array
 
     def _make_gradcam_heatmap(
-        self, img_array, model, last_conv_layer_name, pred_index=None
+            self, img_array, model, last_conv_layer_name, pred_index=None
     ):
         # First, we create a model that maps the input image to the activations
         # of the last conv layer as well as the output predictions
@@ -811,12 +811,12 @@ class TransferModel(Preprocessing, BitVision):
         return heatmap.numpy()
 
     def _save_and_display_gradcam(
-        self,
-        img_path,
-        heatmap,
-        cam_name="transf_cam.jpg",
-        alpha=0.4,
-        **kwargs,
+            self,
+            img_path,
+            heatmap,
+            cam_name="transf_cam.jpg",
+            alpha=0.4,
+            **kwargs,
     ):
         """
         Args:
@@ -946,10 +946,11 @@ class TransferModel(Preprocessing, BitVision):
         )
         plt.show()
 
-    def predict_one_image(self, img_path: str) -> Tuple[np.ndarray, Dict]:
+    def predict_one_image(self, img_path: str, model_path=None) -> Tuple[np.ndarray, Dict]:
         """
         Predict one image
         :param img_path: path to the image
+        :param model_path: path to the model
         :return: None
         """
         # Load the image
@@ -963,6 +964,9 @@ class TransferModel(Preprocessing, BitVision):
         img_array = tf.expand_dims(img_array, 0)
         # Preprocess the image
         img_array = tf.keras.applications.mobilenet_v2.preprocess_input(img_array)
+        if model_path is not None:
+            logger.info(f"Loading the model from {model_path}")
+            self.model = tf.keras.models.load_model(model_path)
         # Predict the image
         prediction = self.model.predict(img_array)
         predicted_class = tf.argmax(prediction, axis=1)[0]
@@ -979,15 +983,14 @@ class TransferModel(Preprocessing, BitVision):
             probability = probabilities[class_index]
             class_probabilities[class_name] = probability
 
-        # Print the label
-        # logging.info(f"predicted_class {predicted_class}")
         # use the self.class_labels to get the label
         flipped_dict = {
             value: key
             for key, value in self.class_labels.items()
         }
         predicted_label = flipped_dict[predicted_class.numpy()]
-        logging.info(f"predicted_label {predicted_label} with probability of {probabilities[predicted_class.numpy()]:.2f}")
+        logging.info(
+            f"predicted_label {predicted_label} with probability of {probabilities[predicted_class.numpy()]:.2f}")
         return predicted_label, class_probabilities
 
 
@@ -1021,7 +1024,7 @@ if __name__ == "__main__":
     }
     transfer_model.predict_test(
         model_path=(
-            Path(__file__).parent / ".." / "deep_model" / "tf_model_ad_1.h5"
+                Path(__file__).parent / ".." / "deep_model" / "tf_model_ad_1.h5"
         ).resolve(),
         rotation=90,
         y_axis_label_size=12,
