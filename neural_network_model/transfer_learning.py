@@ -1016,8 +1016,8 @@ class TransferModel(Preprocessing, BitVision):
         figsize = kwargs.get("figsize", (15, 15))
         window_percent = kwargs.get("window_percent", 10)
         stride = kwargs.get("stride", 150)
-        output_dir = kwargs.get("output_dir", Path(__file__).parent / ".." / "dataset" / "patch_images")
-        core_box_red_dir = kwargs.get("core_box_red_dir", Path(__file__).parent / ".." / "dataset" /
+        patch_images_dir = kwargs.get("patch_images_dir", Path(__file__).parent / ".." / "dataset" / "patch_images")
+        img_with_box_dir = kwargs.get("img_with_box_dir", Path(__file__).parent / ".." / "dataset" /
                                       "images_with_box")
         fig_show = kwargs.get("fig_show", False)
         model_path = kwargs.get("model_path", None)
@@ -1034,10 +1034,10 @@ class TransferModel(Preprocessing, BitVision):
         window_width = int(width * window_percent / 100)
 
         # Output directory to save patch images
-        os.makedirs(output_dir, exist_ok=True)
+        os.makedirs(patch_images_dir, exist_ok=True)
 
         # Output directory to save patch images
-        os.makedirs(core_box_red_dir, exist_ok=True)
+        os.makedirs(img_with_box_dir, exist_ok=True)
 
         save_results = {}
 
@@ -1049,7 +1049,7 @@ class TransferModel(Preprocessing, BitVision):
                 patch = image[y:y + window_height, x:x + window_width]
 
                 # Save the patch as an image
-                patch_filename = os.path.join(output_dir, f'patch_{count}.jpg')
+                patch_filename = os.path.join(patch_images_dir, f'patch_{count}.jpg')
                 cv2.imwrite(patch_filename, patch)
 
                 # Pass the patch to your model for estimation
@@ -1089,7 +1089,7 @@ class TransferModel(Preprocessing, BitVision):
                     plt.show()
 
                 # Save the image
-                core_filename = os.path.join(core_box_red_dir, f'patch_{count}.jpg')
+                core_filename = os.path.join(img_with_box_dir, f'patch_{count}.jpg')
                 cv2.imwrite(core_filename, image_rgb)
 
         return save_results
@@ -1154,8 +1154,8 @@ if __name__ == "__main__":
         "img_path": str(Path(__file__).parent / ".." / "dataset_core" / "long_core" / "Picture1.png"),
         "window_percent": 10,
         "stride": 150,
-        "output_dir": Path(__file__).parent / ".." / "dataset_core" / "patch_images",
-        "core_box_red_dir": Path(__file__).parent / ".." / "dataset_core" / "core_images_with_box_red",
+        "patch_images_dir": Path(__file__).parent / ".." / "dataset_core" / "patch_images",
+        "img_with_box_dir": Path(__file__).parent / ".." / "dataset_core" / "core_images_with_box_red",
         "figsize": (15, 15),
         "fig_show": False,
         "model_path": None
