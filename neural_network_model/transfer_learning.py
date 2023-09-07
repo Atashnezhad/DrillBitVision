@@ -1069,7 +1069,7 @@ class TransferModel(Preprocessing, BitVision):
             logger.info(f"Loading the model from {model_path}")
             self.model = tf.keras.models.load_model(model_path)
         else:
-            logger.info(f"Using the self.model from memory")
+            logger.info("Using the self.model from memory")
         # Predict the image
         prediction = self.model.predict(img_array)
         predicted_class = tf.argmax(prediction, axis=1)[0]
@@ -1153,9 +1153,9 @@ class TransferModel(Preprocessing, BitVision):
             ):
                 # Extract the patch using the sliding window
                 patch = image[
-                        y:y + window_height,
-                        x:x + window_width
-                        ]
+                    y: y + window_height,
+                    x: x + window_width
+                ]
 
                 # Save the patch as an image
                 patch_filename = os.path.join(patch_images_dir, f'patch_{count}.jpg')
@@ -1260,9 +1260,9 @@ class TransferModel(Preprocessing, BitVision):
             ):
                 # Extract the patch using the sliding window
                 patch = image[
-                        y:y + window_height,
-                        x:x + window_width
-                        ]
+                    y: y + window_height,
+                    x: x + window_width
+                ]
 
                 # Save the patch as an image
                 patch_filename = os.path.join(patch_images_dir, f'patch_{count}.jpg')
@@ -1313,6 +1313,7 @@ class TransferModel(Preprocessing, BitVision):
 
 if __name__ == "__main__":
     from neural_network_model.process_data import Preprocessing
+    from PIL import Image  # noqa: F811
 
     # download the dataset
     # obj = Preprocessing()
@@ -1325,11 +1326,11 @@ if __name__ == "__main__":
     # transfer_model.plot_classes_number()
     # transfer_model.analyze_image_names()
     # transfer_model.plot_data_images(num_rows=3, num_cols=3, cmap="jet")
-    transfer_model.train_model(
-        epochs=5,
-        model_save_path=(Path(__file__).parent / ".." / "deep_model").resolve(),
-        model_name="tf_model_core_1.h5",
-    )
+    # transfer_model.train_model(
+    #     epochs=5,
+    #     model_save_path=(Path(__file__).parent / ".." / "deep_model").resolve(),
+    #     model_name="tf_model_core_1.h5",
+    # )
     # transfer_model.plot_metrics_results()
     # transfer_model.results()
     # one can pass the model address to the predict_test method
@@ -1382,7 +1383,6 @@ if __name__ == "__main__":
 
     img_path = Path(__file__).parent / ".." / "dataset_core" / "patch_images" / "patch_0.jpg"
     # load the img from img_path
-    from PIL import Image
 
     img = Image.open(img_path)
     # Resize the image to the expected shape (224x224)
