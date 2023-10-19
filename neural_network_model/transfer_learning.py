@@ -2,12 +2,14 @@
 # Author: Datalira
 # Link: https://www.kaggle.com/code/databeru/plant-seedlings-classifier-grad-cam-acc-95
 # Location: Dresden, Saxony, Germany
-
+import json
 import logging
 import math
 import os
 from pathlib import Path
+from typing import Dict, Tuple
 
+import cv2
 import matplotlib.cm as cm
 import numpy as np
 import pandas as pd
@@ -20,14 +22,22 @@ from sklearn.cluster import KMeans
 from sklearn.metrics import classification_report, confusion_matrix
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
+from sklearn.utils.class_weight import compute_class_weight
+from tensorflow.keras.preprocessing.image import (
+    ImageDataGenerator,
+    array_to_img,
+    img_to_array,
+    load_img,
+)
+from tqdm import tqdm
 
 from neural_network_model.bit_vision import BitVision
-from neural_network_model.model import TRANSFER_LEARNING_SETTING
+from neural_network_model.model import SETTING, TRANSFER_LEARNING_SETTING
 from neural_network_model.process_data import Preprocessing
 
 # Initialize the logger
 logger = logging.getLogger()
-logger.setLevel(logging.INFO)
+logger.setLevel(logging.WARNING)
 
 
 class TransferModel(Preprocessing, BitVision):
@@ -44,11 +54,13 @@ class TransferModel(Preprocessing, BitVision):
 
         self.pred: np.ndarray = None
 
+        self.class_labels: dict = None
+
     def _prepare_data(
-        self,
-        print_data_head=False,
-        x_col=TRANSFER_LEARNING_SETTING.DF_X_COL_NAME,
-        y_col=TRANSFER_LEARNING_SETTING.DF_Y_COL_NAME,
+            self,
+            print_data_head=False,
+            x_col=TRANSFER_LEARNING_SETTING.DF_X_COL_NAME,
+            y_col=TRANSFER_LEARNING_SETTING.DF_Y_COL_NAME,
     ):
         """
         Prepare the data for the model
@@ -62,6 +74,8 @@ class TransferModel(Preprocessing, BitVision):
         filepaths = list(image_dir.glob(r"**/*.png"))
         # add those with jpg extension
         filepaths.extend(list(image_dir.glob(r"**/*.jpg")))
+        # add those with jpeg extension
+        filepaths.extend(list(image_dir.glob(r"**/*.jpeg")))
         labels = list(map(lambda x: os.path.split(os.path.split(x)[0])[1], filepaths))
 
         filepaths = pd.Series(filepaths, name=x_col).astype(str)
@@ -80,11 +94,11 @@ class TransferModel(Preprocessing, BitVision):
         logging.info("Data was prepared")
 
     def plot_classes_number(
-        self,
-        figsize=(10, 5),
-        x_rotation=0,
-        palette="Greens_r",
-        **kwargs,
+            self,
+            figsize=(10, 5),
+            x_rotation=0,
+            palette="Greens_r",
+            **kwargs,
     ) -> None:
         """
         Plot the number of images per species
@@ -135,14 +149,14 @@ class TransferModel(Preprocessing, BitVision):
             logger.info(f"number of images belong to {names[i]}: {counts[i]}")
 
     def analyze_image_names(
-        self,
-        figsize=(20, 22),
-        figsize_2=(10, 7),
-        cmap_2="YlGnBu",
-        size=15,
-        label_size=25,
-        num_cluster=5,
-        **kwargs,
+            self,
+            figsize=(20, 22),
+            figsize_2=(10, 7),
+            cmap_2="YlGnBu",
+            size=15,
+            label_size=25,
+            num_cluster=5,
+            **kwargs,
     ) -> None:
         """
         Analyze the image names if there is any pattern in the names
@@ -279,7 +293,7 @@ class TransferModel(Preprocessing, BitVision):
         plt.show()
 
     def plot_data_images(
-        self, num_rows=None, num_cols=None, figsize=(15, 10), **kwargs
+            self, num_rows=None, num_cols=None, figsize=(15, 10), **kwargs
     ):
         """
         Plot the images in a grid
@@ -317,7 +331,7 @@ class TransferModel(Preprocessing, BitVision):
                 filepath = self.image_df.Filepath[i]
                 file_extension = os.path.splitext(filepath)[1].lower()
 
-                if file_extension in [".png", ".jpg"]:
+                if file_extension in TRANSFER_LEARNING_SETTING.SUPPORTED_FILE_FORMATS:
                     try:
                         image = plt.imread(filepath)
                         ax.imshow(image, cmap=cmap)
@@ -369,12 +383,12 @@ class TransferModel(Preprocessing, BitVision):
         """
         train_df, test_df = self._train_test_split()
         # Load the Images with a generator and Data Augmentation
-        train_generator = tf.keras.preprocessing.image.ImageDataGenerator(
+        train_generator = ImageDataGenerator(
             preprocessing_function=tf.keras.applications.mobilenet_v2.preprocess_input,
             validation_split=TRANSFER_LEARNING_SETTING.VALIDATION_SPLIT,
         )
 
-        test_generator = tf.keras.preprocessing.image.ImageDataGenerator(
+        test_generator = ImageDataGenerator(
             preprocessing_function=tf.keras.applications.mobilenet_v2.preprocess_input
         )
 
@@ -399,6 +413,16 @@ class TransferModel(Preprocessing, BitVision):
         horizontal_flip = TRANSFER_LEARNING_SETTING.AUGMENTATION_SETTING.HORIZONTAL_FLIP
         fill_mode = TRANSFER_LEARNING_SETTING.AUGMENTATION_SETTING.FILL_MODE
 
+        # # Calculate class weights
+        # class_labels = train_df['Label'].unique()
+        # class_weights = compute_class_weight(
+        #     'balanced',
+        #     classes=class_labels,
+        #     y=train_df['Label']
+        # )
+        # class_weights_dict = dict(zip(range(len(class_labels)), class_weights))
+        # logging.info(f"class_weights_dict: {class_weights_dict}")
+
         train_images = train_generator.flow_from_dataframe(
             dataframe=train_df,
             x_col=xcol,
@@ -417,7 +441,20 @@ class TransferModel(Preprocessing, BitVision):
             shear_range=shear_range,
             horizontal_flip=horizontal_flip,
             fill_mode=fill_mode,
+            # class_weight=class_weights_dict,
         )
+
+        # # get the self.class_labels from the train_generator
+        self.class_labels = train_images.class_indices
+        # save the class labels on disk as a json file
+        with open(
+                Path(__file__).parent / "class_labels.json", "w"
+        ) as f:
+            json.dump(self.class_labels, f)
+            logger.info(f"Class labels were saved in {f.name}")
+
+        # Print the class labels
+        logging.info(f"Class labels: {self.class_labels}")
 
         val_images = train_generator.flow_from_dataframe(
             dataframe=train_df,
@@ -522,6 +559,12 @@ class TransferModel(Preprocessing, BitVision):
             val_images,
             test_images,
         ) = self._create_model()
+
+        # After you create the data generator for training (train_generator), you can get the class labels like this:
+        # self.class_labels = train_generator.class_indices
+        # # Print the class labels
+        # logging.info("Class labels:", self.class_labels)
+
         inputs = pretrained_model.input
 
         number_of_units_layer_1 = TRANSFER_LEARNING_SETTING.DENSE_LAYER_1_UNITS
@@ -733,15 +776,15 @@ class TransferModel(Preprocessing, BitVision):
         return report
 
     def _get_img_array(self, img_path, size):
-        img = tf.keras.preprocessing.image.load_img(img_path, target_size=size)
-        array = tf.keras.preprocessing.image.img_to_array(img)
+        img = load_img(img_path, target_size=size)
+        array = img_to_array(img)
         # We add a dimension to transform our array into a "batch"
         # of size "size"
         array = np.expand_dims(array, axis=0)
         return array
 
     def _make_gradcam_heatmap(
-        self, img_array, model, last_conv_layer_name, pred_index=None
+            self, img_array, model, last_conv_layer_name, pred_index=None
     ):
         # First, we create a model that maps the input image to the activations
         # of the last conv layer as well as the output predictions
@@ -777,12 +820,12 @@ class TransferModel(Preprocessing, BitVision):
         return heatmap.numpy()
 
     def _save_and_display_gradcam(
-        self,
-        img_path,
-        heatmap,
-        cam_name="transf_cam.jpg",
-        alpha=0.4,
-        **kwargs,
+            self,
+            img_path,
+            heatmap,
+            cam_name="transf_cam.jpg",
+            alpha=0.4,
+            **kwargs,
     ):
         """
         Args:
@@ -802,8 +845,8 @@ class TransferModel(Preprocessing, BitVision):
             os.makedirs(cam_path)
 
         # Load the original image
-        img = tf.keras.preprocessing.image.load_img(img_path)
-        img = tf.keras.preprocessing.image.img_to_array(img)
+        img = load_img(img_path)
+        img = img_to_array(img)
 
         # Rescale heatmap to a range 0-255
         heatmap = np.uint8(255 * heatmap)
@@ -816,13 +859,13 @@ class TransferModel(Preprocessing, BitVision):
         jet_heatmap = jet_colors[heatmap]
 
         # Create an image with RGB colorized heatmap
-        jet_heatmap = tf.keras.preprocessing.image.array_to_img(jet_heatmap)
+        jet_heatmap = array_to_img(jet_heatmap)
         jet_heatmap = jet_heatmap.resize((img.shape[1], img.shape[0]))
-        jet_heatmap = tf.keras.preprocessing.image.img_to_array(jet_heatmap)
+        jet_heatmap = img_to_array(jet_heatmap)
 
         # Superimpose the heatmap on original image
         superimposed_img = jet_heatmap * alpha + img
-        superimposed_img = tf.keras.preprocessing.image.array_to_img(superimposed_img)
+        superimposed_img = array_to_img(superimposed_img)
 
         # Save the superimposed image
         superimposed_img.save(cam_path / cam_name)
@@ -835,6 +878,7 @@ class TransferModel(Preprocessing, BitVision):
     def grad_cam_viz(self, *args, **kwargs):
         """
         Visualize the Grad-CAM heatmap
+        This method needs the train and predict methods to be run first
         Keyword Arguments:
             num_rows {int} -- Number of rows of the subplot grid (default: {None})
             num_cols {int} -- Number of columns of the subplot grid (default: {None})
@@ -912,47 +956,440 @@ class TransferModel(Preprocessing, BitVision):
         )
         plt.show()
 
+    def grad_cam_viz_2(self, **kwargs):
+        """
+        Visualize the Grad-CAM heatmap
+        Keyword Arguments:
+            last_conv_layer_name {str} -- Name of the last convolutional layer (default: {"Conv_1"})
+            img_size {tuple} -- Size of the image (default: {(224, 224)})
+            gard_cam_image_name {str} -- Name of the Grad-CAM image (default: {"transf_cam.jpg"})
+            model_path {str} -- path to the model (default: {None})
+            img_path {str} -- path to the image (default: {None})
+        """
+        preprocess_input = tf.keras.applications.mobilenet_v2.preprocess_input
+        # decode_predictions = tf.keras.applications.mobilenet_v2.decode_predictions
+
+        last_conv_layer_name = kwargs.get("last_conv_layer_name", "Conv_1")
+        # img_size = kwargs.get("img_size", (224, 224))
+        gard_cam_image_name = kwargs.get("gard_cam_image_name", "transf_cam.jpg")
+        model_path = kwargs.get("model_path", None)
+        img = kwargs.get("img", None)
+        cmap = kwargs.get("cmap", "jet")
+        alpha = kwargs.get("alpha", 0.4)
+        cam_path = kwargs.get(
+            "figure_folder_path", Path(__file__).parent / ".." / "figures"
+        )
+        cam_name = kwargs.get("cam_name", "transf_cam.jpg")
+
+        # Remove last layer's softmax
+        if not model_path:
+            raise ValueError("model_path is None")
+
+        logger.info(f"Loading the model from {model_path}")
+        self.model = tf.keras.models.load_model(model_path)
+        self.model.layers[-1].activation = None
+
+        array = img_to_array(img)
+        # We add a dimension to transform our array into a "batch"
+        # of size "size"
+        array = np.expand_dims(array, axis=0)
+
+        img_array = preprocess_input(
+            array
+        )
+        heatmap = self._make_gradcam_heatmap(
+            img_array, self.model, last_conv_layer_name
+        )
+
+        # Load the original image
+        # img = load_img(img)
+        # img = img_to_array(img)
+        # Rescale heatmap to a range 0-255
+        heatmap = np.uint8(255 * heatmap)
+        # Use jet colormap to colorize heatmap
+        jet = cm.get_cmap(cmap)
+
+        # Use RGB values of the colormap
+        jet_colors = jet(np.arange(256))[:, :3]
+        jet_heatmap = jet_colors[heatmap]
+
+        # Create an image with RGB colorized heatmap
+        jet_heatmap = array_to_img(jet_heatmap)
+        jet_heatmap = jet_heatmap.resize((array.shape[1], array.shape[0]))
+        jet_heatmap = img_to_array(jet_heatmap)
+
+        # Superimpose the heatmap on original image
+        superimposed_img = jet_heatmap * alpha + array
+        superimposed_img = array_to_img(superimposed_img[0])
+
+        # Save the superimposed image
+        superimposed_img.save(cam_path / cam_name)
+
+        plt.imshow(plt.imread(cam_path / f"{gard_cam_image_name}"))
+        plt.tight_layout()
+        # save the figure
+        plt.savefig(
+            Path(__file__).parent / ".." / "figures" / "grad_cam.png",
+            bbox_inches="tight",
+        )
+        plt.show()
+
+    def predict_one_image(
+            self,
+            img_path: str,
+            model_path=None,
+            class_labels_path: str = None
+    ) -> Tuple[np.ndarray, Dict]:
+        """
+        Predict one image
+        :param img_path: path to the image
+        :param model_path: path to the model
+        :param class_labels_path: path to the class labels
+        :return: None
+        """
+
+        if class_labels_path:
+            # read the class labels from the json file
+            with open(class_labels_path, "r") as f:
+                class_labels = json.load(f)
+        else:
+            class_labels = self.class_labels
+        # Load the image
+        img = tf.keras.preprocessing.image.load_img(
+            img_path,
+            target_size=SETTING.FLOW_FROM_DIRECTORY_SETTING.TARGET_SIZE,
+        )
+        # Convert the image to array
+        img_array = tf.keras.preprocessing.image.img_to_array(img)
+        # Expand the dimension of the image
+        img_array = tf.expand_dims(img_array, 0)
+        # Preprocess the image
+        img_array = tf.keras.applications.mobilenet_v2.preprocess_input(img_array)
+        if model_path:
+            logger.info(f"Loading the model from {model_path}")
+            self.model = tf.keras.models.load_model(model_path)
+        else:
+            logger.info("Using the self.model from memory")
+        # Predict the image
+        prediction = self.model.predict(img_array)
+        predicted_class = tf.argmax(prediction, axis=1)[0]
+
+        # also get the probability of the prediction for all the classes
+        softmax_output = np.exp(prediction) / np.sum(np.exp(prediction), axis=1, keepdims=True)
+        probabilities = softmax_output[0]
+
+        # Create a new dictionary to store class-probability pairs
+        class_probabilities = {}
+
+        # Iterate through the class dictionary and probabilities, and add them to the new dictionary
+        for class_name, class_index in class_labels.items():
+            probability = probabilities[class_index]
+            class_probabilities[class_name] = probability
+
+        # use the class_labels to get the label
+        flipped_dict = {
+            value: key
+            for key, value in class_labels.items()
+        }
+        predicted_label = flipped_dict[predicted_class.numpy()]
+        logging.info(
+            f"predicted_label {predicted_label} with probability of {probabilities[predicted_class.numpy()]:.2f}")
+        return predicted_label, class_probabilities
+
+    def predict_image_patch_classes(self, **kwargs):
+        """
+        Predict the classes of the image patches
+        This function gets the path to an image which is a horizontal and make patches of the image
+        for each path it does the prediction and save the image and also the original image with the box in
+        separated folders
+        :param kwargs:
+            img_path: path to the image
+            window_percent: the percentage of the window size
+            stride: the stride of the window
+            patch_images_dir: the output directory to save the patch images
+            img_with_box_dir: the output directory to save the original image with the box
+            figsize: Tuple the size of the figure
+        :return: save_results: Dict the dictionary of the results
+        """
+
+        img_path = kwargs.get("img_path", None)
+        figsize = kwargs.get("figsize", (15, 15))
+        window_percent = kwargs.get("window_percent", 10)
+        stride = kwargs.get("stride", 150)
+        patch_images_dir = kwargs.get("patch_images_dir", Path(__file__).parent / ".." / "dataset" / "patch_images")
+        img_with_box_dir = kwargs.get("img_with_box_dir", Path(__file__).parent / ".." / "dataset" /
+                                      "images_with_box")
+        fig_show = kwargs.get("fig_show", False)
+        model_path = kwargs.get("model_path", None)
+        class_labels_path = kwargs.get("class_labels_path", None)
+
+        if img_path is None:
+            raise ValueError("img_path is None")
+
+        # Load the image
+        image = cv2.imread(img_path)
+
+        # Calculate the window size based on the percentage
+        height, width, _ = image.shape
+        logger.info(f"Image height, width: {height}, {width}")
+        window_height = int(height)
+        window_width = int(width * window_percent / 100)
+        logger.info(f"Window height, width: {window_height}, {window_width}")
+
+        # Output directory to save patch images
+        os.makedirs(patch_images_dir, exist_ok=True)
+
+        # Output directory to save patch images
+        os.makedirs(img_with_box_dir, exist_ok=True)
+
+        save_results = {}
+
+        # Iterate through the image using sliding window
+        count = 0
+        for y in range(0, height - window_height + 1, stride):
+            for x in tqdm(
+                    range(0, width - window_width + 1 + stride, stride),
+                    desc="Predicting the image patches"
+            ):
+                # Extract the patch using the sliding window
+                patch = image[
+                    y: y + window_height,
+                    x: x + window_width
+                ]
+
+                # Save the patch as an image
+                patch_filename = os.path.join(patch_images_dir, f'patch_{count}.jpg')
+                cv2.imwrite(patch_filename, patch)
+
+                # Pass the patch to your model for estimation
+                # Replace the following line with your model's prediction code
+                predicted_label, class_probabilities = self.predict_one_image(
+                    img_path=patch_filename,
+                    model_path=model_path,
+                    class_labels_path=class_labels_path
+                )
+
+                save_results[f'patch_{count}.jpg'] = {
+                    'predicted_label': predicted_label,
+                    'class_probabilities': class_probabilities
+                }
+
+                count += 1
+
+                # Create a copy of the original image to draw on
+                image_with_box = image.copy()
+
+                # Draw a single red box
+                cv2.rectangle(
+                    image_with_box,
+                    (x, y),
+                    (x + window_width, y + window_height),
+                    (0, 0, 255), 4
+                )  # Red box
+
+                # Convert BGR image to RGB for matplotlib
+                image_rgb = cv2.cvtColor(image_with_box, cv2.COLOR_BGR2RGB)
+
+                # Display the image using matplotlib
+                if fig_show:
+                    plt.figure(figsize=figsize)
+                    plt.imshow(image_with_box)
+                    plt.axis('off')  # Turn off axis labels
+                    plt.show()
+
+                # Save the image
+                _filename = os.path.join(img_with_box_dir, f'patch_{count}.jpg')
+                cv2.imwrite(_filename, image_rgb)
+
+        return save_results
+
+    def predict_image_patch_classes_2(self, **kwargs):
+        """
+        Predict the classes of the image patches
+        This function gets the path to an image which is a horizontal and make patches of the image
+        for each path it does the prediction and save the image and also the original image with the box in
+        separated folders
+        :param kwargs:
+            img_path: path to the image
+            window_percent: the percentage of the window size
+            stride: the stride of the window
+            patch_images_dir: the output directory to save the patch images
+            img_with_box_dir: the output directory to save the original image with the box
+            figsize: Tuple the size of the figure
+        :return: save_results: Dict the dictionary of the results
+        """
+
+        img_path = kwargs.get("img_path", None)
+        figsize = kwargs.get("figsize", (15, 15))
+        window_percent = kwargs.get("window_percent", 10)
+        stride = kwargs.get("stride", 150)
+        patch_images_dir = kwargs.get("patch_images_dir", Path(__file__).parent / ".." / "dataset" / "patch_images")
+        img_with_box_dir = kwargs.get("img_with_box_dir", Path(__file__).parent / ".." / "dataset" /
+                                      "images_with_box")
+        fig_show = kwargs.get("fig_show", False)
+        model_path = kwargs.get("model_path", None)
+        class_labels_path = kwargs.get("class_labels_path", None)
+
+        if img_path is None:
+            raise ValueError("img_path is None")
+
+        # Load the image
+        image = cv2.imread(img_path)
+
+        # Calculate the window size based on the percentage
+        height, width, _ = image.shape
+        logger.info(f"Image height, width: {height}, {width}")
+        window_height = int(height)
+        window_width = int(width * window_percent / 100)
+        logger.info(f"Window height, width: {window_height}, {window_width}")
+
+        # Output directory to save patch images
+        os.makedirs(patch_images_dir, exist_ok=True)
+
+        # Output directory to save patch images
+        os.makedirs(img_with_box_dir, exist_ok=True)
+
+        save_results = {}
+
+        # Iterate through the image using sliding window
+        count = 0
+        for y in range(0, height - window_height + 1, stride):
+            for x in tqdm(
+                    range(0, width - window_width + 1 + stride, stride),
+                    desc="Predicting the image patches"
+            ):
+                # Extract the patch using the sliding window
+                patch = image[
+                    y: y + window_height,
+                    x: x + window_width
+                ]
+
+                # Save the patch as an image
+                patch_filename = os.path.join(patch_images_dir, f'patch_{count}.jpg')
+                cv2.imwrite(patch_filename, patch)
+
+                # Pass the patch to your model for estimation
+                # Replace the following line with your model's prediction code
+                predicted_label, class_probabilities = self.predict_one_image(
+                    img_path=patch_filename,
+                    model_path=model_path,
+                    class_labels_path=class_labels_path
+                )
+
+                save_results[f'patch_{count}.jpg'] = {
+                    'predicted_label': predicted_label,
+                    'class_probabilities': class_probabilities
+                }
+
+                count += 1
+
+                # Create a copy of the original image to draw on
+                image_with_box = image.copy()
+
+                # Draw a single red box
+                cv2.rectangle(
+                    image_with_box,
+                    (x, y),
+                    (x + window_width, y + window_height),
+                    (0, 0, 255), 4
+                )  # Red box
+
+                # Convert BGR image to RGB for matplotlib
+                image_rgb = cv2.cvtColor(image_with_box, cv2.COLOR_BGR2RGB)
+
+                # Display the image using matplotlib
+                if fig_show:
+                    plt.figure(figsize=figsize)
+                    plt.imshow(image_with_box)
+                    plt.axis('off')  # Turn off axis labels
+                    plt.show()
+
+                # Save the image
+                _filename = os.path.join(img_with_box_dir, f'patch_{count}.jpg')
+                cv2.imwrite(_filename, image_rgb)
+
+        return save_results
+
 
 if __name__ == "__main__":
     from neural_network_model.process_data import Preprocessing
+    from PIL import Image  # noqa: F811
 
     # download the dataset
     # obj = Preprocessing()
     # obj.download_images(limit=30)
 
     transfer_model = TransferModel(
-        dataset_address=Path(__file__).parent / ".." / "dataset_ad"
+        dataset_address=Path(__file__).parent / ".." / "dataset_core" / "augmented_dataset",
     )
 
     # transfer_model.plot_classes_number()
     # transfer_model.analyze_image_names()
-    transfer_model.plot_data_images(num_rows=3, num_cols=3, cmap="jet")
+    # transfer_model.plot_data_images(num_rows=3, num_cols=3, cmap="jet")
     # transfer_model.train_model(
-    #     epochs=3,
+    #     epochs=5,
     #     model_save_path=(Path(__file__).parent / ".." / "deep_model").resolve(),
-    #     model_name="tf_model_ad_1.h5",
+    #     model_name="tf_model_core_1.h5",
     # )
     # transfer_model.plot_metrics_results()
     # transfer_model.results()
     # one can pass the model address to the predict_test method
-    custom_titles = {
-        "NonDemented": "Healthy",
-        "ModerateDemented": "Moderate",
-        "MildDemented": "Mild",
-        "VeryMildDemented": "Very Mild",
+    # custom_titles = {
+    #     "NonDemented": "Healthy",
+    #     "ModerateDemented": "Moderate",
+    #     "MildDemented": "Mild",
+    #     "VeryMildDemented": "Very Mild",
+    # }
+    # transfer_model.predict_test(
+    #     model_path=(
+    #             Path(__file__).parent / ".." / "deep_model" / "tf_model_core_1.h5"
+    #     ).resolve(),
+    #     rotation=90,
+    #     y_axis_label_size=12,
+    #     x_axis_label_size=12,
+    #     title_size=14,
+    #     fig_title="Original Confusion Matrix",
+    #     conf_matx_font_size=12,
+    #     # custom_titles=custom_titles,
+    #     cmap="winter",
+    #     normalize="true",
+    # )
+    # transfer_model.grad_cam_viz(num_rows=3, num_cols=2)
+
+    # transfer_model.predict_one_image(
+    #     img_path=str(
+    #         Path(__file__).parent
+    #         / ".."
+    #         / "dataset_core"
+    #         / "augmented_dataset"
+    #         / "GRANODIORITE"
+    #         / "augmented_image_0_9.jpeg"
+    #     ),
+    # )
+
+    # kwargs_dict = {
+    #     "img_path": str(Path(__file__).parent / ".." / "dataset_core" / "long_core" / "Picture1.png"),
+    #     "window_percent": 5,
+    #     "stride": 150,
+    #     "patch_images_dir": Path(__file__).parent / ".." / "dataset_core" / "patch_images",
+    #     "img_with_box_dir": Path(__file__).parent / ".." / "dataset_core" / "core_images_with_box_red",
+    #     "figsize": (15, 3),
+    #     "fig_show": True,
+    #     "model_path": Path(__file__).parent / ".." / "deep_model" / "tf_model_core_1.h5",
+    #     "class_labels_path": str(Path(__file__).parent / "class_labels.json")
+    # }
+    # save_results = transfer_model.predict_image_patch_classes(**kwargs_dict)
+    # print(save_results)
+
+    img_path = Path(__file__).parent / ".." / "dataset_core" / "patch_images" / "patch_0.jpg"
+    # load the img from img_path
+
+    img = Image.open(img_path)
+    # Resize the image to the expected shape (224x224)
+    img = img.resize((224, 224))
+    kwargs_dict = {
+        "model_path": Path(__file__).parent / ".." / "deep_model" / "tf_model_core_1.h5",
+        "img": img,
+        "cmap": "gray",
     }
-    transfer_model.predict_test(
-        model_path=(
-            Path(__file__).parent / ".." / "deep_model" / "tf_model_ad_1.h5"
-        ).resolve(),
-        rotation=90,
-        y_axis_label_size=12,
-        x_axis_label_size=12,
-        title_size=14,
-        fig_title="Original Confusion Matrix",
-        conf_matx_font_size=12,
-        custom_titles=custom_titles,
-        cmap="winter",
-        normalize="true",
-    )
-    transfer_model.grad_cam_viz(num_rows=3, num_cols=2)
+    transfer_model.grad_cam_viz_2(**kwargs_dict)

@@ -4,6 +4,7 @@ import multiprocessing
 import os
 import warnings
 from pathlib import Path
+from typing import List, Tuple
 
 import cv2
 import matplotlib.pyplot as plt
@@ -1474,6 +1475,98 @@ class ImageNumeric:
         plt.tight_layout()
         plt.show()
 
+    def region_of_interest(
+        self,
+        image_address: str,
+        plt_show=False,
+        path_name_to_save: str = None,
+    ):
+        # Load the image
+        image = cv2.imread(image_address, cv2.IMREAD_GRAYSCALE)
+
+        # Apply Gaussian blur to reduce noise and improve edge detection
+        blurred = cv2.GaussianBlur(image, (5, 5), 0)
+
+        # Apply Canny edge detection
+        edges = cv2.Canny(blurred, threshold1=10, threshold2=150)
+
+        # Find contours in the edge-detected image
+        contours, _ = cv2.findContours(
+            edges.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE
+        )
+
+        if contours:
+            # Sort contours by area in descending order
+            sorted_contours = sorted(contours, key=cv2.contourArea, reverse=True)
+
+            # Get the largest contour
+            largest_contour = sorted_contours[0]
+
+            # Get the bounding rectangle of the largest contour
+            x, y, width, height = cv2.boundingRect(largest_contour)
+
+            # Crop the image using the bounding rectangle
+            cropped_image = image[y: y + height, x: x + width]
+
+            # Save or process the cropped image
+            cv2.imwrite(path_name_to_save, cropped_image)
+        else:
+            print("No contours found in the image.")
+
+    def _divide_image(
+        self,
+        image_path: str = None,
+        target_width: int = 224,
+        target_height: int = 224,
+    ) -> Tuple:
+        # Open the image using PIL (Python Imaging Library)
+        img = Image.open(image_path)
+
+        # Get the dimensions of the image
+        width, height = img.size
+
+        # Calculate the height of each section
+        section_height = height // 3
+
+        # Define the starting and ending points for each section
+        section_1_start = 0
+        section_1_end = section_height
+        section_2_start = section_height
+        section_2_end = 2 * section_height
+        section_3_start = 2 * section_height
+        section_3_end = height
+
+        # Crop the image into three sections
+        section_1 = img.crop((0, section_1_start, width, section_1_end))
+        section_2 = img.crop((0, section_2_start, width, section_2_end))
+        section_3 = img.crop((0, section_3_start, width, section_3_end))
+
+        # Resize the sections to the target dimensions
+        section_1 = section_1.resize((target_width, target_height))
+        section_2 = section_2.resize((target_width, target_height))
+        section_3 = section_3.resize((target_width, target_height))
+
+        return section_1, section_2, section_3
+
+    def run_divide_image(
+        self, image_path_list: List[str] = None, dir_path: str = None
+    ) -> None:
+        for image_path in tqdm(
+            image_path_list, total=len(image_path_list), desc="Dividing images"
+        ):
+            section_1, section_2, section_3 = self._divide_image(image_path)
+
+            # get the name of the image
+            image_name = os.path.basename(image_path)
+
+            # Save the cropped sections
+            # check if the dir_path exists if not create it
+            if not os.path.exists(dir_path):
+                os.makedirs(dir_path)
+
+            for i, sec in enumerate([section_1, section_2, section_3]):
+                sec.save(os.path.join(dir_path, f"{image_name}_section_{i}.jpg"))
+
 
 class RunCodeLocally:
     """
@@ -1563,15 +1656,20 @@ class RunCodeLocally:
         # )
 
     def run_3(self):
-        dataset_path = Path(__file__).parent / ".." / "dataset"
+        dataset_path = Path(__file__).parent / ".." / "dataset_core"
         obj = ImageNumeric(dataset_address=dataset_path)
         image_path = str(
-            (Path(__file__).parent / ".." / "dataset" / "pdc_bit" / "Image_26.jpg")
+            (
+                Path(__file__).parent
+                / ".."
+                / "dataset_core"
+                / "FORGE 16A 32-78_5473-5476blended masked.jpg"
+            )
         )
 
         obj.scikit_image_example(
             image_path,
-            section_zoom=[0, 2000, 0, 1000],
+            # section_zoom=[0, 2000, 0, 1000],
             save_path=Path(__file__).parent / ".." / "assets",
             save_name="scikit_image_example.jpg",
         )
@@ -1626,12 +1724,69 @@ class RunCodeLocally:
             replace_existing=False,
         )
 
+    def run_6(self):
+        obj = ImageNumeric()
+        image_path = str(
+            Path(__file__).parent
+            / ".."
+            / "dataset_core"
+            / "FORGE 16A 32-78_5473-5476blended masked.jpg"
+        )
+        path_name_to_save = str(
+            Path(__file__).parent / ".." / "dataset_core" / "region_of_interest.jpg"
+        )
+        obj.region_of_interest(
+            image_path, plt_show=True, path_name_to_save=path_name_to_save
+        )
+
+    def run_7(self):
+        obj = ImageNumeric()
+        # image_path = str(
+        #     Path(__file__).parent
+        #     / ".."
+        #     / "dataset_core"
+        #     / "croped"
+        #     / "FORGE 16A 32-78_5473-5476blended masked.jpg"
+        # )
+        # get the list of all images in the directory dataset_core/croped
+        image_list = os.listdir(
+            str(Path(__file__).parent / ".." / "dataset_core" / "croped")
+        )
+        image_path_list = [
+            str(Path(__file__).parent / ".." / "dataset_core" / "croped" / image)
+            for image in image_list
+        ]
+
+        obj.run_divide_image(
+            image_path_list=image_path_list,
+            dir_path=str(
+                Path(__file__).parent / ".." / "dataset_core" / "divided_images"
+            ),
+        )
+
+    def augment_data(self):
+        from neural_network_model.process_data import Preprocessing
+
+        obj = Preprocessing(
+            dataset_address=Path(__file__).parent / ".." / "dataset_core" / "dataset"
+        )
+        obj.augment_data(
+            number_of_images_tobe_gen=500,
+            augment_data_address=Path(__file__).parent
+            / ".."
+            / "dataset_core"
+            / "augmented_dataset",
+        )
+
 
 if __name__ == "__main__":
     run_locally_obj = RunCodeLocally()
 
     # run_locally_obj.run_1()
     # run_locally_obj.run_2()
-    run_locally_obj.run_3()
+    # run_locally_obj.run_3()
     # run_locally_obj.run_4()
     # run_locally_obj.run_5()
+    # run_locally_obj.run_6()
+    # run_locally_obj.run_7()
+    run_locally_obj.augment_data()
