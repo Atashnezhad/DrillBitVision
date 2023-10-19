@@ -207,6 +207,7 @@ def image_dict_object(*args, **kwargs):
         "rollercone_bit": {"image_list": [ImageAddressObject], "number_of_images": 0},
     }
 
+
 # skip this test TODO: fix this test later
 @pytest.mark.skip
 def test_augment_data(mocker, _object):
@@ -243,6 +244,7 @@ def test_augment_data(mocker, _object):
     )
 
     _object.augment_data(number_of_images_tobe_gen=5)
+
 
 # skip this test TODO: fix this test later
 # here same test is done by just using one class
