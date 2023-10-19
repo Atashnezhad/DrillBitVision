@@ -1,14 +1,16 @@
-# Drill Bit Classifier
+# Drill Vision
 
 [![Python 3.9](https://img.shields.io/badge/python-3.9-blue.svg)](https://www.python.org/downloads/release/python-360/)
 ![GitHub CI](https://github.com/Atashnezhad/DrillBitVision/actions/workflows/main.yml/badge.svg)
 [![Downloads](https://static.pepy.tech/badge/drillvision)](https://pepy.tech/project/drillvision)
 
-The Drill Bit Classifier is an app that uses a Convolutional Neural Network (CNN) to 
-classify images of drill bits. The app can be used by machinists and engineers to 
-quickly and accurately identify the type of drill bit required for a particular job.
 
 ## Description:
+The Drill Vision is a Python library for training, evaluating, and visualizing neural network models specifically initially tailored to subject with focus 
+on drilling engineering classification tasks. However, it has since evolved to support general classification problems beyond drilling bits. 
+With Drill Vision, you can effortlessly assemble and train models, make predictions, and generate visualizations for various classification 
+applications, including but not limited to drilling bits.
+
 ### Preprocessing Module
 The code is for image preprocessing for a neural network. 
 It contains functions to download images from Bing, read data from a directory, 
