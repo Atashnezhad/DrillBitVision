@@ -35,3 +35,4 @@ drillvision.egg-info/
 /ec2_key/
 /segmentation_dataset_ad_kmean/
 /tutorial/.ipynb_checkpoints/
+/tutorial/dataset/
