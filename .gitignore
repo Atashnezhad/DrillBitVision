@@ -36,3 +36,4 @@ drillvision.egg-info/
 /segmentation_dataset_ad_kmean/
 /tutorial/.ipynb_checkpoints/
 /tutorial/dataset/
+/tutorial/dataset_train_test_val/
