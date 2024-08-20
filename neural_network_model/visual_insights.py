@@ -51,6 +51,7 @@ class ImageNumeric:
         filepaths = list(image_dir.glob(r"**/*.png"))
         # add those with jpg extension
         filepaths.extend(list(image_dir.glob(r"**/*.jpg")))
+        filepaths.extend(list(image_dir.glob(r"**/*.JPG")))
         labels = list(map(lambda x: os.path.split(os.path.split(x)[0])[1], filepaths))
 
         filepaths = pd.Series(
